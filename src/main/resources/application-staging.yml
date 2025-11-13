@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/physical_risk_db?useUnicode=true&characterEncoding=utf8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+fastapi:
+  base-url: https://staging-ai-agent-api.skax.co.kr
+
+aws:
+  s3:
+    bucket-name: skax-reports-staging
+
+logging:
+  level:
+    com.skax.physicalrisk: DEBUG
