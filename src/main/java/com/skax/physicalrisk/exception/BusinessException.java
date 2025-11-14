@@ -1,5 +1,32 @@
 package com.skax.physicalrisk.exception;
 
-public class BusinessException {
-    // 비즈니스 로직 예외
+import lombok.Getter;
+
+/**
+ * 비즈니스 로직 예외
+ *
+ * 최종 수정일: 2025-11-13
+ * 파일 버전: v01
+ *
+ * @author SKAX Team
+ */
+@Getter
+public class BusinessException extends RuntimeException {
+
+	private final ErrorCode errorCode;
+
+	public BusinessException(ErrorCode errorCode) {
+		super(errorCode.getMessage());
+		this.errorCode = errorCode;
+	}
+
+	public BusinessException(ErrorCode errorCode, String message) {
+		super(message);
+		this.errorCode = errorCode;
+	}
+
+	public BusinessException(ErrorCode errorCode, Throwable cause) {
+		super(errorCode.getMessage(), cause);
+		this.errorCode = errorCode;
+	}
 }

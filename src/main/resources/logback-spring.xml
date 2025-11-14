@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	파일명: logback-spring.xml
+	최종 수정일: 2025-11-13
+	파일 버전: v01
+	설명: Spring Boot 로깅 설정 파일 (개발 표준 준수)
+		- 로그 레벨: DEBUG < INFO < WARN < ERROR
+		- 로그 포맷: timestamp | level | module | function:line | message
+		- 파일 로그: logs/ 디렉토리에 일별 롤링
+-->
+<configuration>
+	<conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+
+	<!-- 로그 디렉토리 설정 -->
+	<property name="LOG_DIR" value="logs" />
+	<property name="LOG_FILE_NAME" value="physical-risk-api" />
+
+	<!-- 로그 포맷: timestamp | level | module | function:line | message -->
+	<property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} | %5p | %logger{36} | %M:%L | %msg%n" />
+	<property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} | %clr(%5p) | %clr(%logger{36}){cyan} | %clr(%M:%L){magenta} | %msg%n" />
+
+	<!-- Console Appender -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<!-- File Appender (All Logs) -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/${LOG_FILE_NAME}.log</file>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- Error Log File -->
+	<appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/${LOG_FILE_NAME}-error.log</file>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- 프로파일별 로그 레벨 설정 -->
+	<springProfile name="local">
+		<root level="DEBUG">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="FILE" />
+			<appender-ref ref="ERROR_FILE" />
+		</root>
+		<logger name="com.skax.physicalrisk" level="DEBUG" />
+		<logger name="org.springframework.web" level="DEBUG" />
+		<logger name="org.hibernate.SQL" level="DEBUG" />
+		<logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
+	</springProfile>
+
+	<springProfile name="staging">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="FILE" />
+			<appender-ref ref="ERROR_FILE" />
+		</root>
+		<logger name="com.skax.physicalrisk" level="INFO" />
+		<logger name="org.springframework.web" level="INFO" />
+	</springProfile>
+
+	<springProfile name="prod">
+		<root level="INFO">
+			<appender-ref ref="FILE" />
+			<appender-ref ref="ERROR_FILE" />
+		</root>
+		<logger name="com.skax.physicalrisk" level="INFO" />
+		<logger name="org.springframework.web" level="WARN" />
+		<logger name="org.hibernate.SQL" level="WARN" />
+	</springProfile>
+</configuration>
