@@ -64,6 +64,10 @@ public class User {
 	@Column(name = "last_login_at")
 	private LocalDateTime lastLoginAt; // 마지막 로그인 일시
 
+	@Column(name = "is_active")
+	@Builder.Default
+	private Boolean isActive = true; // 계정 활성화 상태
+
 	/**
 	 * 사용자 권한 열거형
 	 */
@@ -77,5 +81,19 @@ public class User {
 	 */
 	public void updateLastLogin() {
 		this.lastLoginAt = LocalDateTime.now();
+	}
+
+	/**
+	 * 계정 비활성화
+	 */
+	public void deactivate() {
+		this.isActive = false;
+	}
+
+	/**
+	 * 계정 활성화 여부 확인
+	 */
+	public boolean isActive() {
+		return this.isActive != null && this.isActive;
 	}
 }

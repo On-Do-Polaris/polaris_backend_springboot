@@ -47,7 +47,7 @@ public class DashboardService {
 
 		// 위험도별 사업장 수
 		long highRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.HIGH);
-		long mediumRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.MEDIUM);
+		long mediumRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.MODERATE);
 		long lowRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.LOW);
 
 		Map<String, Object> summary = new HashMap<>();

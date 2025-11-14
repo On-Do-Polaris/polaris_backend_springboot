@@ -9,10 +9,21 @@ spring:
       ddl-auto: update  # 로컬에서는 자동 DDL
     show-sql: true
 
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  # Redis 비활성화 (로컬 개발용)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dev@example.com
+    password: devpassword
+
+# JWT 설정 (로컬 개발용)
+jwt:
+  secret: skax-physical-risk-management-local-development-secret-key-2024-must-be-at-least-256-bits-long-for-hs256
 
 fastapi:
   base-url: http://localhost:8000
@@ -20,8 +31,14 @@ fastapi:
 aws:
   s3:
     bucket-name: skax-reports-dev
+    access-key: dev-access-key
+    secret-key: dev-secret-key
     # 로컬 개발 시 MinIO 사용 가능
     endpoint: http://localhost:9000
+
+kakao:
+  api:
+    key: dev-kakao-api-key
 
 logging:
   level:

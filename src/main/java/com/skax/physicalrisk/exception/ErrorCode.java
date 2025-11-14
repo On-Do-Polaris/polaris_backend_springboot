@@ -34,6 +34,7 @@ public enum ErrorCode {
 	ANALYSIS_JOB_NOT_FOUND("ANALYSIS_JOB_NOT_FOUND", "분석 작업을 찾을 수 없습니다"),
 
 	// 중복 에러
+	DUPLICATE_EMAIL("DUPLICATE_EMAIL", "이미 존재하는 이메일입니다"),
 	EMAIL_ALREADY_EXISTS("EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다"),
 	DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", "중복된 리소스입니다"),
 

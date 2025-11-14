@@ -3,7 +3,9 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn clean install:*)"
     ],
     "deny": [],
     "ask": []
