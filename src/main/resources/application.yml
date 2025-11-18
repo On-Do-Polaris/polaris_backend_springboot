@@ -50,6 +50,7 @@ jwt:
 # FastAPI 설정
 fastapi:
   base-url: ${FASTAPI_BASE_URL:http://localhost:8000}
+  api-key: ${FASTAPI_API_KEY}
   timeout: 300000  # 5분
 
 # AWS S3 설정

@@ -12,19 +12,18 @@ import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 인증 서비스
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-11-14
+ * 파일 버전: v02
  *
  * @author SKAX Team
  */
@@ -36,7 +35,9 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final RedisTemplate<String, String> redisTemplate;
+
+	// Redis 대신 인메모리 저장소 사용 (로컬 개발용)
+	private final Map<String, String> refreshTokenStore = new ConcurrentHashMap<>();
 
 	/**
 	 * 회원가입
@@ -101,9 +102,9 @@ public class AuthService {
 		String accessToken = jwtTokenProvider.createAccessToken(user.getId());
 		String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-		// Refresh Token을 Redis에 저장 (7일)
-		String redisKey = "refresh_token:" + user.getId();
-		redisTemplate.opsForValue().set(redisKey, refreshToken, 7, TimeUnit.DAYS);
+		// Refresh Token을 메모리에 저장 (로컬 개발용)
+		String tokenKey = "refresh_token:" + user.getId();
+		refreshTokenStore.put(tokenKey, refreshToken);
 
 		log.info("User logged in successfully: {}", user.getId());
 
@@ -123,9 +124,9 @@ public class AuthService {
 	public void logout(String userId) {
 		log.info("Logging out user: {}", userId);
 
-		// Redis에서 Refresh Token 삭제
-		String redisKey = "refresh_token:" + userId;
-		redisTemplate.delete(redisKey);
+		// 메모리에서 Refresh Token 삭제
+		String tokenKey = "refresh_token:" + userId;
+		refreshTokenStore.remove(tokenKey);
 
 		log.info("User logged out successfully: {}", userId);
 	}

@@ -22,8 +22,8 @@ import java.util.UUID;
 /**
  * 사업장 서비스
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-11-18
+ * 파일 버전: v02
  *
  * @author SKAX Team
  */
@@ -116,6 +116,13 @@ public class SiteService {
 			.longitude(request.getLongitude())
 			.industry(request.getIndustry())
 			.description(request.getDescription())
+			// AI 분석용 필드
+			.buildingAge(request.getBuildingAge())
+			.buildingType(request.getBuildingType())
+			.seismicDesign(request.getSeismicDesign())
+			.floorArea(request.getFloorArea())
+			.assetValue(request.getAssetValue())
+			.employeeCount(request.getEmployeeCount())
 			.build();
 
 		Site savedSite = siteRepository.save(site);
@@ -150,11 +157,37 @@ public class SiteService {
 			site.setAddress(request.getAddress());
 			site.setCity(extractCity(request.getAddress()));
 		}
+		if (request.getLatitude() != null) {
+			site.setLatitude(request.getLatitude());
+		}
+		if (request.getLongitude() != null) {
+			site.setLongitude(request.getLongitude());
+		}
 		if (request.getIndustry() != null) {
 			site.setIndustry(request.getIndustry());
 		}
 		if (request.getDescription() != null) {
 			site.setDescription(request.getDescription());
+		}
+
+		// AI 분석용 필드 업데이트
+		if (request.getBuildingAge() != null) {
+			site.setBuildingAge(request.getBuildingAge());
+		}
+		if (request.getBuildingType() != null) {
+			site.setBuildingType(request.getBuildingType());
+		}
+		if (request.getSeismicDesign() != null) {
+			site.setSeismicDesign(request.getSeismicDesign());
+		}
+		if (request.getFloorArea() != null) {
+			site.setFloorArea(request.getFloorArea());
+		}
+		if (request.getAssetValue() != null) {
+			site.setAssetValue(request.getAssetValue());
+		}
+		if (request.getEmployeeCount() != null) {
+			site.setEmployeeCount(request.getEmployeeCount());
 		}
 
 		Site savedSite = siteRepository.save(site);

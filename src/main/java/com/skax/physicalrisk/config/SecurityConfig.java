@@ -49,8 +49,10 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/**").permitAll() // 인증 API는 모두 허용
 				.requestMatchers("/api/meta/**").permitAll() // 메타 API는 모두 허용
 				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger는 모두 허용
+				.requestMatchers("/h2-console/**").permitAll() // H2 콘솔은 모두 허용 (개발용)
 				.anyRequest().authenticated() // 나머지는 인증 필요
 			)
+			.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // H2 콘솔용
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
 		return http.build();

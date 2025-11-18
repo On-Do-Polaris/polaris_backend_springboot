@@ -1,13 +1,24 @@
 spring:
+  # H2 인메모리 데이터베이스 (MariaDB 없이 테스트용)
   datasource:
-    url: jdbc:mariadb://localhost:3306/physical_risk_db?useUnicode=true&characterEncoding=utf8
-    username: root
-    password: password
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true  # H2 콘솔 활성화 (http://localhost:8080/h2-console)
+      path: /h2-console
 
   jpa:
     hibernate:
-      ddl-auto: update  # 로컬에서는 자동 DDL
+      ddl-auto: create-drop  # 시작시 테이블 생성, 종료시 삭제
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
 
   # Redis 비활성화 (로컬 개발용)
   autoconfigure:
@@ -27,6 +38,7 @@ jwt:
 
 fastapi:
   base-url: http://localhost:8000
+  api-key: local-dev-api-key-for-testing
 
 aws:
   s3:

@@ -55,6 +55,25 @@ public class Site {
 	@Column(name = "industry", length = 100)
 	private String industry; // 업종
 
+	// AI 분석용 추가 필드
+	@Column(name = "building_age")
+	private Integer buildingAge; // 건물 연령 (년)
+
+	@Column(name = "building_type", length = 100)
+	private String buildingType; // 건물 유형 (철근 콘크리트, 철골, 목조 등)
+
+	@Column(name = "seismic_design")
+	private Boolean seismicDesign; // 내진설계 여부
+
+	@Column(name = "floor_area")
+	private Double floorArea; // 연면적 (m²)
+
+	@Column(name = "asset_value")
+	private Double assetValue; // 자산 가치 (KRW)
+
+	@Column(name = "employee_count")
+	private Integer employeeCount; // 직원 수
+
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description; // 사업장 설명
 

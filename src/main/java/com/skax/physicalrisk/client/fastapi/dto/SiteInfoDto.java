@@ -1,4 +1,4 @@
-package com.skax.physicalrisk.dto.response.site;
+package com.skax.physicalrisk.client.fastapi.dto;
 
 import com.skax.physicalrisk.domain.site.entity.Site;
 import lombok.AllArgsConstructor;
@@ -6,14 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 사업장 응답 DTO
+ * FastAPI SiteInfo DTO
+ *
+ * FastAPI 서버의 SiteInfo 스키마에 매핑되는 DTO
  *
  * 최종 수정일: 2025-11-18
- * 파일 버전: v02
+ * 파일 버전: v01
  *
  * @author SKAX Team
  */
@@ -21,7 +22,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SiteResponse {
+public class SiteInfoDto {
 
 	private UUID id;
 	private String name;
@@ -31,7 +32,7 @@ public class SiteResponse {
 	private Double longitude;
 	private String industry;
 
-	// AI 분석용 필드
+	// AI 분석 필수 필드
 	private Integer buildingAge;
 	private String buildingType;
 	private Boolean seismicDesign;
@@ -39,21 +40,14 @@ public class SiteResponse {
 	private Double assetValue;
 	private Integer employeeCount;
 
-	private String mainHazard;
-	private Integer riskScore;
-	private Site.RiskLevel riskLevel;
-	private LocalDateTime lastAnalyzedAt;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-
 	/**
-	 * 엔티티로부터 응답 DTO 생성
+	 * Site 엔티티로부터 DTO 생성
 	 *
 	 * @param site 사업장 엔티티
-	 * @return SiteResponse
+	 * @return SiteInfoDto
 	 */
-	public static SiteResponse from(Site site) {
-		return SiteResponse.builder()
+	public static SiteInfoDto from(Site site) {
+		return SiteInfoDto.builder()
 			.id(site.getId())
 			.name(site.getName())
 			.address(site.getAddress())
@@ -67,12 +61,6 @@ public class SiteResponse {
 			.floorArea(site.getFloorArea())
 			.assetValue(site.getAssetValue())
 			.employeeCount(site.getEmployeeCount())
-			.mainHazard(site.getMainHazard())
-			.riskScore(site.getRiskScore())
-			.riskLevel(site.getRiskLevel())
-			.lastAnalyzedAt(site.getLastAnalyzedAt())
-			.createdAt(site.getCreatedAt())
-			.updatedAt(site.getUpdatedAt())
 			.build();
 	}
 }
