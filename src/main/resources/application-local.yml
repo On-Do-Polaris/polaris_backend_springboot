@@ -38,7 +38,7 @@ jwt:
 
 fastapi:
   base-url: http://localhost:8000
-  api-key: local-dev-api-key-for-testing
+  api-key: ${FASTAPI_API_KEY}
 
 aws:
   s3:
