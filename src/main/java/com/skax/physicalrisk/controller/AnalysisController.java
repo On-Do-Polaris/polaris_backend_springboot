@@ -89,6 +89,25 @@ public class AnalysisController {
 	}
 
 	/**
+	 * 물리적 리스크 점수 조회
+	 *
+	 * GET /api/sites/{siteId}/analysis/physical-risk-scores
+	 *
+	 * @param siteId     사업장 ID
+	 * @param hazardType 위험 유형 (옵션)
+	 * @return 물리적 리스크 점수
+	 */
+	@GetMapping("/physical-risk-scores")
+	public Mono<ResponseEntity<Map<String, Object>>> getPhysicalRiskScores(
+		@PathVariable UUID siteId,
+		@RequestParam(required = false) String hazardType
+	) {
+		log.info("GET /api/sites/{}/analysis/physical-risk-scores?hazardType={}", siteId, hazardType);
+		return analysisService.getPhysicalRiskScores(siteId, hazardType)
+			.map(ResponseEntity::ok);
+	}
+
+	/**
 	 * 과거 재난 이력 조회
 	 *
 	 * GET /api/sites/{siteId}/analysis/past-events

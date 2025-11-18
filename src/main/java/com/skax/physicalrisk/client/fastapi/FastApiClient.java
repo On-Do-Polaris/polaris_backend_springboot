@@ -99,6 +99,26 @@ public class FastApiClient {
 	}
 
 	/**
+	 * 물리적 리스크 점수 조회
+	 *
+	 * GET /api/v1/analysis/{siteId}/physical-risk-scores
+	 *
+	 * @param siteId 사업장 ID
+	 * @param hazardType 위험 유형 (옵션)
+	 * @return 물리적 리스크 점수
+	 */
+	public Mono<Map<String, Object>> getPhysicalRiskScores(UUID siteId, String hazardType) {
+		return webClient.get()
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v1/analysis/{siteId}/physical-risk-scores")
+				.queryParamIfPresent("hazardType", java.util.Optional.ofNullable(hazardType))
+				.build(siteId))
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
 	 * 과거 재난 이력 조회
 	 *
 	 * GET /api/v1/analysis/{siteId}/past-events

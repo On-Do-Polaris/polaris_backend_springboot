@@ -107,6 +107,22 @@ public class AnalysisService {
 	}
 
 	/**
+	 * 물리적 리스크 점수 조회
+	 *
+	 * @param siteId     사업장 ID
+	 * @param hazardType 위험 유형 (옵션)
+	 * @return 물리적 리스크 점수
+	 */
+	public Mono<Map<String, Object>> getPhysicalRiskScores(UUID siteId, String hazardType) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Fetching physical risk scores for site: {}, hazardType: {}", siteId, hazardType);
+
+		getSiteWithAuth(siteId, userId);
+
+		return fastApiClient.getPhysicalRiskScores(siteId, hazardType);
+	}
+
+	/**
 	 * 과거 재난 이력 조회
 	 *
 	 * @param siteId 사업장 ID

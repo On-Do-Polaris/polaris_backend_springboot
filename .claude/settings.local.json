@@ -5,7 +5,10 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(mvn clean compile:*)",
-      "Bash(mvn clean install:*)"
+      "Bash(mvn clean install:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
