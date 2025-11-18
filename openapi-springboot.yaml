@@ -1786,7 +1786,7 @@ paths:
     get:
       tags: [Analysis]
       security: [{ bearerAuth: [] }]
-      summary: SSP 시나리오별 재무 영향
+      summary: 연평균 자산 손실률 조회
       parameters:
         - in: path
           name: siteId
