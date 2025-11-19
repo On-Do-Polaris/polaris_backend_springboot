@@ -13,7 +13,10 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(Stop-Process -Id 33028 -Force)"
+      "Bash(Stop-Process -Id 33028 -Force)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
