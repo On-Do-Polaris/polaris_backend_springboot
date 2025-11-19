@@ -11,6 +11,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-22.04
 
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      FASTAPI_API_KEY: ${{ secrets.FASTAPI_API_KEY }}
+
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
@@ -29,7 +33,7 @@ jobs:
         run: mvn -B clean compile -DskipTests
 
       - name: JUnit 테스트 실행
-        run: mvn -B test
+        run: mvn -B test -Dspring.profiles.active=local
 
       - name: 테스트 커버리지 리포트 생성
         run: mvn -B jacoco:report
