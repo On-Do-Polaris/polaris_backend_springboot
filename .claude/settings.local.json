@@ -8,7 +8,12 @@
       "Bash(mvn clean install:*)",
       "Bash(mkdir:*)",
       "Bash(cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mvn clean:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(Stop-Process -Id 33028 -Force)"
     ],
     "deny": [],
     "ask": []

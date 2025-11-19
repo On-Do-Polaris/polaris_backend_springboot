@@ -28,23 +28,6 @@ public class SimulationController {
 	private final SimulationService simulationService;
 
 	/**
-	 * 사업장 이전 후보지 추천
-	 *
-	 * POST /api/simulation/relocation/candidates
-	 *
-	 * @param request 후보지 요청
-	 * @return 후보지 목록
-	 */
-	@PostMapping("/relocation/candidates")
-	public Mono<ResponseEntity<Map<String, Object>>> getRelocationCandidates(
-		@RequestBody Map<String, Object> request
-	) {
-		log.info("POST /api/simulation/relocation/candidates");
-		return simulationService.getRelocationCandidates(request)
-			.map(ResponseEntity::ok);
-	}
-
-	/**
 	 * 사업장 이전 시뮬레이션 (비교)
 	 *
 	 * POST /api/simulation/relocation/compare

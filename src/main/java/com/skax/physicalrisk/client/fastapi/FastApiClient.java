@@ -52,7 +52,9 @@ public class FastApiClient {
 	 * @return 작업 상태 응답
 	 */
 	public Mono<Map<String, Object>> startAnalysis(StartAnalysisRequestDto request) {
-		log.info("FastAPI 분석 시작 요청: siteId={}", request.getSite().getId());
+		log.info("FastAPI 분석 시작 요청: siteId={}, hazardTypes={}, priority={}",
+			request.getSite().getId(), request.getHazardTypes(), request.getPriority());
+		log.debug("전체 요청 본문: {}", request);
 
 		return webClient.post()
 			.uri("/api/v1/analysis/start")
@@ -202,23 +204,6 @@ public class FastApiClient {
 				.queryParam("hazardType", hazardType)
 				.build(siteId))
 			.header("X-API-Key", apiKey)
-			.retrieve()
-			.bodyToMono(MAP_TYPE_REF);
-	}
-
-	/**
-	 * 사업장 이전 후보지 추천
-	 *
-	 * POST /api/v1/simulation/relocation/candidates
-	 *
-	 * @param request 후보지 요청
-	 * @return 후보지 목록
-	 */
-	public Mono<Map<String, Object>> getRelocationCandidates(Map<String, Object> request) {
-		return webClient.post()
-			.uri("/api/v1/simulation/relocation/candidates")
-			.header("X-API-Key", apiKey)
-			.bodyValue(request)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
 	}

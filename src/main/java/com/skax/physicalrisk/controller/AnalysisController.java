@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -40,18 +39,21 @@ public class AnalysisController {
 	 * @return 작업 상태
 	 */
 	@PostMapping("/start")
-	public Mono<ResponseEntity<Map<String, Object>>> startAnalysis(
+	public ResponseEntity<Map<String, Object>> startAnalysis(
 		@PathVariable UUID siteId,
 		@RequestBody StartAnalysisRequest request
 	) {
 		log.info("POST /api/sites/{}/analysis/start", siteId);
 
-		return analysisService.startAnalysis(
+		Map<String, Object> response = analysisService.startAnalysis(
 			siteId,
 			request.getHazardTypes(),
 			request.getPriority(),
 			request.getOptions()
-		).map(ResponseEntity::ok);
+		);
+
+		log.info("Controller returning success: 200 OK");
+		return ResponseEntity.ok(response);
 	}
 
 	/**
@@ -64,13 +66,12 @@ public class AnalysisController {
 	 * @return 작업 상태
 	 */
 	@GetMapping("/status/{jobId}")
-	public Mono<ResponseEntity<Map<String, Object>>> getAnalysisStatus(
+	public ResponseEntity<Map<String, Object>> getAnalysisStatus(
 		@PathVariable UUID siteId,
 		@PathVariable UUID jobId
 	) {
 		log.info("GET /api/sites/{}/analysis/status/{}", siteId, jobId);
-		return analysisService.getAnalysisStatus(siteId, jobId)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getAnalysisStatus(siteId, jobId));
 	}
 
 	/**
@@ -82,10 +83,9 @@ public class AnalysisController {
 	 * @return 분석 개요
 	 */
 	@GetMapping("/overview")
-	public Mono<ResponseEntity<Map<String, Object>>> getAnalysisOverview(@PathVariable UUID siteId) {
+	public ResponseEntity<Map<String, Object>> getAnalysisOverview(@PathVariable UUID siteId) {
 		log.info("GET /api/sites/{}/analysis/overview", siteId);
-		return analysisService.getAnalysisOverview(siteId)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getAnalysisOverview(siteId));
 	}
 
 	/**
@@ -98,13 +98,12 @@ public class AnalysisController {
 	 * @return 물리적 리스크 점수
 	 */
 	@GetMapping("/physical-risk-scores")
-	public Mono<ResponseEntity<Map<String, Object>>> getPhysicalRiskScores(
+	public ResponseEntity<Map<String, Object>> getPhysicalRiskScores(
 		@PathVariable UUID siteId,
 		@RequestParam(required = false) String hazardType
 	) {
 		log.info("GET /api/sites/{}/analysis/physical-risk-scores?hazardType={}", siteId, hazardType);
-		return analysisService.getPhysicalRiskScores(siteId, hazardType)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getPhysicalRiskScores(siteId, hazardType));
 	}
 
 	/**
@@ -116,10 +115,9 @@ public class AnalysisController {
 	 * @return 과거 이벤트
 	 */
 	@GetMapping("/past-events")
-	public Mono<ResponseEntity<Map<String, Object>>> getPastEvents(@PathVariable UUID siteId) {
+	public ResponseEntity<Map<String, Object>> getPastEvents(@PathVariable UUID siteId) {
 		log.info("GET /api/sites/{}/analysis/past-events", siteId);
-		return analysisService.getPastEvents(siteId)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getPastEvents(siteId));
 	}
 
 	/**
@@ -132,13 +130,12 @@ public class AnalysisController {
 	 * @return SSP 전망
 	 */
 	@GetMapping("/ssp")
-	public Mono<ResponseEntity<Map<String, Object>>> getSSPProjection(
+	public ResponseEntity<Map<String, Object>> getSSPProjection(
 		@PathVariable UUID siteId,
 		@RequestParam(required = false) String hazardType
 	) {
 		log.info("GET /api/sites/{}/analysis/ssp?hazardType={}", siteId, hazardType);
-		return analysisService.getSSPProjection(siteId, hazardType)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getSSPProjection(siteId, hazardType));
 	}
 
 	/**
@@ -150,10 +147,9 @@ public class AnalysisController {
 	 * @return 재무 영향
 	 */
 	@GetMapping("/financial-impacts")
-	public Mono<ResponseEntity<Map<String, Object>>> getFinancialImpact(@PathVariable UUID siteId) {
+	public ResponseEntity<Map<String, Object>> getFinancialImpact(@PathVariable UUID siteId) {
 		log.info("GET /api/sites/{}/analysis/financial-impacts", siteId);
-		return analysisService.getFinancialImpact(siteId)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getFinancialImpact(siteId));
 	}
 
 	/**
@@ -165,10 +161,9 @@ public class AnalysisController {
 	 * @return 취약성 분석
 	 */
 	@GetMapping("/vulnerability")
-	public Mono<ResponseEntity<Map<String, Object>>> getVulnerability(@PathVariable UUID siteId) {
+	public ResponseEntity<Map<String, Object>> getVulnerability(@PathVariable UUID siteId) {
 		log.info("GET /api/sites/{}/analysis/vulnerability", siteId);
-		return analysisService.getVulnerability(siteId)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getVulnerability(siteId));
 	}
 
 	/**
@@ -181,13 +176,12 @@ public class AnalysisController {
 	 * @return 통합 분석 결과
 	 */
 	@GetMapping("/total")
-	public Mono<ResponseEntity<Map<String, Object>>> getTotalAnalysis(
+	public ResponseEntity<Map<String, Object>> getTotalAnalysis(
 		@PathVariable UUID siteId,
 		@RequestParam String hazardType
 	) {
 		log.info("GET /api/sites/{}/analysis/total?hazardType={}", siteId, hazardType);
-		return analysisService.getTotalAnalysis(siteId, hazardType)
-			.map(ResponseEntity::ok);
+		return ResponseEntity.ok(analysisService.getTotalAnalysis(siteId, hazardType));
 	}
 
 	/**

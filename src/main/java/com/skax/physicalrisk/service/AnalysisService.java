@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -49,8 +48,7 @@ public class AnalysisService {
 	 * @param options      분석 옵션
 	 * @return 작업 상태 응답
 	 */
-	@Transactional
-	public Mono<Map<String, Object>> startAnalysis(
+	public Map<String, Object> startAnalysis(
 		UUID siteId,
 		List<String> hazardTypes,
 		String priority,
@@ -71,7 +69,8 @@ public class AnalysisService {
 			.options(options)
 			.build();
 
-		return fastApiClient.startAnalysis(request);
+		// WebClient 호출 후 block()으로 동기 변환
+		return fastApiClient.startAnalysis(request).block();
 	}
 
 	/**
@@ -81,14 +80,13 @@ public class AnalysisService {
 	 * @param jobId  작업 ID
 	 * @return 작업 상태
 	 */
-	public Mono<Map<String, Object>> getAnalysisStatus(UUID siteId, UUID jobId) {
+	public Map<String, Object> getAnalysisStatus(UUID siteId, UUID jobId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching analysis status for site: {}, job: {}", siteId, jobId);
 
 		// 권한 확인
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getAnalysisStatus(jobId);
+		return fastApiClient.getAnalysisStatus(jobId).block();
 	}
 
 	/**
@@ -97,13 +95,12 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 분석 개요
 	 */
-	public Mono<Map<String, Object>> getAnalysisOverview(UUID siteId) {
+	public Map<String, Object> getAnalysisOverview(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching analysis overview for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getAnalysisOverview(siteId);
+		return fastApiClient.getAnalysisOverview(siteId).block();
 	}
 
 	/**
@@ -113,13 +110,12 @@ public class AnalysisService {
 	 * @param hazardType 위험 유형 (옵션)
 	 * @return 물리적 리스크 점수
 	 */
-	public Mono<Map<String, Object>> getPhysicalRiskScores(UUID siteId, String hazardType) {
+	public Map<String, Object> getPhysicalRiskScores(UUID siteId, String hazardType) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching physical risk scores for site: {}, hazardType: {}", siteId, hazardType);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getPhysicalRiskScores(siteId, hazardType);
+		return fastApiClient.getPhysicalRiskScores(siteId, hazardType).block();
 	}
 
 	/**
@@ -128,13 +124,12 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 과거 이벤트
 	 */
-	public Mono<Map<String, Object>> getPastEvents(UUID siteId) {
+	public Map<String, Object> getPastEvents(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching past events for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getPastEvents(siteId);
+		return fastApiClient.getPastEvents(siteId).block();
 	}
 
 	/**
@@ -144,13 +139,12 @@ public class AnalysisService {
 	 * @param hazardType 위험 유형 (옵션)
 	 * @return SSP 전망
 	 */
-	public Mono<Map<String, Object>> getSSPProjection(UUID siteId, String hazardType) {
+	public Map<String, Object> getSSPProjection(UUID siteId, String hazardType) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching SSP projection for site: {}, hazardType: {}", siteId, hazardType);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getSSPProjection(siteId, hazardType);
+		return fastApiClient.getSSPProjection(siteId, hazardType).block();
 	}
 
 	/**
@@ -159,13 +153,12 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 재무 영향
 	 */
-	public Mono<Map<String, Object>> getFinancialImpact(UUID siteId) {
+	public Map<String, Object> getFinancialImpact(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching financial impact for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getFinancialImpact(siteId);
+		return fastApiClient.getFinancialImpact(siteId).block();
 	}
 
 	/**
@@ -174,13 +167,12 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 취약성 분석
 	 */
-	public Mono<Map<String, Object>> getVulnerability(UUID siteId) {
+	public Map<String, Object> getVulnerability(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching vulnerability for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getVulnerability(siteId);
+		return fastApiClient.getVulnerability(siteId).block();
 	}
 
 	/**
@@ -190,13 +182,12 @@ public class AnalysisService {
 	 * @param hazardType 위험 유형
 	 * @return 통합 분석 결과
 	 */
-	public Mono<Map<String, Object>> getTotalAnalysis(UUID siteId, String hazardType) {
+	public Map<String, Object> getTotalAnalysis(UUID siteId, String hazardType) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching total analysis for site: {}, hazardType: {}", siteId, hazardType);
 
 		getSiteWithAuth(siteId, userId);
-
-		return fastApiClient.getTotalAnalysis(siteId, hazardType);
+		return fastApiClient.getTotalAnalysis(siteId, hazardType).block();
 	}
 
 	/**

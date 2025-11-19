@@ -28,17 +28,6 @@ public class SimulationService {
 	private final FastApiClient fastApiClient;
 
 	/**
-	 * 사업장 이전 후보지 추천
-	 *
-	 * @param request 후보지 요청 (siteId, hazardTypes, targetRegion 등)
-	 * @return 후보지 목록
-	 */
-	public Mono<Map<String, Object>> getRelocationCandidates(Map<String, Object> request) {
-		log.info("Fetching relocation candidates with request: {}", request);
-		return fastApiClient.getRelocationCandidates(request);
-	}
-
-	/**
 	 * 사업장 이전 시뮬레이션 (현재지 vs 후보지 비교)
 	 *
 	 * @param request 비교 요청 (currentSiteId, candidateSiteId 등)

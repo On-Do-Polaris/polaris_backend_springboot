@@ -55,3 +55,6 @@ kakao:
 logging:
   level:
     com.skax.physicalrisk: DEBUG
+  charset:
+    console: UTF-8
+    file: UTF-8
