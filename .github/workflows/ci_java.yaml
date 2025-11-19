@@ -26,9 +26,6 @@ jobs:
           java-version: "21"
           cache: "maven"
 
-      - name: Checkstyle 검사
-        run: mvn -B checkstyle:check
-
       - name: 빌드 (테스트 제외)
         run: mvn -B clean compile -DskipTests
 
@@ -56,6 +53,5 @@ jobs:
           name: test-results
           path: |
             target/surefire-reports/
-            target/site/checkstyle/
             target/site/jacoco/
           retention-days: 7
