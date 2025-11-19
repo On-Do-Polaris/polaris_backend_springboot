@@ -187,7 +187,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <configLocation>google_checks.xml</configLocation>
+                    <configLocation>sun_checks.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>false</failsOnError>
                     <violationSeverity>warning</violationSeverity>
