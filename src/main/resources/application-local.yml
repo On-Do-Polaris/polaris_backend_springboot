@@ -20,12 +20,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
 
-  # Redis 비활성화 (로컬 개발용)
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-
   mail:
     host: smtp.gmail.com
     port: 587

@@ -16,7 +16,10 @@
       "Bash(Stop-Process -Id 33028 -Force)",
       "Bash(git checkout:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\config\\RedisConfig.java\")",
+      "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\service\\user\\RefreshTokenService.java\")"
     ],
     "deny": [],
     "ask": []
