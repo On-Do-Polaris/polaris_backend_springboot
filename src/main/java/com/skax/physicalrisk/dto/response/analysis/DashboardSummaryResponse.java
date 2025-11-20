@@ -1,4 +1,4 @@
-package com.skax.physicalrisk.dto.response.site;
+package com.skax.physicalrisk.dto.response.analysis;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

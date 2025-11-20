@@ -3,7 +3,6 @@ package com.skax.physicalrisk.controller;
 import com.skax.physicalrisk.dto.request.auth.LoginRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
-import com.skax.physicalrisk.dto.response.user.UserResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
 import com.skax.physicalrisk.service.AuthService;
 import jakarta.validation.Valid;
@@ -38,13 +37,13 @@ public class AuthController {
 	 * 회원가입
 	 *
 	 * @param request 회원가입 요청
-	 * @return 생성된 사용자 정보
+	 * @return 생성된 사용자 ID (이메일)
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
-		UserResponse response = authService.register(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		String userId = authService.register(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("userId", userId));
 	}
 
 	/**

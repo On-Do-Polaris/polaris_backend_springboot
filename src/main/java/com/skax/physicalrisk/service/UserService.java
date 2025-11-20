@@ -17,9 +17,6 @@ import java.util.UUID;
 /**
  * 사용자 서비스
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
- *
  * @author SKAX Team
  */
 @Slf4j
@@ -42,7 +39,11 @@ public class UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		return UserResponse.from(user);
+		return UserResponse.builder()
+			.email(user.getEmail())
+			.name(user.getName())
+			.language(user.getLanguage())
+			.build();
 	}
 
 	/**
@@ -59,13 +60,7 @@ public class UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// 수정 가능한 필드만 업데이트
-		if (request.getName() != null) {
-			user.setName(request.getName());
-		}
-		if (request.getOrganization() != null) {
-			user.setOrganization(request.getOrganization());
-		}
+		// 언어 설정만 수정 가능
 		if (request.getLanguage() != null) {
 			user.setLanguage(request.getLanguage());
 		}
@@ -73,7 +68,11 @@ public class UserService {
 		User savedUser = userRepository.save(user);
 		log.info("User updated successfully: {}", userId);
 
-		return UserResponse.from(savedUser);
+		return UserResponse.builder()
+			.email(savedUser.getEmail())
+			.name(savedUser.getName())
+			.language(savedUser.getLanguage())
+			.build();
 	}
 
 	/**

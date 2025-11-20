@@ -1,5 +1,6 @@
 package com.skax.physicalrisk.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.client.fastapi.dto.SiteInfoDto;
 import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
@@ -7,6 +8,7 @@ import com.skax.physicalrisk.domain.site.entity.Site;
 import com.skax.physicalrisk.domain.site.repository.SiteRepository;
 import com.skax.physicalrisk.domain.user.entity.User;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
+import com.skax.physicalrisk.dto.response.analysis.*;
 import com.skax.physicalrisk.exception.ErrorCode;
 import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import com.skax.physicalrisk.security.SecurityUtil;
@@ -24,8 +26,8 @@ import java.util.UUID;
  *
  * FastAPI 서버를 통한 AI 분석 기능 제공
  *
- * 최종 수정일: 2025-11-18
- * 파일 버전: v01
+ * 최종 수정일: 2025-11-20
+ * 파일 버전: v02
  *
  * @author SKAX Team
  */
@@ -38,6 +40,7 @@ public class AnalysisService {
 	private final FastApiClient fastApiClient;
 	private final SiteRepository siteRepository;
 	private final UserRepository userRepository;
+	private final ObjectMapper objectMapper;
 
 	/**
 	 * 분석 시작
@@ -48,7 +51,7 @@ public class AnalysisService {
 	 * @param options      분석 옵션
 	 * @return 작업 상태 응답
 	 */
-	public Map<String, Object> startAnalysis(
+	public AnalysisJobStatusResponse startAnalysis(
 		UUID siteId,
 		List<String> hazardTypes,
 		String priority,
@@ -70,7 +73,8 @@ public class AnalysisService {
 			.build();
 
 		// WebClient 호출 후 block()으로 동기 변환
-		return fastApiClient.startAnalysis(request).block();
+		Map<String, Object> response = fastApiClient.startAnalysis(request).block();
+		return convertToDto(response, AnalysisJobStatusResponse.class);
 	}
 
 	/**
@@ -80,27 +84,30 @@ public class AnalysisService {
 	 * @param jobId  작업 ID
 	 * @return 작업 상태
 	 */
-	public Map<String, Object> getAnalysisStatus(UUID siteId, UUID jobId) {
+	public AnalysisJobStatusResponse getAnalysisStatus(UUID siteId, UUID jobId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching analysis status for site: {}, job: {}", siteId, jobId);
 
 		// 권한 확인
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getAnalysisStatus(jobId).block();
+		Map<String, Object> response = fastApiClient.getAnalysisStatus(jobId).block();
+		return convertToDto(response, AnalysisJobStatusResponse.class);
 	}
 
 	/**
-	 * 분석 개요 조회
+	 * 대시보드 요약 조회 (전체 사업장)
 	 *
-	 * @param siteId 사업장 ID
-	 * @return 분석 개요
+	 * @return 대시보드 요약
 	 */
-	public Map<String, Object> getAnalysisOverview(UUID siteId) {
+	public DashboardSummaryResponse getDashboardSummary() {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching analysis overview for site: {}", siteId);
+		log.info("Fetching dashboard summary for user: {}", userId);
 
-		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getAnalysisOverview(siteId).block();
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		Map<String, Object> response = fastApiClient.getDashboardSummary(userId).block();
+		return convertToDto(response, DashboardSummaryResponse.class);
 	}
 
 	/**
@@ -110,12 +117,13 @@ public class AnalysisService {
 	 * @param hazardType 위험 유형 (옵션)
 	 * @return 물리적 리스크 점수
 	 */
-	public Map<String, Object> getPhysicalRiskScores(UUID siteId, String hazardType) {
+	public PhysicalRiskScoreResponse getPhysicalRiskScores(UUID siteId, String hazardType) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching physical risk scores for site: {}, hazardType: {}", siteId, hazardType);
 
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getPhysicalRiskScores(siteId, hazardType).block();
+		Map<String, Object> response = fastApiClient.getPhysicalRiskScores(siteId, hazardType).block();
+		return convertToDto(response, PhysicalRiskScoreResponse.class);
 	}
 
 	/**
@@ -124,27 +132,13 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 과거 이벤트
 	 */
-	public Map<String, Object> getPastEvents(UUID siteId) {
+	public PastEventsResponse getPastEvents(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching past events for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getPastEvents(siteId).block();
-	}
-
-	/**
-	 * SSP 시나리오별 리스크 전망
-	 *
-	 * @param siteId     사업장 ID
-	 * @param hazardType 위험 유형 (옵션)
-	 * @return SSP 전망
-	 */
-	public Map<String, Object> getSSPProjection(UUID siteId, String hazardType) {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching SSP projection for site: {}, hazardType: {}", siteId, hazardType);
-
-		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getSSPProjection(siteId, hazardType).block();
+		Map<String, Object> response = fastApiClient.getPastEvents(siteId).block();
+		return convertToDto(response, PastEventsResponse.class);
 	}
 
 	/**
@@ -153,12 +147,13 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 재무 영향
 	 */
-	public Map<String, Object> getFinancialImpact(UUID siteId) {
+	public FinancialImpactResponse getFinancialImpact(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching financial impact for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getFinancialImpact(siteId).block();
+		Map<String, Object> response = fastApiClient.getFinancialImpact(siteId).block();
+		return convertToDto(response, FinancialImpactResponse.class);
 	}
 
 	/**
@@ -167,12 +162,13 @@ public class AnalysisService {
 	 * @param siteId 사업장 ID
 	 * @return 취약성 분석
 	 */
-	public Map<String, Object> getVulnerability(UUID siteId) {
+	public VulnerabilityResponse getVulnerability(UUID siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching vulnerability for site: {}", siteId);
 
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getVulnerability(siteId).block();
+		Map<String, Object> response = fastApiClient.getVulnerability(siteId).block();
+		return convertToDto(response, VulnerabilityResponse.class);
 	}
 
 	/**
@@ -182,12 +178,13 @@ public class AnalysisService {
 	 * @param hazardType 위험 유형
 	 * @return 통합 분석 결과
 	 */
-	public Map<String, Object> getTotalAnalysis(UUID siteId, String hazardType) {
+	public AnalysisTotalResponse getTotalAnalysis(UUID siteId, String hazardType) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching total analysis for site: {}, hazardType: {}", siteId, hazardType);
 
 		getSiteWithAuth(siteId, userId);
-		return fastApiClient.getTotalAnalysis(siteId, hazardType).block();
+		Map<String, Object> response = fastApiClient.getTotalAnalysis(siteId, hazardType).block();
+		return convertToDto(response, AnalysisTotalResponse.class);
 	}
 
 	/**
@@ -203,5 +200,21 @@ public class AnalysisService {
 
 		return siteRepository.findByIdAndUser(siteId, user)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND));
+	}
+
+	/**
+	 * Map을 DTO로 변환
+	 *
+	 * @param map   소스 맵
+	 * @param clazz 대상 DTO 클래스
+	 * @return 변환된 DTO
+	 */
+	private <T> T convertToDto(Map<String, Object> map, Class<T> clazz) {
+		try {
+			return objectMapper.convertValue(map, clazz);
+		} catch (Exception e) {
+			log.error("Failed to convert response to {}: {}", clazz.getSimpleName(), e.getMessage());
+			throw new RuntimeException("응답 변환 실패: " + e.getMessage(), e);
+		}
 	}
 }

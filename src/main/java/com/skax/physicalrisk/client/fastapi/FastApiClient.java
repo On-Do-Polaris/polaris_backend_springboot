@@ -85,16 +85,19 @@ public class FastApiClient {
 	}
 
 	/**
-	 * 분석 개요 조회
+	 * 대시보드 요약 조회 (전체 사업장)
 	 *
-	 * GET /api/v1/analysis/{siteId}/overview
+	 * GET /api/v1/dashboard/summary
 	 *
-	 * @param siteId 사업장 ID
-	 * @return 분석 개요
+	 * @param userId 사용자 ID
+	 * @return 대시보드 요약
 	 */
-	public Mono<Map<String, Object>> getAnalysisOverview(UUID siteId) {
+	public Mono<Map<String, Object>> getDashboardSummary(UUID userId) {
 		return webClient.get()
-			.uri("/api/v1/analysis/{siteId}/overview", siteId)
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v1/dashboard/summary")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
