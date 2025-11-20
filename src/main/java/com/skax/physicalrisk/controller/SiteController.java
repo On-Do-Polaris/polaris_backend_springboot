@@ -3,7 +3,7 @@ package com.skax.physicalrisk.controller;
 import com.skax.physicalrisk.dto.request.site.CreateSiteRequest;
 import com.skax.physicalrisk.dto.request.site.UpdateSiteRequest;
 import com.skax.physicalrisk.dto.response.site.SiteResponse;
-import com.skax.physicalrisk.service.SiteService;
+import com.skax.physicalrisk.service.site.SiteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

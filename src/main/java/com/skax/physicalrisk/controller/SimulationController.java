@@ -4,7 +4,7 @@ import com.skax.physicalrisk.dto.request.simulation.ClimateSimulationRequest;
 import com.skax.physicalrisk.dto.request.simulation.RelocationSimulationRequest;
 import com.skax.physicalrisk.dto.response.simulation.ClimateSimulationResponse;
 import com.skax.physicalrisk.dto.response.simulation.RelocationSimulationResponse;
-import com.skax.physicalrisk.service.SimulationService;
+import com.skax.physicalrisk.service.simulation.SimulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -3,7 +3,7 @@ package com.skax.physicalrisk.controller;
 import com.skax.physicalrisk.dto.request.report.CreateReportRequest;
 import com.skax.physicalrisk.dto.response.report.ReportPdfResponse;
 import com.skax.physicalrisk.dto.response.report.ReportWebViewResponse;
-import com.skax.physicalrisk.service.ReportService;
+import com.skax.physicalrisk.service.report.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

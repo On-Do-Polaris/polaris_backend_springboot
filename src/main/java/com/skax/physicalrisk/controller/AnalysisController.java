@@ -2,7 +2,7 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
 import com.skax.physicalrisk.dto.response.analysis.*;
-import com.skax.physicalrisk.service.AnalysisService;
+import com.skax.physicalrisk.service.analysis.AnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

@@ -4,7 +4,7 @@ import com.skax.physicalrisk.dto.request.auth.LoginRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
-import com.skax.physicalrisk.service.AuthService;
+import com.skax.physicalrisk.service.user.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

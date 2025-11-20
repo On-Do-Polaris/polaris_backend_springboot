@@ -2,7 +2,7 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.user.UpdateUserRequest;
 import com.skax.physicalrisk.dto.response.user.UserResponse;
-import com.skax.physicalrisk.service.UserService;
+import com.skax.physicalrisk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
