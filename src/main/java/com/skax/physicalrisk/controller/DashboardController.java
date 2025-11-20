@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
-import com.skax.physicalrisk.service.DashboardService;
+import com.skax.physicalrisk.dto.response.analysis.DashboardSummaryResponse;
+import com.skax.physicalrisk.service.AnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -8,13 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 /**
  * 대시보드 컨트롤러
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-11-20
+ * 파일 버전: v02
  *
  * @author SKAX Team
  */
@@ -24,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DashboardController {
 
-	private final DashboardService dashboardService;
+	private final AnalysisService analysisService;
 
 	/**
 	 * 대시보드 요약 정보 조회
@@ -32,9 +31,9 @@ public class DashboardController {
 	 * @return 대시보드 요약 정보
 	 */
 	@GetMapping("/summary")
-	public ResponseEntity<Map<String, Object>> getDashboardSummary() {
+	public ResponseEntity<DashboardSummaryResponse> getDashboardSummary() {
 		log.info("GET /api/dashboard/summary - Fetching dashboard summary");
-		Map<String, Object> summary = dashboardService.getDashboardSummary();
-		return ResponseEntity.ok(summary);
+		DashboardSummaryResponse response = analysisService.getDashboardSummary();
+		return ResponseEntity.ok(response);
 	}
 }

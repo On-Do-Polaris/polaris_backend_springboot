@@ -244,4 +244,69 @@ public class FastApiClient {
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
 	}
+
+	/**
+	 * 리포트 생성
+	 *
+	 * POST /api/v1/reports
+	 *
+	 * @param request 리포트 생성 요청
+	 * @return 생성된 리포트 정보
+	 */
+	public Mono<Map<String, Object>> createReport(Map<String, Object> request) {
+		return webClient.post()
+			.uri("/api/v1/reports")
+			.header("X-API-Key", apiKey)
+			.bodyValue(request)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 리포트 웹 뷰 조회
+	 *
+	 * GET /api/v1/reports/{reportId}/web
+	 *
+	 * @param reportId 리포트 ID
+	 * @return 웹 뷰 리포트
+	 */
+	public Mono<Map<String, Object>> getReportWebView(UUID reportId) {
+		return webClient.get()
+			.uri("/api/v1/reports/{reportId}/web", reportId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 리포트 PDF 다운로드 정보 조회
+	 *
+	 * GET /api/v1/reports/{reportId}/pdf
+	 *
+	 * @param reportId 리포트 ID
+	 * @return PDF 다운로드 정보
+	 */
+	public Mono<Map<String, Object>> getReportPdf(UUID reportId) {
+		return webClient.get()
+			.uri("/api/v1/reports/{reportId}/pdf", reportId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 리포트 삭제
+	 *
+	 * DELETE /api/v1/reports/{reportId}
+	 *
+	 * @param reportId 리포트 ID
+	 * @return 삭제 결과
+	 */
+	public Mono<Map<String, Object>> deleteReport(UUID reportId) {
+		return webClient.delete()
+			.uri("/api/v1/reports/{reportId}", reportId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
 }
