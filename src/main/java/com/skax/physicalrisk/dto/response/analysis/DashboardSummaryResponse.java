@@ -10,37 +10,42 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 사업장 목록 응답 DTO
- * 사용자가 등록한 전체 사업장의 기본 정보
+ * 대시보드 요약 응답 DTO
  *
  * @author SKAX Team
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Schema(description = "사업장 목록")
-public class SiteResponse {
+@Schema(description = "대시보드 요약 정보")
+public class DashboardSummaryResponse {
+
+	@Schema(description = "전체 사업장의 주요 기후 리스크", example = "폭염")
+	private String mainClimateRisk;
 
 	@Schema(description = "사업장 목록")
-	private List<SiteInfo> sites;
+	private List<SiteSummary> sites;
 
 	@Data
+	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
-	@Builder
-	@Schema(description = "사업장 정보")
-	public static class SiteInfo {
+	@Schema(description = "사업장 요약")
+	public static class SiteSummary {
 		@Schema(description = "사업장 ID")
 		private UUID siteId;
 
 		@Schema(description = "사업장 이름", example = "서울 본사")
 		private String siteName;
 
+		@Schema(description = "사업장 유형", example = "공장")
+		private String siteType;
+
 		@Schema(description = "위치", example = "서울특별시 강남구")
 		private String location;
 
-		@Schema(description = "사업장 유형", example = "공장")
-		private String siteType;
+		@Schema(description = "통합 리스크 점수 (0-100)", example = "75")
+		private Integer totalRiskScore;
 	}
 }
