@@ -21,7 +21,7 @@ public class HazardTypeResponse {
 	@Schema(description = "위험 유형 코드", example = "HEAT_WAVE")
 	private String code;
 
-	@Schema(description = "위험 유형명 (한글)", example = "폭염")
+	@Schema(description = "위험 유형명 (한글)", example = "극심한 고온")
 	private String name;
 
 	@Schema(description = "위험 유형명 (영문)", example = "Heat Wave")

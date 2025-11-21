@@ -25,7 +25,7 @@ public class ClimateSimulationResponse {
 	@Schema(description = "SSP 시나리오", example = "SSP2-4.5")
 	private String scenario;
 
-	@Schema(description = "리스크 유형", example = "폭염")
+	@Schema(description = "리스크 유형", example = "극심한 고온")
 	private String riskType;
 
 	@Schema(description = "연도별 시뮬레이션 데이터")

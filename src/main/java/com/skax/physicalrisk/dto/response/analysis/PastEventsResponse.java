@@ -36,7 +36,7 @@ public class PastEventsResponse {
 	@AllArgsConstructor
 	@Schema(description = "재난 이벤트")
 	public static class DisasterEvent {
-		@Schema(description = "재난 유형", example = "폭염")
+		@Schema(description = "재난 유형", example = "극심한 고온")
 		private String disasterType;
 
 		@Schema(description = "발생 연도", example = "2023")

@@ -21,7 +21,7 @@ import java.util.UUID;
 @Schema(description = "대시보드 요약 정보")
 public class DashboardSummaryResponse {
 
-	@Schema(description = "전체 사업장의 주요 기후 리스크", example = "폭염")
+	@Schema(description = "전체 사업장의 주요 기후 리스크", example = "극심한 고온")
 	private String mainClimateRisk;
 
 	@Schema(description = "사업장 목록")

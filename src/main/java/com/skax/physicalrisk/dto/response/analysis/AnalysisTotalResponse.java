@@ -37,7 +37,7 @@ public class AnalysisTotalResponse {
 	@AllArgsConstructor
 	@Schema(description = "물리적 리스크 상세")
 	public static class PhysicalRiskDetail {
-		@Schema(description = "리스크 유형", example = "폭염")
+		@Schema(description = "리스크 유형", example = "극심한 고온")
 		private String riskType;
 
 		@Schema(description = "리스크 점수", minimum = "0", maximum = "100", example = "75")

@@ -28,7 +28,7 @@ public class ClimateSimulationRequest {
 	@NotBlank(message = "SSP 시나리오는 필수입니다")
 	private String scenario;
 
-	@Schema(description = "위험 유형", example = "폭염")
+	@Schema(description = "위험 유형", example = "극심한 고온")
 	@NotBlank(message = "위험 유형은 필수입니다")
 	private String hazardType;
 

@@ -43,7 +43,7 @@ public class RelocationSimulationResponse {
 	@AllArgsConstructor
 	@Schema(description = "리스크별 데이터")
 	public static class RiskData {
-		@Schema(description = "리스크 유형", example = "폭염")
+		@Schema(description = "리스크 유형", example = "극심한 고온")
 		private String riskType;
 
 		@Schema(description = "리스크 점수 (0-100)", example = "75")

@@ -47,9 +47,9 @@ public class HazardType {
 	 * 위험 요인 카테고리 열거형
 	 */
 	public enum HazardCategory {
-		TEMPERATURE, // 온도 관련 (폭염, 한파)
-		WATER,       // 물 관련 (홍수, 가뭄)
-		WIND,        // 바람 관련 (태풍, 강풍)
-		OTHER        // 기타
+		TEMPERATURE, // 온도 관련 (극심한 고온, 극심한 한파)
+		WATER,       // 물 관련 (하천 홍수, 도시 홍수, 가뭄, 물부족, 해수면 상승)
+		WIND,        // 바람 관련 (태풍)
+		OTHER        // 기타 (산불)
 	}
 }

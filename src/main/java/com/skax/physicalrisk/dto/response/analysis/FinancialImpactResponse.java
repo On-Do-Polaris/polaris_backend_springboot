@@ -36,7 +36,7 @@ public class FinancialImpactResponse {
 		@Schema(description = "SSP 시나리오", example = "SSP1-2.6", allowableValues = {"SSP1-2.6", "SSP2-4.5", "SSP3-7.0", "SSP5-8.5"})
 		private String scenario;
 
-		@Schema(description = "리스크 종류", example = "폭염")
+		@Schema(description = "리스크 종류", example = "극심한 고온")
 		private String riskType;
 
 		@Schema(description = "단기 AAL (분기별: Q1, Q2, Q3, Q4)")
