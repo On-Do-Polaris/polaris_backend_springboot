@@ -48,7 +48,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/health/**").permitAll() // 헬스 체크는 모두 허용
 				.requestMatchers("/api/auth/**").permitAll() // 인증 API는 모두 허용
 				.requestMatchers("/api/meta/**").permitAll() // 메타 API는 모두 허용
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger는 모두 허용
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs.yaml",  "/v3/api-docs/**").permitAll() // Swagger는 모두 허용
 				.requestMatchers("/h2-console/**").permitAll() // H2 콘솔은 모두 허용 (개발용)
 				.anyRequest().authenticated() // 나머지는 인증 필요
 			)
