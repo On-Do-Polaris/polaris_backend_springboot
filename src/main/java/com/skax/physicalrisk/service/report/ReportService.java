@@ -67,43 +67,48 @@ public class ReportService {
 	/**
 	 * 리포트 웹 뷰 조회
 	 *
-	 * @param reportId 리포트 ID
 	 * @return 웹 뷰 리포트 (이미지 페이지들)
 	 */
-	public ReportWebViewResponse getReportWebView(UUID reportId) {
+	public ReportWebViewResponse getReportWebView() {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching web view report: reportId={}, userId={}", reportId, userId);
+		log.info("Fetching web view report for userId={}", userId);
 
-		Map<String, Object> response = fastApiClient.getReportWebView(reportId).block();
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		Map<String, Object> response = fastApiClient.getReportWebViewByUserId(userId).block();
 		return convertToDto(response, ReportWebViewResponse.class);
 	}
 
 	/**
 	 * 리포트 PDF 다운로드 정보 조회
 	 *
-	 * @param reportId 리포트 ID
 	 * @return PDF 다운로드 정보
 	 */
-	public ReportPdfResponse getReportPdf(UUID reportId) {
+	public ReportPdfResponse getReportPdf() {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching PDF report: reportId={}, userId={}", reportId, userId);
+		log.info("Fetching PDF report for userId={}", userId);
 
-		Map<String, Object> response = fastApiClient.getReportPdf(reportId).block();
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		Map<String, Object> response = fastApiClient.getReportPdfByUserId(userId).block();
 		return convertToDto(response, ReportPdfResponse.class);
 	}
 
 	/**
 	 * 리포트 삭제
-	 *
-	 * @param reportId 리포트 ID
 	 */
 	@Transactional
-	public void deleteReport(UUID reportId) {
+	public void deleteReport() {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Deleting report: reportId={}, userId={}", reportId, userId);
+		log.info("Deleting report for userId={}", userId);
 
-		fastApiClient.deleteReport(reportId).block();
-		log.info("Report deleted successfully: reportId={}", reportId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		fastApiClient.deleteReportByUserId(userId).block();
+		log.info("Report deleted successfully for userId={}", userId);
 	}
 
 	/**

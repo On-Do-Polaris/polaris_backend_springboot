@@ -263,48 +263,57 @@ public class FastApiClient {
 	}
 
 	/**
-	 * 리포트 웹 뷰 조회
+	 * 리포트 웹 뷰 조회 (사용자 ID 기반)
 	 *
-	 * GET /api/v1/reports/{reportId}/web
+	 * GET /api/v1/reports/web?userId={userId}
 	 *
-	 * @param reportId 리포트 ID
+	 * @param userId 사용자 ID
 	 * @return 웹 뷰 리포트
 	 */
-	public Mono<Map<String, Object>> getReportWebView(UUID reportId) {
+	public Mono<Map<String, Object>> getReportWebViewByUserId(UUID userId) {
 		return webClient.get()
-			.uri("/api/v1/reports/{reportId}/web", reportId)
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v1/reports/web")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
 	/**
-	 * 리포트 PDF 다운로드 정보 조회
+	 * 리포트 PDF 다운로드 정보 조회 (사용자 ID 기반)
 	 *
-	 * GET /api/v1/reports/{reportId}/pdf
+	 * GET /api/v1/reports/pdf?userId={userId}
 	 *
-	 * @param reportId 리포트 ID
+	 * @param userId 사용자 ID
 	 * @return PDF 다운로드 정보
 	 */
-	public Mono<Map<String, Object>> getReportPdf(UUID reportId) {
+	public Mono<Map<String, Object>> getReportPdfByUserId(UUID userId) {
 		return webClient.get()
-			.uri("/api/v1/reports/{reportId}/pdf", reportId)
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v1/reports/pdf")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
 	/**
-	 * 리포트 삭제
+	 * 리포트 삭제 (사용자 ID 기반)
 	 *
-	 * DELETE /api/v1/reports/{reportId}
+	 * DELETE /api/v1/reports?userId={userId}
 	 *
-	 * @param reportId 리포트 ID
+	 * @param userId 사용자 ID
 	 * @return 삭제 결과
 	 */
-	public Mono<Map<String, Object>> deleteReport(UUID reportId) {
+	public Mono<Map<String, Object>> deleteReportByUserId(UUID userId) {
 		return webClient.delete()
-			.uri("/api/v1/reports/{reportId}", reportId)
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v1/reports")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);

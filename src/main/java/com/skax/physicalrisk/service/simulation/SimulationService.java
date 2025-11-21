@@ -40,12 +40,12 @@ public class SimulationService {
 	 * @return 비교 결과
 	 */
 	public RelocationSimulationResponse compareRelocation(RelocationSimulationRequest request) {
-		log.info("Comparing relocation: baseSiteId={}, newLocation=({}, {})",
-			request.getBaseSiteId(), request.getLatitude(), request.getLongitude());
+		log.info("Comparing relocation: currentSiteId={}, newLocation=({}, {})",
+			request.getCurrentSiteId(), request.getLatitude(), request.getLongitude());
 
 		// DTO를 Map으로 변환
 		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("baseSiteId", request.getBaseSiteId());
+		requestMap.put("currentSiteId", request.getCurrentSiteId());
 		requestMap.put("latitude", request.getLatitude());
 		requestMap.put("longitude", request.getLongitude());
 		requestMap.put("roadAddress", request.getRoadAddress());

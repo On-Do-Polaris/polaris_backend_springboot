@@ -46,30 +46,34 @@ public class AnalysisService {
 	 * 분석 시작
 	 *
 	 * @param siteId       사업장 ID
-	 * @param hazardTypes  위험 유형 목록
-	 * @param priority     우선순위
-	 * @param options      분석 옵션
+	 * @param latitude     위도
+	 * @param longitude    경도
+	 * @param industryType 산업 유형
 	 * @return 작업 상태 응답
 	 */
 	public AnalysisJobStatusResponse startAnalysis(
 		UUID siteId,
-		List<String> hazardTypes,
-		String priority,
-		StartAnalysisRequestDto.AnalysisOptions options
+		Double latitude,
+		Double longitude,
+		String industryType
 	) {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Starting analysis for site: {} by user: {}", siteId, userId);
+		log.info("Starting analysis for site: {} by user: {}, lat: {}, lon: {}, industry: {}",
+			siteId, userId, latitude, longitude, industryType);
 
 		// 사업장 조회 및 권한 확인
 		Site site = getSiteWithAuth(siteId, userId);
 
-		// FastAPI 요청 DTO 생성
-		SiteInfoDto siteInfo = SiteInfoDto.from(site);
+		// FastAPI 요청 DTO 생성 (사업장 ID, 위경도, 유형)
+		SiteInfoDto siteInfo = SiteInfoDto.builder()
+			.id(siteId)
+			.latitude(latitude)
+			.longitude(longitude)
+			.industry(industryType)
+			.build();
+
 		StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
 			.site(siteInfo)
-			.hazardTypes(hazardTypes)
-			.priority(priority)
-			.options(options)
 			.build();
 
 		// WebClient 호출 후 block()으로 동기 변환

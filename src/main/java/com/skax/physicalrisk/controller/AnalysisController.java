@@ -35,7 +35,7 @@ public class AnalysisController {
 	 * POST /api/sites/{siteId}/analysis/start
 	 *
 	 * @param siteId  사업장 ID
-	 * @param request 분석 요청
+	 * @param request 분석 요청 (위경도, 유형)
 	 * @return 작업 상태
 	 */
 	@PostMapping("/start")
@@ -47,9 +47,9 @@ public class AnalysisController {
 
 		AnalysisJobStatusResponse response = analysisService.startAnalysis(
 			siteId,
-			request.getHazardTypes(),
-			request.getPriority(),
-			request.getOptions()
+			request.getLatitude(),
+			request.getLongitude(),
+			request.getIndustryType()
 		);
 
 		log.info("Controller returning success: 200 OK");
@@ -172,8 +172,8 @@ public class AnalysisController {
 	@lombok.NoArgsConstructor
 	@lombok.AllArgsConstructor
 	public static class StartAnalysisRequest {
-		private List<String> hazardTypes;
-		private String priority;
-		private StartAnalysisRequestDto.AnalysisOptions options;
+		private Double latitude;
+		private Double longitude;
+		private String industryType;
 	}
 }

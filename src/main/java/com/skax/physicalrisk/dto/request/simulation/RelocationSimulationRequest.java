@@ -21,9 +21,9 @@ import java.util.UUID;
 @Schema(description = "사업장 이전 시뮬레이션 요청")
 public class RelocationSimulationRequest {
 
-	@Schema(description = "기존 사업장 ID", required = true)
-	@NotNull(message = "기존 사업장 ID는 필수입니다")
-	private UUID baseSiteId;
+	@Schema(description = "현재 사업장 ID", required = true)
+	@NotNull(message = "현재 사업장 ID는 필수입니다")
+	private UUID currentSiteId;
 
 	@Schema(description = "이전될 위치의 위도", example = "37.5665", required = true)
 	@NotNull(message = "위도는 필수입니다")

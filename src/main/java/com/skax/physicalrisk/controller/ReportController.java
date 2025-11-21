@@ -50,45 +50,42 @@ public class ReportController {
 	/**
 	 * 리포트 웹 뷰 조회
 	 *
-	 * GET /api/reports/{reportId}/web
+	 * GET /api/reports/web
 	 *
-	 * @param reportId 리포트 ID
 	 * @return 웹 뷰 리포트
 	 */
-	@GetMapping("/{reportId}/web")
-	public ResponseEntity<ReportWebViewResponse> getReportWebView(@PathVariable UUID reportId) {
-		log.info("GET /api/reports/{}/web", reportId);
-		ReportWebViewResponse response = reportService.getReportWebView(reportId);
+	@GetMapping("/web")
+	public ResponseEntity<ReportWebViewResponse> getReportWebView() {
+		log.info("GET /api/reports/web");
+		ReportWebViewResponse response = reportService.getReportWebView();
 		return ResponseEntity.ok(response);
 	}
 
 	/**
 	 * 리포트 PDF 다운로드 정보 조회
 	 *
-	 * GET /api/reports/{reportId}/pdf
+	 * GET /api/reports/pdf
 	 *
-	 * @param reportId 리포트 ID
 	 * @return PDF 다운로드 정보
 	 */
-	@GetMapping("/{reportId}/pdf")
-	public ResponseEntity<ReportPdfResponse> getReportPdf(@PathVariable UUID reportId) {
-		log.info("GET /api/reports/{}/pdf", reportId);
-		ReportPdfResponse response = reportService.getReportPdf(reportId);
+	@GetMapping("/pdf")
+	public ResponseEntity<ReportPdfResponse> getReportPdf() {
+		log.info("GET /api/reports/pdf");
+		ReportPdfResponse response = reportService.getReportPdf();
 		return ResponseEntity.ok(response);
 	}
 
 	/**
 	 * 리포트 삭제
 	 *
-	 * DELETE /api/reports/{reportId}
+	 * DELETE /api/reports
 	 *
-	 * @param reportId 리포트 ID
 	 * @return 성공 메시지
 	 */
-	@DeleteMapping("/{reportId}")
-	public ResponseEntity<Map<String, String>> deleteReport(@PathVariable UUID reportId) {
-		log.info("DELETE /api/reports/{}", reportId);
-		reportService.deleteReport(reportId);
+	@DeleteMapping
+	public ResponseEntity<Map<String, String>> deleteReport() {
+		log.info("DELETE /api/reports");
+		reportService.deleteReport();
 		return ResponseEntity.ok(Map.of("message", "리포트가 삭제되었습니다"));
 	}
 }
