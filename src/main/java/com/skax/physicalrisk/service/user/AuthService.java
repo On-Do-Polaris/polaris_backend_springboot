@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -124,5 +125,56 @@ public class AuthService {
 		refreshTokenStore.remove(tokenKey);
 
 		log.info("User logged out successfully: {}", userId);
+	}
+
+	/**
+	 * 토큰 갱신
+	 *
+	 * @param refreshToken 리프레시 토큰
+	 * @return 새로운 액세스 토큰 및 리프레시 토큰
+	 */
+	@Transactional
+	public LoginResponse refresh(String refreshToken) {
+		log.info("Refreshing token");
+
+		// Refresh Token 검증
+		if (!jwtTokenProvider.validateToken(refreshToken)) {
+			log.error("Invalid refresh token");
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+		}
+
+		// 토큰에서 사용자 ID 추출 (UUID)
+		UUID userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+		// 저장된 Refresh Token과 비교
+		String tokenKey = "refresh_token:" + userId.toString();
+		String storedRefreshToken = refreshTokenStore.get(tokenKey);
+
+		if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+			log.error("Refresh token not found or mismatched for user: {}", userId);
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+		}
+
+		// 사용자 조회
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> {
+				log.error("User not found: {}", userId);
+				return new UnauthorizedException(ErrorCode.USER_NOT_FOUND);
+			});
+
+		// 새로운 토큰 생성
+		String newAccessToken = jwtTokenProvider.createAccessToken(user.getId());
+		String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+
+		// 새로운 Refresh Token을 메모리에 저장
+		refreshTokenStore.put(tokenKey, newRefreshToken);
+
+		log.info("Token refreshed successfully for user: {}", userId);
+
+		return LoginResponse.builder()
+			.accessToken(newAccessToken)
+			.refreshToken(newRefreshToken)
+			.userId(user.getEmail())
+			.build();
 	}
 }

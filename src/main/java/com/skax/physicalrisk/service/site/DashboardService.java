@@ -1,4 +1,4 @@
-package com.skax.physicalrisk.service;
+package com.skax.physicalrisk.service.site;
 
 import com.skax.physicalrisk.domain.site.entity.Site;
 import com.skax.physicalrisk.domain.site.repository.SiteRepository;

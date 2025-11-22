@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.auth.LoginRequest;
+import com.skax.physicalrisk.dto.request.auth.RefreshTokenRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
@@ -73,15 +74,16 @@ public class AuthController {
 	}
 
 	/**
-	 * 토큰 갱신 (미구현)
+	 * 토큰 갱신
 	 *
-	 * @return 갱신된 토큰
+	 * @param request 리프레시 토큰 요청
+	 * @return 갱신된 액세스 토큰 및 리프레시 토큰
 	 */
 	@PostMapping("/refresh")
-	public ResponseEntity<Map<String, String>> refresh() {
-		log.info("POST /api/auth/refresh - Not implemented yet");
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-			.body(Map.of("message", "Not implemented yet"));
+	public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+		log.info("POST /api/auth/refresh");
+		LoginResponse response = authService.refresh(request.getRefreshToken());
+		return ResponseEntity.ok(response);
 	}
 
 	/**
