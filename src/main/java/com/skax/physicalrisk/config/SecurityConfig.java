@@ -77,6 +77,8 @@ public class SecurityConfig {
 		configuration.setAllowedOrigins(Arrays.asList(
 			"http://localhost:3000",  // React 개발 서버
 			"http://localhost:5173",  // Vite 개발 서버
+			"http://localhost:8080",  // Vue CLI 개발 서버
+			"http://localhost:8081",  // Vue CLI 대체 포트
 			"https://skax.co.kr",     // 프로덕션 도메인
 			"https://www.skax.co.kr"
 		));
