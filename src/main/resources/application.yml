@@ -60,6 +60,16 @@ kakao:
   api:
     key: ${KAKAO_API_KEY}
 
+# Actuator (Health Check)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 # 로깅
 logging:
   level:

@@ -21,7 +21,8 @@
       "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\config\\RedisConfig.java\")",
       "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\service\\user\\RefreshTokenService.java\")",
       "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\controller\\ReportController.java\")",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(dir /b \"c:\\Users\\Administrator\\Desktop\\backend_team_java\")"
     ],
     "deny": [],
     "ask": []
