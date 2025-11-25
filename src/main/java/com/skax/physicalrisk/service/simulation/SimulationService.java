@@ -2,6 +2,7 @@ package com.skax.physicalrisk.service.simulation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
+import com.skax.physicalrisk.client.fastapi.dto.AalAnalysisData;
 import com.skax.physicalrisk.dto.request.simulation.ClimateSimulationRequest;
 import com.skax.physicalrisk.dto.request.simulation.RelocationSimulationRequest;
 import com.skax.physicalrisk.dto.response.simulation.ClimateSimulationResponse;
@@ -19,8 +20,8 @@ import java.util.Map;
  *
  * FastAPI 서버를 통한 기후 시뮬레이션 및 사업장 이전 분석
  *
- * 최종 수정일: 2025-11-20
- * 파일 버전: v02
+ * 최종 수정일: 2025-11-25
+ * 파일 버전: v03 (AAL v11 지원)
  *
  * @author SKAX Team
  */
@@ -35,6 +36,7 @@ public class SimulationService {
 
 	/**
 	 * 사업장 이전 시뮬레이션 (현재지 vs 이전지 비교)
+	 * AAL v11: aal_analysis에서 final_aal_percentage를 가져와 0-1 스케일로 변환
 	 *
 	 * @param request 이전 시뮬레이션 요청
 	 * @return 비교 결과
@@ -52,7 +54,9 @@ public class SimulationService {
 		requestMap.put("jibunAddress", request.getJibunAddress());
 
 		Map<String, Object> response = fastApiClient.compareRelocation(requestMap).block();
-		return convertToDto(response, RelocationSimulationResponse.class);
+
+		// AAL v11: aal_analysis 필드에서 AAL 데이터 추출 및 변환
+		return convertToRelocationResponse(response);
 	}
 
 	/**
@@ -82,5 +86,111 @@ public class SimulationService {
 			log.error("Failed to convert response to {}: {}", clazz.getSimpleName(), e.getMessage());
 			throw new RuntimeException("응답 변환 실패: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * AAL v11 응답을 RelocationSimulationResponse로 변환
+	 * physical_risk_scores와 aal_analysis를 결합하여 최종 응답 생성
+	 *
+	 * @param response FastAPI 응답 Map
+	 * @return 변환된 RelocationSimulationResponse
+	 */
+	@SuppressWarnings("unchecked")
+	private RelocationSimulationResponse convertToRelocationResponse(Map<String, Object> response) {
+		try {
+			RelocationSimulationResponse result = new RelocationSimulationResponse();
+
+			// currentLocation 처리
+			Map<String, Object> currentLoc = (Map<String, Object>) response.get("currentLocation");
+			if (currentLoc != null) {
+				result.setCurrentLocation(convertLocationData(currentLoc));
+			}
+
+			// newLocation 처리
+			Map<String, Object> newLoc = (Map<String, Object>) response.get("newLocation");
+			if (newLoc != null) {
+				result.setNewLocation(convertLocationData(newLoc));
+			}
+
+			return result;
+		} catch (Exception e) {
+			log.error("Failed to convert relocation response: {}", e.getMessage());
+			throw new RuntimeException("이전 시뮬레이션 응답 변환 실패: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * LocationData 변환
+	 * AAL v11: aal_analysis에서 final_aal_percentage를 추출하여 AAL 설정
+	 *
+	 * @param locationMap FastAPI 응답의 location 맵
+	 * @return 변환된 LocationData
+	 */
+	@SuppressWarnings("unchecked")
+	private RelocationSimulationResponse.LocationData convertLocationData(Map<String, Object> locationMap) {
+		RelocationSimulationResponse.LocationData locationData = new RelocationSimulationResponse.LocationData();
+
+		// physical_risk_scores 가져오기
+		Map<String, Object> physicalRiskScores = (Map<String, Object>) locationMap.get("physical_risk_scores");
+
+		// AAL v11: aal_analysis 가져오기
+		Map<String, Object> aalAnalysis = (Map<String, Object>) locationMap.get("aal_analysis");
+
+		if (physicalRiskScores != null && aalAnalysis != null) {
+			java.util.List<RelocationSimulationResponse.RiskData> risks = new java.util.ArrayList<>();
+
+			// 각 리스크 타입에 대해 physical_risk_score와 AAL을 결합
+			for (Map.Entry<String, Object> entry : physicalRiskScores.entrySet()) {
+				String riskType = entry.getKey();
+				Map<String, Object> riskData = (Map<String, Object>) entry.getValue();
+
+				// Physical Risk Score 추출
+				Object scoreObj = riskData.get("physical_risk_score_100");
+				Integer riskScore = scoreObj != null ? ((Number) scoreObj).intValue() : 0;
+
+				// AAL v11: aal_analysis에서 final_aal_percentage 추출
+				Double aal = 0.0;
+				Map<String, Object> aalData = (Map<String, Object>) aalAnalysis.get(riskType);
+				if (aalData != null) {
+					Object finalAalObj = aalData.get("final_aal_percentage");
+					if (finalAalObj != null) {
+						Double finalAalPercentage = ((Number) finalAalObj).doubleValue();
+						// % → 0-1 스케일 변환
+						aal = finalAalPercentage / 100.0;
+						log.debug("Risk type: {}, AAL: {}% -> {}", riskType, finalAalPercentage, aal);
+					}
+				}
+
+				RelocationSimulationResponse.RiskData risk = RelocationSimulationResponse.RiskData.builder()
+					.riskType(convertRiskTypeName(riskType))
+					.riskScore(riskScore)
+					.aal(aal)
+					.build();
+
+				risks.add(risk);
+			}
+
+			locationData.setRisks(risks);
+		}
+
+		return locationData;
+	}
+
+	/**
+	 * 리스크 타입 이름 변환 (영문 → 한글)
+	 *
+	 * @param riskType 영문 리스크 타입
+	 * @return 한글 리스크 타입
+	 */
+	private String convertRiskTypeName(String riskType) {
+		Map<String, String> riskNames = Map.of(
+			"extreme_heat", "극심한 고온",
+			"typhoon", "태풍",
+			"flood", "홍수",
+			"drought", "가뭄",
+			"wildfire", "산불",
+			"sea_level_rise", "해수면 상승"
+		);
+		return riskNames.getOrDefault(riskType, riskType);
 	}
 }

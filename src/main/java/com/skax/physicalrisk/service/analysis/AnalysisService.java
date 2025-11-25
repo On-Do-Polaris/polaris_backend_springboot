@@ -94,7 +94,7 @@ public class AnalysisService {
 
 		// 권한 확인
 		getSiteWithAuth(siteId, userId);
-		Map<String, Object> response = fastApiClient.getAnalysisStatus(jobId).block();
+		Map<String, Object> response = fastApiClient.getAnalysisStatus(siteId, jobId).block();
 		return convertToDto(response, AnalysisJobStatusResponse.class);
 	}
 

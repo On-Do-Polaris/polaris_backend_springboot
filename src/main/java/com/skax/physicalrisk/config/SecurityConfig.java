@@ -17,13 +17,16 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Spring Security 설정
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-11-24
+ * 파일 버전: v02
  *
  * JWT 기반 인증 및 권한 설정
  *
@@ -36,6 +39,9 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080}")
+	private String allowedOrigins;
 
 	/**
 	 * Security Filter Chain 설정
@@ -66,6 +72,8 @@ public class SecurityConfig {
 
 	/**
 	 * CORS 설정
+	 * 환경변수 CORS_ALLOWED_ORIGINS로 허용 도메인 설정 가능
+	 * 예: CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-domain.com
 	 *
 	 * @return CorsConfigurationSource
 	 */
@@ -73,15 +81,9 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		// 허용할 origin (프론트엔드 도메인)
-		configuration.setAllowedOrigins(Arrays.asList(
-			"http://localhost:3000",  // React 개발 서버
-			"http://localhost:5173",  // Vite 개발 서버
-			"http://localhost:8080",  // Vue CLI 개발 서버
-			"http://localhost:8081",  // Vue CLI 대체 포트
-			"https://skax.co.kr",     // 프로덕션 도메인
-			"https://www.skax.co.kr"
-		));
+		// 허용할 origin (환경변수에서 읽어옴)
+		List<String> origins = Arrays.asList(allowedOrigins.split(","));
+		configuration.setAllowedOrigins(origins);
 
 		// 허용할 HTTP 메서드
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
