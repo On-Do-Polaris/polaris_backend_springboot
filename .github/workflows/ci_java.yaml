@@ -8,7 +8,7 @@ on:
     branches: [main, develop]
 
 env:
-  IMAGE_NAME: polaris-backend
+  IMAGE_NAME: polaris-backend-java
 
 jobs:
   test:
