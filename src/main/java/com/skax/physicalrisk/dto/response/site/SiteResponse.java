@@ -1,19 +1,17 @@
 package com.skax.physicalrisk.dto.response.site;
 
-import com.skax.physicalrisk.domain.site.entity.Site;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
- * 사업장 응답 DTO
- *
- * 최종 수정일: 2025-11-18
- * 파일 버전: v02
+ * 사업장 목록 응답 DTO
+ * 사용자가 등록한 전체 사업장의 기본 정보
  *
  * @author SKAX Team
  */
@@ -21,58 +19,28 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "사업장 목록")
 public class SiteResponse {
 
-	private UUID id;
-	private String name;
-	private String address;
-	private String city;
-	private Double latitude;
-	private Double longitude;
-	private String industry;
+	@Schema(description = "사업장 목록")
+	private List<SiteInfo> sites;
 
-	// AI 분석용 필드
-	private Integer buildingAge;
-	private String buildingType;
-	private Boolean seismicDesign;
-	private Double floorArea;
-	private Double assetValue;
-	private Integer employeeCount;
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	@Schema(description = "사업장 정보")
+	public static class SiteInfo {
+		@Schema(description = "사업장 ID")
+		private UUID siteId;
 
-	private String mainHazard;
-	private Integer riskScore;
-	private Site.RiskLevel riskLevel;
-	private LocalDateTime lastAnalyzedAt;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
+		@Schema(description = "사업장 이름", example = "서울 본사")
+		private String siteName;
 
-	/**
-	 * 엔티티로부터 응답 DTO 생성
-	 *
-	 * @param site 사업장 엔티티
-	 * @return SiteResponse
-	 */
-	public static SiteResponse from(Site site) {
-		return SiteResponse.builder()
-			.id(site.getId())
-			.name(site.getName())
-			.address(site.getAddress())
-			.city(site.getCity())
-			.latitude(site.getLatitude())
-			.longitude(site.getLongitude())
-			.industry(site.getIndustry())
-			.buildingAge(site.getBuildingAge())
-			.buildingType(site.getBuildingType())
-			.seismicDesign(site.getSeismicDesign())
-			.floorArea(site.getFloorArea())
-			.assetValue(site.getAssetValue())
-			.employeeCount(site.getEmployeeCount())
-			.mainHazard(site.getMainHazard())
-			.riskScore(site.getRiskScore())
-			.riskLevel(site.getRiskLevel())
-			.lastAnalyzedAt(site.getLastAnalyzedAt())
-			.createdAt(site.getCreatedAt())
-			.updatedAt(site.getUpdatedAt())
-			.build();
+		@Schema(description = "위치", example = "서울특별시 강남구")
+		private String location;
+
+		@Schema(description = "사업장 유형", example = "공장")
+		private String siteType;
 	}
 }

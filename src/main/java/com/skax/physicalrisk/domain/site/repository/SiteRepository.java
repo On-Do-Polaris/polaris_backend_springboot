@@ -25,7 +25,15 @@ import java.util.UUID;
 public interface SiteRepository extends JpaRepository<Site, UUID> {
 
 	/**
-	 * 사용자의 사업장 목록 조회
+	 * 사용자의 전체 사업장 목록 조회
+	 *
+	 * @param user 사용자
+	 * @return 사업장 목록
+	 */
+	List<Site> findByUser(User user);
+
+	/**
+	 * 사용자의 사업장 목록 조회 (페이징)
 	 *
 	 * @param user 사용자
 	 * @param pageable 페이징 정보

@@ -1,19 +1,13 @@
 package com.skax.physicalrisk.dto.response.user;
 
-import com.skax.physicalrisk.domain.user.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 /**
  * 사용자 응답 DTO
- *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
  *
  * @author SKAX Team
  */
@@ -21,33 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "사용자 정보")
 public class UserResponse {
 
-	private UUID id;
+	@Schema(description = "이메일", example = "user@example.com")
 	private String email;
-	private String name;
-	private String organization;
-	private String language;
-	private User.UserRole role;
-	private LocalDateTime createdAt;
-	private LocalDateTime lastLoginAt;
 
-	/**
-	 * 엔티티로부터 응답 DTO 생성
-	 *
-	 * @param user 사용자 엔티티
-	 * @return UserResponse
-	 */
-	public static UserResponse from(User user) {
-		return UserResponse.builder()
-			.id(user.getId())
-			.email(user.getEmail())
-			.name(user.getName())
-			.organization(user.getOrganization())
-			.language(user.getLanguage())
-			.role(user.getRole())
-			.createdAt(user.getCreatedAt())
-			.lastLoginAt(user.getLastLoginAt())
-			.build();
-	}
+	@Schema(description = "이름", example = "홍길동")
+	private String name;
+
+	@Schema(description = "언어 설정", example = "ko", allowableValues = {"ko", "en"})
+	private String language;
 }

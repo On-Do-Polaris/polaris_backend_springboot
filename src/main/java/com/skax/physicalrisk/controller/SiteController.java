@@ -3,12 +3,10 @@ package com.skax.physicalrisk.controller;
 import com.skax.physicalrisk.dto.request.site.CreateSiteRequest;
 import com.skax.physicalrisk.dto.request.site.UpdateSiteRequest;
 import com.skax.physicalrisk.dto.response.site.SiteResponse;
-import com.skax.physicalrisk.service.SiteService;
+import com.skax.physicalrisk.service.site.SiteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,22 +33,13 @@ public class SiteController {
 	/**
 	 * 사업장 목록 조회
 	 *
-	 * @param keyword  검색 키워드 (선택)
-	 * @param pageable 페이징 정보
 	 * @return 사업장 목록
 	 */
 	@GetMapping
-	public ResponseEntity<Page<SiteResponse>> getSites(
-		@RequestParam(required = false) String keyword,
-		Pageable pageable
-	) {
-		log.info("GET /api/sites - Keyword: {}, Page: {}", keyword, pageable.getPageNumber());
-
-		Page<SiteResponse> sites = keyword != null && !keyword.isEmpty()
-			? siteService.searchSites(keyword, pageable)
-			: siteService.getSites(pageable);
-
-		return ResponseEntity.ok(sites);
+	public ResponseEntity<SiteResponse> getSites() {
+		log.info("GET /api/sites - Fetching all sites");
+		SiteResponse response = siteService.getSites();
+		return ResponseEntity.ok(response);
 	}
 
 	/**
@@ -60,23 +49,10 @@ public class SiteController {
 	 * @return 생성된 사업장 정보
 	 */
 	@PostMapping
-	public ResponseEntity<SiteResponse> createSite(@Valid @RequestBody CreateSiteRequest request) {
+	public ResponseEntity<SiteResponse.SiteInfo> createSite(@Valid @RequestBody CreateSiteRequest request) {
 		log.info("POST /api/sites - Name: {}", request.getName());
-		SiteResponse response = siteService.createSite(request);
+		SiteResponse.SiteInfo response = siteService.createSite(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
-
-	/**
-	 * 사업장 상세 조회
-	 *
-	 * @param siteId 사업장 ID
-	 * @return 사업장 상세 정보
-	 */
-	@GetMapping("/{siteId}")
-	public ResponseEntity<SiteResponse> getSite(@PathVariable UUID siteId) {
-		log.info("GET /api/sites/{} - Fetching site", siteId);
-		SiteResponse response = siteService.getSite(siteId);
-		return ResponseEntity.ok(response);
 	}
 
 	/**
@@ -87,12 +63,12 @@ public class SiteController {
 	 * @return 수정된 사업장 정보
 	 */
 	@PatchMapping("/{siteId}")
-	public ResponseEntity<SiteResponse> updateSite(
+	public ResponseEntity<SiteResponse.SiteInfo> updateSite(
 		@PathVariable UUID siteId,
 		@RequestBody UpdateSiteRequest request
 	) {
 		log.info("PATCH /api/sites/{} - Updating site", siteId);
-		SiteResponse response = siteService.updateSite(siteId, request);
+		SiteResponse.SiteInfo response = siteService.updateSite(siteId, request);
 		return ResponseEntity.ok(response);
 	}
 

@@ -1,7 +1,7 @@
 package com.skax.physicalrisk.dto.request.site;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,38 +9,27 @@ import lombok.NoArgsConstructor;
 /**
  * 사업장 생성 요청 DTO
  *
- * 최종 수정일: 2025-11-18
- * 파일 버전: v02
- *
  * @author SKAX Team
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "사업장 생성 요청")
 public class CreateSiteRequest {
 
+	@Schema(description = "사업장 이름", example = "서울 본사", required = true)
 	@NotBlank(message = "사업장 이름은 필수입니다")
 	private String name;
 
+	@Schema(description = "위치 (시군구 단위)", example = "서울특별시 강남구", required = true)
+	@NotBlank(message = "위치는 필수입니다")
+	private String location;
+
+	@Schema(description = "주소 (도로명 또는 지번)", example = "서울특별시 강남구 테헤란로 123", required = true)
 	@NotBlank(message = "주소는 필수입니다")
 	private String address;
 
-	@NotBlank(message = "산업 분류는 필수입니다")
-	private String industry;
-
-	@NotNull(message = "위도는 필수입니다")
-	private Double latitude;
-
-	@NotNull(message = "경도는 필수입니다")
-	private Double longitude;
-
-	// AI 분석용 추가 필드
-	private Integer buildingAge;        // 건물 연령 (년)
-	private String buildingType;        // 건물 유형
-	private Boolean seismicDesign;      // 내진설계 여부
-	private Double floorArea;           // 연면적 (m²)
-	private Double assetValue;          // 자산 가치 (KRW)
-	private Integer employeeCount;      // 직원 수
-
-	private String description;
+	@Schema(description = "사업장 유형", example = "공장", required = true)
+	@NotBlank(message = "사업장 유형은 필수입니다")
+	private String type;
 }

@@ -1,11 +1,11 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.auth.LoginRequest;
+import com.skax.physicalrisk.dto.request.auth.RefreshTokenRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
-import com.skax.physicalrisk.dto.response.user.UserResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
-import com.skax.physicalrisk.service.AuthService;
+import com.skax.physicalrisk.service.user.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,13 +38,13 @@ public class AuthController {
 	 * 회원가입
 	 *
 	 * @param request 회원가입 요청
-	 * @return 생성된 사용자 정보
+	 * @return 생성된 사용자 ID (이메일)
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
-		UserResponse response = authService.register(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		String userId = authService.register(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("userId", userId));
 	}
 
 	/**
@@ -74,15 +74,16 @@ public class AuthController {
 	}
 
 	/**
-	 * 토큰 갱신 (미구현)
+	 * 토큰 갱신
 	 *
-	 * @return 갱신된 토큰
+	 * @param request 리프레시 토큰 요청
+	 * @return 갱신된 액세스 토큰 및 리프레시 토큰
 	 */
 	@PostMapping("/refresh")
-	public ResponseEntity<Map<String, String>> refresh() {
-		log.info("POST /api/auth/refresh - Not implemented yet");
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-			.body(Map.of("message", "Not implemented yet"));
+	public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+		log.info("POST /api/auth/refresh");
+		LoginResponse response = authService.refresh(request.getRefreshToken());
+		return ResponseEntity.ok(response);
 	}
 
 	/**

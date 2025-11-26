@@ -1,5 +1,6 @@
 package com.skax.physicalrisk.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,21 +11,22 @@ import java.time.LocalDateTime;
 /**
  * 에러 응답 DTO
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
- *
  * @author SKAX Team
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "에러 응답")
 public class ErrorResponse {
 
-	private String code; // 에러 코드
+	@Schema(description = "에러 코드", example = "USER_NOT_FOUND")
+	private String code;
 
-	private String message; // 에러 메시지
+	@Schema(description = "에러 메시지", example = "사용자를 찾을 수 없습니다")
+	private String message;
 
+	@Schema(description = "발생 시간")
 	@Builder.Default
-	private LocalDateTime timestamp = LocalDateTime.now(); // 발생 시간
+	private LocalDateTime timestamp = LocalDateTime.now();
 }

@@ -2,7 +2,7 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.domain.meta.entity.HazardType;
 import com.skax.physicalrisk.domain.meta.entity.Industry;
-import com.skax.physicalrisk.service.MetaService;
+import com.skax.physicalrisk.service.meta.MetaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
