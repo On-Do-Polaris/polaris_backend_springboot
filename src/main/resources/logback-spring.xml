@@ -83,8 +83,7 @@
 
 	<springProfile name="prod">
 		<root level="INFO">
-			<appender-ref ref="FILE" />
-			<appender-ref ref="ERROR_FILE" />
+			<appender-ref ref="CONSOLE" />
 		</root>
 		<logger name="com.skax.physicalrisk" level="INFO" />
 		<logger name="org.springframework.web" level="WARN" />
