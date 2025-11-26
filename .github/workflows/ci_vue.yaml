@@ -1,4 +1,4 @@
-# ci_java.yaml
+# ci_vue.yaml
 name: CI - Build & Push
 
 on:
@@ -8,7 +8,7 @@ on:
     branches: [main, develop]
 
 env:
-  IMAGE_NAME: polaris-backend
+  IMAGE_NAME: polaris-frontend
 
 jobs:
   test:
@@ -20,24 +20,26 @@ jobs:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
-      - name: JDK 21 설정
-        uses: actions/setup-java@v4
+      - name: Node 22 설정
+        uses: actions/setup-node@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+          node-version: '22.11.0'
+          cache: 'npm'
 
-      - name: 빌드 (테스트 제외)
-        run: mvn -B clean compile -DskipTests
+      - name: 의존성 설치
+        run: npm ci
 
-      - name: 코드 스타일 검사 (Checkstyle)
-        run: mvn -B checkstyle:check || true
+      - name: 코드 스타일 검사 (ESLint)
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx,.vue
 
-      - name: JUnit 테스트 실행
-        run: mvn -B test -Dspring.profiles.active=local
+      - name: 코드 포맷 검사 (Prettier)
+        run: npx prettier --check .
 
-      - name: 테스트 커버리지 리포트 생성
-        run: mvn -B jacoco:report
+      - name: 타입 체크 (TypeScript)
+        run: npx tsc --noEmit
+
+      - name: 단위 테스트 실행 (Vitest)
+        run: npx vitest run
 
   build-and-push:
     name: Docker 이미지 빌드 및 푸시
