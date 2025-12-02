@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "### Starting Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** ${{ secrets.OCIR_REGISTRY }}/${{ secrets.OCIR_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ secrets.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
           echo "**Target:** ${{ secrets.SERVER_HOST }}" >> $GITHUB_STEP_SUMMARY
 
       - name: SSH로 서버 배포
@@ -41,18 +41,19 @@ jobs:
             echo "========================================="
 
             # 변수 설정
-            REGISTRY="${{ secrets.OCIR_REGISTRY }}"
-            NAMESPACE="${{ secrets.OCIR_NAMESPACE }}"
+            REGISTRY="${{ secrets.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev"
+            PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}"
+            REPO="${{ secrets.ARTIFACT_REGISTRY_REPO }}"
             IMAGE_NAME="${{ env.IMAGE_NAME }}"
             CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
-            IMAGE="${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:latest"
+            IMAGE="${REGISTRY}/${PROJECT_ID}/${REPO}/${IMAGE_NAME}:latest"
 
             # 필요시 네트워크 생성
             docker network create web || true
 
-            # OCIR 로그인
-            echo "1. OCIR 로그인 중..."
-            echo "${{ secrets.OCIR_TOKEN }}" | docker login ${REGISTRY} -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+            # GCP Artifact Registry 인증
+            echo "1. GCP Artifact Registry 인증 중..."
+            echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin https://${{ secrets.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev
 
             # 최신 이미지 pull
             echo "2. 최신 이미지 다운로드 중..."
