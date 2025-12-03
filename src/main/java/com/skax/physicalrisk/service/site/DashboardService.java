@@ -45,16 +45,14 @@ public class DashboardService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// 위험도별 사업장 수
-		long highRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.HIGH);
-		long mediumRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.MODERATE);
-		long lowRiskCount = siteRepository.countByUserAndRiskLevel(user, Site.RiskLevel.LOW);
+		// 전체 사업장 수
+		long totalSites = siteRepository.countByUser(user);
 
 		Map<String, Object> summary = new HashMap<>();
-		summary.put("totalSites", highRiskCount + mediumRiskCount + lowRiskCount);
-		summary.put("highRiskSites", highRiskCount);
-		summary.put("mediumRiskSites", mediumRiskCount);
-		summary.put("lowRiskSites", lowRiskCount);
+		summary.put("totalSites", totalSites);
+		summary.put("highRiskSites", 0L);
+		summary.put("mediumRiskSites", 0L);
+		summary.put("lowRiskSites", 0L);
 
 		log.info("Dashboard summary fetched successfully for user: {}", userId);
 		return summary;

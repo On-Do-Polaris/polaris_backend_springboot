@@ -1,6 +1,8 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.auth.LoginRequest;
+import com.skax.physicalrisk.dto.request.auth.PasswordResetConfirmRequest;
+import com.skax.physicalrisk.dto.request.auth.PasswordResetRequest;
 import com.skax.physicalrisk.dto.request.auth.RefreshTokenRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
@@ -87,26 +89,28 @@ public class AuthController {
 	}
 
 	/**
-	 * 비밀번호 재설정 요청 (미구현)
+	 * 비밀번호 재설정 요청
 	 *
+	 * @param request 비밀번호 재설정 요청
 	 * @return 성공 메시지
 	 */
 	@PostMapping("/password/reset-request")
-	public ResponseEntity<Map<String, String>> resetPasswordRequest() {
-		log.info("POST /api/auth/password/reset-request - Not implemented yet");
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-			.body(Map.of("message", "Not implemented yet"));
+	public ResponseEntity<Map<String, String>> resetPasswordRequest(@Valid @RequestBody PasswordResetRequest request) {
+		log.info("POST /api/auth/password/reset-request - Email: {}", request.getEmail());
+		authService.requestPasswordReset(request);
+		return ResponseEntity.ok(Map.of("message", "비밀번호 재설정 이메일이 발송되었습니다"));
 	}
 
 	/**
-	 * 비밀번호 재설정 확인 (미구현)
+	 * 비밀번호 재설정 확인
 	 *
+	 * @param request 비밀번호 재설정 확인 요청
 	 * @return 성공 메시지
 	 */
 	@PostMapping("/password/reset-confirm")
-	public ResponseEntity<Map<String, String>> resetPasswordConfirm() {
-		log.info("POST /api/auth/password/reset-confirm - Not implemented yet");
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-			.body(Map.of("message", "Not implemented yet"));
+	public ResponseEntity<Map<String, String>> resetPasswordConfirm(@Valid @RequestBody PasswordResetConfirmRequest request) {
+		log.info("POST /api/auth/password/reset-confirm");
+		authService.confirmPasswordReset(request);
+		return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다"));
 	}
 }

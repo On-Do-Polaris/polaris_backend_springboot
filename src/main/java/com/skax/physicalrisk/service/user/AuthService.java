@@ -1,12 +1,19 @@
 package com.skax.physicalrisk.service.user;
 
+import com.skax.physicalrisk.domain.user.entity.PasswordResetToken;
+import com.skax.physicalrisk.domain.user.entity.RefreshToken;
 import com.skax.physicalrisk.domain.user.entity.User;
+import com.skax.physicalrisk.domain.user.repository.PasswordResetTokenRepository;
+import com.skax.physicalrisk.domain.user.repository.RefreshTokenRepository;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
 import com.skax.physicalrisk.dto.request.auth.LoginRequest;
+import com.skax.physicalrisk.dto.request.auth.PasswordResetConfirmRequest;
+import com.skax.physicalrisk.dto.request.auth.PasswordResetRequest;
 import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
 import com.skax.physicalrisk.exception.DuplicateResourceException;
 import com.skax.physicalrisk.exception.ErrorCode;
+import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +22,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 인증 서비스
@@ -26,15 +33,28 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
 	private final UserRepository userRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
+	private final PasswordResetTokenRepository passwordResetTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final Optional<EmailService> emailService;
 
-	// Redis 대신 인메모리 저장소 사용 (로컬 개발용)
-	private final Map<String, String> refreshTokenStore = new ConcurrentHashMap<>();
+	public AuthService(UserRepository userRepository,
+					   RefreshTokenRepository refreshTokenRepository,
+					   PasswordResetTokenRepository passwordResetTokenRepository,
+					   PasswordEncoder passwordEncoder,
+					   JwtTokenProvider jwtTokenProvider,
+					   Optional<EmailService> emailService) {
+		this.userRepository = userRepository;
+		this.refreshTokenRepository = refreshTokenRepository;
+		this.passwordResetTokenRepository = passwordResetTokenRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.emailService = emailService;
+	}
 
 	/**
 	 * 회원가입
@@ -52,19 +72,18 @@ public class AuthService {
 			throw new DuplicateResourceException(ErrorCode.DUPLICATE_EMAIL);
 		}
 
-		// 사용자 생성 (organization 필드 제거됨)
+		// 사용자 생성
 		User user = User.builder()
 			.email(request.getEmail())
 			.name(request.getName())
 			.password(passwordEncoder.encode(request.getPassword()))
-			.language("ko")  // 기본 언어 설정
-			.role(User.UserRole.USER)
+			.language("ko")
 			.build();
 
 		User savedUser = userRepository.save(user);
 		log.info("User registered successfully: {}", savedUser.getId());
 
-		return savedUser.getEmail();  // 이메일 반환
+		return savedUser.getEmail();
 	}
 
 	/**
@@ -90,24 +109,24 @@ public class AuthService {
 			throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS);
 		}
 
-		// 마지막 로그인 시간 업데이트
-		user.updateLastLogin();
-		userRepository.save(user);
-
 		// 토큰 생성
 		String accessToken = jwtTokenProvider.createAccessToken(user.getId());
 		String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-		// Refresh Token을 메모리에 저장 (로컬 개발용)
-		String tokenKey = "refresh_token:" + user.getId();
-		refreshTokenStore.put(tokenKey, refreshToken);
+		// Refresh Token을 DB에 저장
+		RefreshToken refreshTokenEntity = RefreshToken.builder()
+			.user(user)
+			.token(refreshToken)
+			.expiresAt(LocalDateTime.now().plusDays(7))
+			.build();
+		refreshTokenRepository.save(refreshTokenEntity);
 
 		log.info("User logged in successfully: {}", user.getId());
 
 		return LoginResponse.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
-			.userId(user.getEmail())  // 이메일을 userId로 반환
+			.userId(user.getEmail())
 			.build();
 	}
 
@@ -120,9 +139,11 @@ public class AuthService {
 	public void logout(String userId) {
 		log.info("Logging out user: {}", userId);
 
-		// 메모리에서 Refresh Token 삭제
-		String tokenKey = "refresh_token:" + userId;
-		refreshTokenStore.remove(tokenKey);
+		// DB에서 사용자의 모든 Refresh Token 폐기
+		User user = userRepository.findById(UUID.fromString(userId))
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.USER_NOT_FOUND));
+
+		refreshTokenRepository.revokeAllByUser(user);
 
 		log.info("User logged out successfully: {}", userId);
 	}
@@ -143,38 +164,112 @@ public class AuthService {
 			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
 		}
 
-		// 토큰에서 사용자 ID 추출 (UUID)
-		UUID userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+		// DB에서 Refresh Token 조회
+		RefreshToken tokenEntity = refreshTokenRepository.findByToken(refreshToken)
+			.orElseThrow(() -> {
+				log.error("Refresh token not found in database");
+				return new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+			});
 
-		// 저장된 Refresh Token과 비교
-		String tokenKey = "refresh_token:" + userId.toString();
-		String storedRefreshToken = refreshTokenStore.get(tokenKey);
-
-		if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-			log.error("Refresh token not found or mismatched for user: {}", userId);
+		// 토큰 유효성 확인
+		if (!tokenEntity.isValid()) {
+			log.error("Refresh token is expired or revoked");
 			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
 		}
 
-		// 사용자 조회
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> {
-				log.error("User not found: {}", userId);
-				return new UnauthorizedException(ErrorCode.USER_NOT_FOUND);
-			});
+		User user = tokenEntity.getUser();
+
+		// 기존 Refresh Token 폐기
+		tokenEntity.revoke();
 
 		// 새로운 토큰 생성
 		String newAccessToken = jwtTokenProvider.createAccessToken(user.getId());
 		String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-		// 새로운 Refresh Token을 메모리에 저장
-		refreshTokenStore.put(tokenKey, newRefreshToken);
+		// 새로운 Refresh Token을 DB에 저장
+		RefreshToken newTokenEntity = RefreshToken.builder()
+			.user(user)
+			.token(newRefreshToken)
+			.expiresAt(LocalDateTime.now().plusDays(7))
+			.build();
+		refreshTokenRepository.save(newTokenEntity);
 
-		log.info("Token refreshed successfully for user: {}", userId);
+		log.info("Token refreshed successfully for user: {}", user.getId());
 
 		return LoginResponse.builder()
 			.accessToken(newAccessToken)
 			.refreshToken(newRefreshToken)
 			.userId(user.getEmail())
 			.build();
+	}
+
+	/**
+	 * 비밀번호 재설정 요청
+	 *
+	 * @param request 비밀번호 재설정 요청
+	 */
+	@Transactional
+	public void requestPasswordReset(PasswordResetRequest request) {
+		log.info("Password reset requested for email: {}", request.getEmail());
+
+		// 사용자 조회
+		User user = userRepository.findByEmail(request.getEmail())
+			.orElseThrow(() -> {
+				log.error("User not found: {}", request.getEmail());
+				return new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND);
+			});
+
+		// 재설정 토큰 생성
+		String token = UUID.randomUUID().toString();
+
+		// 토큰 저장 (30분 유효)
+		PasswordResetToken resetToken = PasswordResetToken.builder()
+			.token(token)
+			.user(user)
+			.expiresAt(LocalDateTime.now().plusMinutes(30))
+			.build();
+		passwordResetTokenRepository.save(resetToken);
+
+		// 이메일 발송
+		emailService.ifPresentOrElse(
+			service -> {
+				service.sendPasswordResetEmail(user.getEmail(), token);
+				log.info("Password reset email sent to: {}", user.getEmail());
+			},
+			() -> log.warn("EmailService not available, password reset token created but email not sent")
+		);
+	}
+
+	/**
+	 * 비밀번호 재설정 확인
+	 *
+	 * @param request 비밀번호 재설정 확인 요청
+	 */
+	@Transactional
+	public void confirmPasswordReset(PasswordResetConfirmRequest request) {
+		log.info("Confirming password reset with token");
+
+		// 토큰 조회
+		PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+			.orElseThrow(() -> {
+				log.error("Invalid reset token");
+				return new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+			});
+
+		// 토큰 유효성 검증
+		if (!resetToken.isValid()) {
+			log.error("Reset token is expired or already used");
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+		}
+
+		// 비밀번호 변경
+		User user = resetToken.getUser();
+		user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+		userRepository.save(user);
+
+		// 토큰 사용 처리
+		resetToken.markAsUsed();
+
+		log.info("Password reset successful for user: {}", user.getId());
 	}
 }

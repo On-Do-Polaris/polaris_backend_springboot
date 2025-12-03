@@ -40,9 +40,6 @@ public class HazardType {
 	@Column(name = "category", length = 20)
 	private HazardCategory category; // 카테고리
 
-	@Column(name = "description", columnDefinition = "TEXT")
-	private String description; // 설명
-
 	/**
 	 * 위험 요인 카테고리 열거형
 	 */

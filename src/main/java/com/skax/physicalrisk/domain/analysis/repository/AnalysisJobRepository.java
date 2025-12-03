@@ -29,12 +29,12 @@ public interface AnalysisJobRepository extends JpaRepository<AnalysisJob, UUID> 
 	Optional<AnalysisJob> findByJobId(String jobId);
 
 	/**
-	 * 사업장의 최근 작업 조회
+	 * 사업장의 작업 조회
 	 *
 	 * @param site 사업장
 	 * @return 작업 Optional
 	 */
-	Optional<AnalysisJob> findFirstBySiteOrderByCreatedAtDesc(Site site);
+	Optional<AnalysisJob> findFirstBySite(Site site);
 
 	/**
 	 * 사업장의 실행 중인 작업 조회

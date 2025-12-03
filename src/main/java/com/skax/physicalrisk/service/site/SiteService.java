@@ -51,8 +51,8 @@ public class SiteService {
 			.map(site -> SiteResponse.SiteInfo.builder()
 				.siteId(site.getId())
 				.siteName(site.getName())
-				.location(site.getCity())  // location 필드에 city 매핑
-				.siteType(site.getBuildingType())  // siteType에 buildingType 매핑
+				.location(site.getRoadAddress() != null ? site.getRoadAddress() : site.getJibunAddress())
+				.siteType(site.getType())
 				.build())
 			.collect(Collectors.toList());
 
@@ -78,9 +78,11 @@ public class SiteService {
 		Site site = Site.builder()
 			.user(user)
 			.name(request.getName())
-			.city(request.getLocation())  // location을 city에 저장
-			.address(request.getAddress())
-			.buildingType(request.getType())  // type을 buildingType에 저장
+			.roadAddress(request.getRoadAddress())
+			.jibunAddress(request.getJibunAddress())
+			.latitude(request.getLatitude())
+			.longitude(request.getLongitude())
+			.type(request.getType())
 			.build();
 
 		Site savedSite = siteRepository.save(site);
@@ -89,8 +91,8 @@ public class SiteService {
 		return SiteResponse.SiteInfo.builder()
 			.siteId(savedSite.getId())
 			.siteName(savedSite.getName())
-			.location(savedSite.getCity())
-			.siteType(savedSite.getBuildingType())
+			.location(savedSite.getRoadAddress() != null ? savedSite.getRoadAddress() : savedSite.getJibunAddress())
+			.siteType(savedSite.getType())
 			.build();
 	}
 
@@ -116,14 +118,20 @@ public class SiteService {
 		if (request.getName() != null) {
 			site.setName(request.getName());
 		}
-		if (request.getLocation() != null) {
-			site.setCity(request.getLocation());
+		if (request.getRoadAddress() != null) {
+			site.setRoadAddress(request.getRoadAddress());
 		}
-		if (request.getAddress() != null) {
-			site.setAddress(request.getAddress());
+		if (request.getJibunAddress() != null) {
+			site.setJibunAddress(request.getJibunAddress());
+		}
+		if (request.getLatitude() != null) {
+			site.setLatitude(request.getLatitude());
+		}
+		if (request.getLongitude() != null) {
+			site.setLongitude(request.getLongitude());
 		}
 		if (request.getType() != null) {
-			site.setBuildingType(request.getType());
+			site.setType(request.getType());
 		}
 
 		Site savedSite = siteRepository.save(site);
@@ -132,8 +140,8 @@ public class SiteService {
 		return SiteResponse.SiteInfo.builder()
 			.siteId(savedSite.getId())
 			.siteName(savedSite.getName())
-			.location(savedSite.getCity())
-			.siteType(savedSite.getBuildingType())
+			.location(savedSite.getRoadAddress() != null ? savedSite.getRoadAddress() : savedSite.getJibunAddress())
+			.siteType(savedSite.getType())
 			.build();
 	}
 

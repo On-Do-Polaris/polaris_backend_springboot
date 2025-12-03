@@ -19,12 +19,18 @@ public class UpdateSiteRequest {
 	@Schema(description = "사업장 이름", example = "서울 본사")
 	private String name;
 
-	@Schema(description = "위치 (시군구 단위)", example = "서울특별시 강남구")
-	private String location;
+	@Schema(description = "도로명 주소", example = "서울특별시 강남구 테헤란로 123")
+	private String roadAddress;
 
-	@Schema(description = "주소 (도로명 또는 지번)", example = "서울특별시 강남구 테헤란로 123")
-	private String address;
+	@Schema(description = "지번 주소", example = "서울특별시 강남구 역삼동 123-45")
+	private String jibunAddress;
 
-	@Schema(description = "사업장 유형", example = "공장")
+	@Schema(description = "위도", example = "37.5665")
+	private Double latitude;
+
+	@Schema(description = "경도", example = "126.978")
+	private Double longitude;
+
+	@Schema(description = "사업장 유형", example = "data_center")
 	private String type;
 }

@@ -2,19 +2,17 @@ package com.skax.physicalrisk.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
  * 사용자 엔티티
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-03
+ * 파일 버전: v02 - ERD 스키마 맞춤 단순화
  *
  * 사용자 인증 및 프로필 정보를 관리하는 도메인 엔티티
+ * ERD 문서 기준 스키마를 따름
  *
  * @author SKAX Team
  */
@@ -28,7 +26,7 @@ import java.util.UUID;
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id; // 사용자 고유 ID
 
@@ -41,59 +39,14 @@ public class User {
 	@Column(name = "password", nullable = false, length = 255)
 	private String password; // 비밀번호 (암호화됨)
 
-	@Column(name = "organization", length = 200)
-	private String organization; // 소속 조직
-
 	@Column(name = "language", length = 10)
 	@Builder.Default
 	private String language = "ko"; // 언어 설정 (ko, en)
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false, length = 20)
-	@Builder.Default
-	private UserRole role = UserRole.USER; // 사용자 권한
-
-	@CreationTimestamp
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt; // 생성 일시
-
-	@UpdateTimestamp
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt; // 수정 일시
-
-	@Column(name = "last_login_at")
-	private LocalDateTime lastLoginAt; // 마지막 로그인 일시
-
-	@Column(name = "is_active")
-	@Builder.Default
-	private Boolean isActive = true; // 계정 활성화 상태
-
 	/**
-	 * 사용자 권한 열거형
+	 * 비밀번호 업데이트 (비밀번호 재설정용)
 	 */
-	public enum UserRole {
-		USER,  // 일반 사용자
-		ADMIN  // 관리자
-	}
-
-	/**
-	 * 마지막 로그인 시간 업데이트
-	 */
-	public void updateLastLogin() {
-		this.lastLoginAt = LocalDateTime.now();
-	}
-
-	/**
-	 * 계정 비활성화
-	 */
-	public void deactivate() {
-		this.isActive = false;
-	}
-
-	/**
-	 * 계정 활성화 여부 확인
-	 */
-	public boolean isActive() {
-		return this.isActive != null && this.isActive;
+	public void updatePassword(String encodedPassword) {
+		this.password = encodedPassword;
 	}
 }

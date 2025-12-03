@@ -58,28 +58,18 @@ public interface SiteRepository extends JpaRepository<Site, UUID> {
 	 * @param pageable 페이징 정보
 	 * @return 사업장 페이지
 	 */
-	@Query("SELECT s FROM Site s WHERE s.user = :user AND (s.name LIKE %:keyword% OR s.address LIKE %:keyword%)")
+	@Query("SELECT s FROM Site s WHERE s.user = :user AND (s.name LIKE %:keyword% OR s.roadAddress LIKE %:keyword% OR s.jibunAddress LIKE %:keyword%)")
 	Page<Site> searchByUserAndKeyword(@Param("user") User user, @Param("keyword") String keyword, Pageable pageable);
-
-	/**
-	 * 사용자의 리스크 레벨별 사업장 조회
-	 *
-	 * @param user 사용자
-	 * @param riskLevel 리스크 레벨
-	 * @param pageable 페이징 정보
-	 * @return 사업장 페이지
-	 */
-	Page<Site> findByUserAndRiskLevel(User user, Site.RiskLevel riskLevel, Pageable pageable);
 
 	/**
 	 * 사용자의 업종별 사업장 조회
 	 *
 	 * @param user 사용자
-	 * @param industry 업종
+	 * @param type 업종/유형
 	 * @param pageable 페이징 정보
 	 * @return 사업장 페이지
 	 */
-	Page<Site> findByUserAndIndustry(User user, String industry, Pageable pageable);
+	Page<Site> findByUserAndType(User user, String type, Pageable pageable);
 
 	/**
 	 * 사용자의 전체 사업장 수
@@ -88,13 +78,4 @@ public interface SiteRepository extends JpaRepository<Site, UUID> {
 	 * @return 사업장 수
 	 */
 	long countByUser(User user);
-
-	/**
-	 * 사용자의 리스크 레벨별 사업장 수
-	 *
-	 * @param user 사용자
-	 * @param riskLevel 리스크 레벨
-	 * @return 사업장 수
-	 */
-	long countByUserAndRiskLevel(User user, Site.RiskLevel riskLevel);
 }

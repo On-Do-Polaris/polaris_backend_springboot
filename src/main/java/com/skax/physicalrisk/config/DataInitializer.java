@@ -176,7 +176,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("극심한 고온")
 				.nameEn("Extreme Heat")
 				.category(HazardType.HazardCategory.TEMPERATURE)
-				.description("이상 고온 및 폭염으로 인한 위험")
 				.build(),
 
 			HazardType.builder()
@@ -184,7 +183,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("극심한 한파")
 				.nameEn("Extreme Cold")
 				.category(HazardType.HazardCategory.TEMPERATURE)
-				.description("이상 저온 및 한파로 인한 위험")
 				.build(),
 
 			HazardType.builder()
@@ -192,7 +190,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("하천 홍수")
 				.nameEn("River Flood")
 				.category(HazardType.HazardCategory.WATER)
-				.description("하천 범람으로 인한 침수 위험")
 				.build(),
 
 			HazardType.builder()
@@ -200,7 +197,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("도시 홍수")
 				.nameEn("Urban Flood")
 				.category(HazardType.HazardCategory.WATER)
-				.description("도시 내 집중호우로 인한 침수 위험")
 				.build(),
 
 			HazardType.builder()
@@ -208,7 +204,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("가뭄")
 				.nameEn("Drought")
 				.category(HazardType.HazardCategory.WATER)
-				.description("강수 부족으로 인한 가뭄 위험")
 				.build(),
 
 			HazardType.builder()
@@ -216,7 +211,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("물 부족")
 				.nameEn("Water Stress")
 				.category(HazardType.HazardCategory.WATER)
-				.description("용수 공급 부족으로 인한 위험")
 				.build(),
 
 			HazardType.builder()
@@ -224,7 +218,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("해수면 상승")
 				.nameEn("Sea Level Rise")
 				.category(HazardType.HazardCategory.WATER)
-				.description("해수면 상승으로 인한 침수 위험")
 				.build(),
 
 			HazardType.builder()
@@ -232,7 +225,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("태풍")
 				.nameEn("Typhoon")
 				.category(HazardType.HazardCategory.WIND)
-				.description("강풍과 폭우를 동반한 태풍 위험")
 				.build(),
 
 			HazardType.builder()
@@ -240,7 +232,6 @@ public class DataInitializer implements ApplicationRunner {
 				.name("산불")
 				.nameEn("Wildfire")
 				.category(HazardType.HazardCategory.OTHER)
-				.description("산림 화재로 인한 위험")
 				.build()
 		);
 

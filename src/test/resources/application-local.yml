@@ -1,0 +1,38 @@
+# 테스트 환경 설정
+spring:
+  datasource:
+    # H2 인메모리 데이터베이스 사용
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: false
+
+  h2:
+    console:
+      enabled: false
+
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET:test-secret-key-for-testing-only-minimum-256-bits-long-secret-key}
+  expiration: 3600000
+  refresh-expiration: 604800000
+
+# Frontend 설정
+app:
+  frontend:
+    url: http://localhost:3000
+
+# 로깅
+logging:
+  level:
+    com.skax.physicalrisk: INFO
+    org.hibernate.SQL: DEBUG
