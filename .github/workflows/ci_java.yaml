@@ -14,10 +14,23 @@ jobs:
   test:
     name: 코드 품질 검사
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
-    continue-on-error: true
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    continue-on-error: false
     env:
+      # GCP 환경 변수
       FASTAPI_API_KEY: ${{ secrets.FASTAPI_API_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      # 데이터베이스 설정 (H2 사용하므로 실제 DB 연결은 안 함)
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: testdb
+      DB_USERNAME: sa
+      DB_PASSWORD: ""
+
+      # 메일 설정 (선택적)
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
+      MAIL_PORT: ${{ secrets.MAIL_PORT }}
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
 
@@ -47,6 +60,7 @@ jobs:
   build-and-push:
     name: Docker 이미지 빌드 및 푸시
     runs-on: ubuntu-22.04
+    needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
