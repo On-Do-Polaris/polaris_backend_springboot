@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
     continue-on-error: true
-
+    env:
+      FASTAPI_API_KEY: ${{ secrets.FASTAPI_API_KEY }}
+      
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
