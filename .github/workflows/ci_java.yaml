@@ -18,7 +18,9 @@ jobs:
     continue-on-error: true
     env:
       FASTAPI_API_KEY: ${{ secrets.FASTAPI_API_KEY }}
-      
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
