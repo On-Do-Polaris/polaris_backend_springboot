@@ -86,8 +86,7 @@ public class UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		user.deactivate();
-		userRepository.save(user);
+		userRepository.delete(user);
 
 		log.info("User deleted successfully: {}", userId);
 	}

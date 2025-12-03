@@ -3,7 +3,6 @@ package com.skax.physicalrisk.domain.report.entity;
 import com.skax.physicalrisk.domain.site.entity.Site;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,10 +10,11 @@ import java.util.UUID;
 /**
  * 리포트 엔티티
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-03
+ * 파일 버전: v02 - ERD 스키마 맞춤 단순화
  *
  * 사업장 리스크 분석 리포트 정보 관리
+ * ERD 문서 기준 스키마를 따름
  *
  * @author SKAX Team
  */
@@ -28,12 +28,12 @@ import java.util.UUID;
 public class Report {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id; // 리포트 고유 ID
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "site_id", nullable = false)
+	@JoinColumn(name = "site_id")
 	private Site site; // 대상 사업장
 
 	@Column(name = "site_name", length = 200)
@@ -53,13 +53,6 @@ public class Report {
 
 	@Column(name = "file_size")
 	private Long fileSize; // 파일 크기 (bytes)
-
-	@CreationTimestamp
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt; // 생성 일시
-
-	@Column(name = "completed_at")
-	private LocalDateTime completedAt; // 완료 일시
 
 	@Column(name = "expires_at")
 	private LocalDateTime expiresAt; // 다운로드 만료 일시
@@ -93,16 +86,7 @@ public class Report {
 		this.status = ReportStatus.COMPLETED;
 		this.s3Key = s3Key;
 		this.fileSize = fileSize;
-		this.completedAt = LocalDateTime.now();
 		this.expiresAt = LocalDateTime.now().plusDays(7); // 7일 후 만료
-	}
-
-	/**
-	 * 리포트 생성 실패 처리
-	 */
-	public void fail() {
-		this.status = ReportStatus.FAILED;
-		this.completedAt = LocalDateTime.now();
 	}
 
 	/**

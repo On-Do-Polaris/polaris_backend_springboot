@@ -157,15 +157,19 @@ paths:
       tags:
       - auth-controller
       operationId: refresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+        required: true
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: string
+                $ref: "#/components/schemas/LoginResponse"
   /api/auth/password/reset-request:
     post:
       tags:
@@ -849,21 +853,16 @@ components:
           description: 이메일 인증 코드
           example: "123456"
       description: 회원가입 요청
-    LoginRequest:
+    RefreshTokenRequest:
       required:
-      - email
-      - password
+      - refreshToken
       type: object
       properties:
-        email:
+        refreshToken:
           type: string
-          description: 이메일
-          example: user@example.com
-        password:
-          type: string
-          description: 비밀번호
-          example: password123!
-      description: 로그인 요청
+          description: 리프레시 토큰
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      description: 토큰 갱신 요청
     LoginResponse:
       type: object
       properties:
@@ -880,6 +879,21 @@ components:
           description: 사용자 ID (이메일)
           example: user@example.com
       description: 로그인 응답
+    LoginRequest:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          description: 이메일
+          example: user@example.com
+        password:
+          type: string
+          description: 비밀번호
+          example: password123!
+      description: 로그인 요청
     UpdateUserRequest:
       type: object
       properties:

@@ -27,18 +27,9 @@ public class SiteInfoDto {
 	private UUID id;
 	private String name;
 	private String address;
-	private String city;
 	private Double latitude;
 	private Double longitude;
 	private String industry;
-
-	// AI 분석 필수 필드
-	private Integer buildingAge;
-	private String buildingType;
-	private Boolean seismicDesign;
-	private Double floorArea;
-	private Double assetValue;
-	private Integer employeeCount;
 
 	/**
 	 * Site 엔티티로부터 DTO 생성
@@ -47,20 +38,15 @@ public class SiteInfoDto {
 	 * @return SiteInfoDto
 	 */
 	public static SiteInfoDto from(Site site) {
+		String address = site.getRoadAddress() != null ? site.getRoadAddress() : site.getJibunAddress();
+
 		return SiteInfoDto.builder()
 			.id(site.getId())
 			.name(site.getName())
-			.address(site.getAddress())
-			.city(site.getCity())
+			.address(address)
 			.latitude(site.getLatitude())
 			.longitude(site.getLongitude())
-			.industry(site.getIndustry())
-			.buildingAge(site.getBuildingAge())
-			.buildingType(site.getBuildingType())
-			.seismicDesign(site.getSeismicDesign())
-			.floorArea(site.getFloorArea())
-			.assetValue(site.getAssetValue())
-			.employeeCount(site.getEmployeeCount())
+			.industry(site.getType())
 			.build();
 	}
 }

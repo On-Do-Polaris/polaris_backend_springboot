@@ -27,7 +27,10 @@
       "Bash(Stop-Process -Id 16116 -Force)",
       "Bash(cmd /c \"taskkill /F /PID 16116\")",
       "Bash(powershell.exe -Command \"Stop-Process -Id 16116 -Force\")",
-      "Bash(mvn -B test:*)"
+      "Bash(mvn -B test:*)",
+      "Bash(cmd /c \"taskkill /F /PID 31468\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 31468 -Force\")",
+      "Bash(git reset HEAD .claude/settings.local.json nul)"
     ],
     "deny": [],
     "ask": []

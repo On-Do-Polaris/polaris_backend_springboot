@@ -47,6 +47,11 @@ fastapi:
   api-key: ${FASTAPI_API_KEY}
   timeout: 300000  # 5분
 
+# Frontend 설정
+app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:3000}
+
 # AWS S3 설정
 aws:
   s3:
