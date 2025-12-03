@@ -1,11 +1,16 @@
 # cd_java.yaml
-name: CD - Deploy
+name: CD - Deploy to Server
 
 on:
   workflow_run:
-    workflows: ["CI - Build & Push"]
-    types: [completed]
+    workflows: ['CI - Build & Push']
+    types:
+      - completed
     branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: polaris-backend-java
