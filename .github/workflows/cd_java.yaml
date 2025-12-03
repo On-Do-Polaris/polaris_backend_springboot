@@ -90,6 +90,11 @@ jobs:
               -e DB_NAME="${{ secrets.DB_NAME }}" \
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect \
+              -e MAIL_HOST="${{ secrets.MAIL_HOST }}" \
+              -e MAIL_PORT="${{ secrets.MAIL_PORT }}" \
+              -e MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
+              -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               ${IMAGE}
 
             # Health check - 컨테이너가 준비될 때까지 대기
