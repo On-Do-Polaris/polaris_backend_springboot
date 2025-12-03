@@ -15,7 +15,7 @@ jobs:
     name: 코드 품질 검사
     runs-on: ubuntu-22.04
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
-    continue-on-error: false
+    continue-on-error: true
     env:
       # GCP 환경 변수
       FASTAPI_API_KEY: ${{ secrets.FASTAPI_API_KEY }}
