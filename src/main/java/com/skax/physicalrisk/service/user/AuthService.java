@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,6 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
 	private final UserRepository userRepository;
@@ -40,7 +40,21 @@ public class AuthService {
 	private final PasswordResetTokenRepository passwordResetTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final EmailService emailService;
+	private final Optional<EmailService> emailService;
+
+	public AuthService(UserRepository userRepository,
+					   RefreshTokenRepository refreshTokenRepository,
+					   PasswordResetTokenRepository passwordResetTokenRepository,
+					   PasswordEncoder passwordEncoder,
+					   JwtTokenProvider jwtTokenProvider,
+					   Optional<EmailService> emailService) {
+		this.userRepository = userRepository;
+		this.refreshTokenRepository = refreshTokenRepository;
+		this.passwordResetTokenRepository = passwordResetTokenRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.emailService = emailService;
+	}
 
 	/**
 	 * 회원가입
@@ -217,9 +231,13 @@ public class AuthService {
 		passwordResetTokenRepository.save(resetToken);
 
 		// 이메일 발송
-		emailService.sendPasswordResetEmail(user.getEmail(), token);
-
-		log.info("Password reset email sent to: {}", user.getEmail());
+		emailService.ifPresentOrElse(
+			service -> {
+				service.sendPasswordResetEmail(user.getEmail(), token);
+				log.info("Password reset email sent to: {}", user.getEmail());
+			},
+			() -> log.warn("EmailService not available, password reset token created but email not sent")
+		);
 	}
 
 	/**
