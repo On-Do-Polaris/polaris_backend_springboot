@@ -52,14 +52,6 @@ app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
 
-# AWS S3 설정
-aws:
-  s3:
-    bucket-name: ${S3_BUCKET_NAME:skax-reports}
-    region: ${AWS_REGION:ap-northeast-2}
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}
-
 # Kakao API 설정
 kakao:
   api:
