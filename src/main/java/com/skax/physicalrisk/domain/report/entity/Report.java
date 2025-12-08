@@ -3,6 +3,8 @@ package com.skax.physicalrisk.domain.report.entity;
 import com.skax.physicalrisk.domain.site.entity.Site;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,8 +12,8 @@ import java.util.UUID;
 /**
  * 리포트 엔티티
  *
- * 최종 수정일: 2025-12-03
- * 파일 버전: v02 - ERD 스키마 맞춤 단순화
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v03 - ERD 기준 수정 (타임스탬프 2개 추가, JPA Auditing, 인덱스)
  *
  * 사업장 리스크 분석 리포트 정보 관리
  * ERD 문서 기준 스키마를 따름
@@ -19,7 +21,11 @@ import java.util.UUID;
  * @author SKAX Team
  */
 @Entity
-@Table(name = "reports")
+@Table(name = "reports", indexes = {
+	@Index(name = "idx_report_site_id", columnList = "site_id"),
+	@Index(name = "idx_report_status", columnList = "status")
+})
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,6 +60,13 @@ public class Report {
 	@Column(name = "file_size")
 	private Long fileSize; // 파일 크기 (bytes)
 
+	@CreatedDate
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt; // 생성 시간
+
+	@Column(name = "completed_at")
+	private LocalDateTime completedAt; // 완료 시간
+
 	@Column(name = "expires_at")
 	private LocalDateTime expiresAt; // 다운로드 만료 일시
 
@@ -86,6 +99,7 @@ public class Report {
 		this.status = ReportStatus.COMPLETED;
 		this.s3Key = s3Key;
 		this.fileSize = fileSize;
+		this.completedAt = LocalDateTime.now();
 		this.expiresAt = LocalDateTime.now().plusDays(7); // 7일 후 만료
 	}
 

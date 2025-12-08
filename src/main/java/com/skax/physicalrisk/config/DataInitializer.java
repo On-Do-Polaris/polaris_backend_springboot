@@ -21,8 +21,8 @@ import java.util.List;
  * - Industries (업종)
  * - HazardTypes (기후 위험 유형)
  *
- * 최종 수정일: 2025-11-24
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v02 - ERD 기준 HazardType description 추가
  *
  * @author SKAX Team
  */
@@ -176,6 +176,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("극심한 고온")
 				.nameEn("Extreme Heat")
 				.category(HazardType.HazardCategory.TEMPERATURE)
+				.description("기온이 장기간 평년보다 높은 상태가 지속되어 건강, 농업, 에너지 수요 등에 영향을 미치는 기후 현상")
 				.build(),
 
 			HazardType.builder()
@@ -183,6 +184,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("극심한 한파")
 				.nameEn("Extreme Cold")
 				.category(HazardType.HazardCategory.TEMPERATURE)
+				.description("기온이 급격히 하강하여 인명 피해, 시설 동파, 에너지 공급 차질 등을 유발하는 기후 현상")
 				.build(),
 
 			HazardType.builder()
@@ -190,6 +192,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("하천 홍수")
 				.nameEn("River Flood")
 				.category(HazardType.HazardCategory.WATER)
+				.description("하천의 수위가 급상승하여 제방을 넘어 주변 지역에 침수를 일으키는 자연재해")
 				.build(),
 
 			HazardType.builder()
@@ -197,6 +200,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("도시 홍수")
 				.nameEn("Urban Flood")
 				.category(HazardType.HazardCategory.WATER)
+				.description("집중호우 시 도시 배수 시스템의 한계로 인해 발생하는 침수 현상")
 				.build(),
 
 			HazardType.builder()
@@ -204,6 +208,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("가뭄")
 				.nameEn("Drought")
 				.category(HazardType.HazardCategory.WATER)
+				.description("장기간 강수량 부족으로 인한 물 부족 현상으로 농업, 생활용수, 산업에 영향을 미치는 재해")
 				.build(),
 
 			HazardType.builder()
@@ -211,6 +216,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("물 부족")
 				.nameEn("Water Stress")
 				.category(HazardType.HazardCategory.WATER)
+				.description("수요 대비 가용 수자원이 부족하여 지속 가능한 물 공급에 어려움을 겪는 상태")
 				.build(),
 
 			HazardType.builder()
@@ -218,6 +224,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("해수면 상승")
 				.nameEn("Sea Level Rise")
 				.category(HazardType.HazardCategory.WATER)
+				.description("지구 온난화로 인한 빙하 융해 및 해수 팽창으로 해수면이 상승하여 연안 지역에 침수 위험을 증가시키는 현상")
 				.build(),
 
 			HazardType.builder()
@@ -225,6 +232,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("태풍")
 				.nameEn("Typhoon")
 				.category(HazardType.HazardCategory.WIND)
+				.description("열대 해상에서 발생하는 강력한 회전성 폭풍으로 강풍, 폭우, 해일 등을 동반하여 재산 및 인명 피해를 초래하는 자연재해")
 				.build(),
 
 			HazardType.builder()
@@ -232,6 +240,7 @@ public class DataInitializer implements ApplicationRunner {
 				.name("산불")
 				.nameEn("Wildfire")
 				.category(HazardType.HazardCategory.OTHER)
+				.description("고온 건조한 기후 조건에서 발생하여 산림 및 주변 시설을 소실시키는 대규모 화재")
 				.build()
 		);
 
