@@ -9,8 +9,8 @@ import java.util.UUID;
 /**
  * 사업장 엔티티
  *
- * 최종 수정일: 2025-12-03
- * 파일 버전: v02 - ERD 스키마 맞춤 단순화
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v03 - ERD 기준 수정 (좌표 precision/scale, 인덱스)
  *
  * 기후 리스크 분석 대상 사업장 정보 관리
  * ERD 문서 기준 스키마를 따름
@@ -18,7 +18,10 @@ import java.util.UUID;
  * @author SKAX Team
  */
 @Entity
-@Table(name = "sites")
+@Table(name = "sites", indexes = {
+	@Index(name = "idx_site_user_id", columnList = "user_id"),
+	@Index(name = "idx_site_coordinates", columnList = "latitude, longitude")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,11 +47,11 @@ public class Site {
 	@Column(name = "jibun_address", length = 500)
 	private String jibunAddress; // 지번 주소
 
-	@Column(name = "latitude")
-	private Double latitude; // 위도
+	@Column(name = "latitude", precision = 10, scale = 8)
+	private Double latitude; // 위도 (decimal(10,8))
 
-	@Column(name = "longitude")
-	private Double longitude; // 경도
+	@Column(name = "longitude", precision = 11, scale = 8)
+	private Double longitude; // 경도 (decimal(11,8))
 
 	@Column(name = "type", length = 100)
 	private String type; // 업종/유형

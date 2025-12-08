@@ -2,7 +2,8 @@ package com.skax.physicalrisk.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,15 +11,20 @@ import java.util.UUID;
 /**
  * 비밀번호 재설정 토큰 엔티티
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v02 - ERD 기준 수정 (token 길이, JPA Auditing, 인덱스)
  *
  * 비밀번호 재설정 시 이메일로 발송된 토큰 정보 관리
+ * ERD 문서 기준 스키마를 따름
  *
  * @author SKAX Team
  */
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(name = "password_reset_tokens", indexes = {
+	@Index(name = "idx_password_reset_user_id", columnList = "user_id"),
+	@Index(name = "idx_password_reset_token", columnList = "token")
+})
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,15 +37,15 @@ public class PasswordResetToken {
 	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id; // 토큰 고유 ID
 
-	@Column(name = "token", unique = true, nullable = false, length = 500)
+	@Column(name = "token", unique = true, nullable = false, length = 255)
 	private String token; // 재설정 토큰
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user; // 사용자
 
-	@CreationTimestamp
-	@Column(name = "created_at", updatable = false)
+	@CreatedDate
+	@Column(name = "created_at", updatable = false, nullable = false)
 	private LocalDateTime createdAt; // 생성 일시
 
 	@Column(name = "expires_at", nullable = false)

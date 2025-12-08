@@ -2,6 +2,8 @@ package com.skax.physicalrisk.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,8 +11,8 @@ import java.util.UUID;
 /**
  * Refresh Token 엔티티
  *
- * 최종 수정일: 2025-12-03
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v02 - ERD 기준 수정 (JPA Auditing, 인덱스)
  *
  * JWT Refresh Token 관리 (DB 기반)
  * ERD 문서 기준 스키마를 따름
@@ -18,7 +20,12 @@ import java.util.UUID;
  * @author SKAX Team
  */
 @Entity
-@Table(name = "refresh_tokens")
+@Table(name = "refresh_tokens", indexes = {
+	@Index(name = "idx_refresh_token_user_id", columnList = "user_id"),
+	@Index(name = "idx_refresh_token_token", columnList = "token"),
+	@Index(name = "idx_refresh_token_expires_at", columnList = "expires_at")
+})
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,9 +48,9 @@ public class RefreshToken {
 	@Column(name = "expires_at", nullable = false)
 	private LocalDateTime expiresAt; // 만료 일시
 
-	@Column(name = "created_at", nullable = false)
-	@Builder.Default
-	private LocalDateTime createdAt = LocalDateTime.now(); // 생성 일시
+	@CreatedDate
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt; // 생성 일시
 
 	@Column(name = "revoked", nullable = false)
 	@Builder.Default

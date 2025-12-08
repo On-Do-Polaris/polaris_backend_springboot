@@ -6,10 +6,11 @@ import lombok.*;
 /**
  * 기후 위험 요인 유형 엔티티
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-08
+ * 파일 버전: v02 - ERD 기준 description 필드 추가
  *
  * 시스템에서 지원하는 기후 위험 요인 메타 정보
+ * ERD 문서 기준 스키마를 따름
  *
  * @author SKAX Team
  */
@@ -39,6 +40,9 @@ public class HazardType {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", length = 20)
 	private HazardCategory category; // 카테고리
+
+	@Column(name = "description", columnDefinition = "TEXT")
+	private String description; // 설명
 
 	/**
 	 * 위험 요인 카테고리 열거형
