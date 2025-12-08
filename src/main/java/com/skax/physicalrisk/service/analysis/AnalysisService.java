@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,8 +54,8 @@ public class AnalysisService {
 	 */
 	public AnalysisJobStatusResponse startAnalysis(
 		UUID siteId,
-		Double latitude,
-		Double longitude,
+		BigDecimal latitude,
+		BigDecimal longitude,
 		String industryType
 	) {
 		UUID userId = SecurityUtil.getCurrentUserId();

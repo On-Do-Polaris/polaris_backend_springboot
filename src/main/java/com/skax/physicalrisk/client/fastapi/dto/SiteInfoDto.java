@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -27,8 +28,8 @@ public class SiteInfoDto {
 	private UUID id;
 	private String name;
 	private String address;
-	private Double latitude;
-	private Double longitude;
+	private BigDecimal latitude;
+	private BigDecimal longitude;
 	private String industry;
 
 	/**
