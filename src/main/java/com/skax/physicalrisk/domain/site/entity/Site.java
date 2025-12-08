@@ -4,6 +4,7 @@ import com.skax.physicalrisk.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -48,10 +49,10 @@ public class Site {
 	private String jibunAddress; // 지번 주소
 
 	@Column(name = "latitude", precision = 10, scale = 8)
-	private Double latitude; // 위도 (decimal(10,8))
+	private BigDecimal latitude; // 위도 (decimal(10,8))
 
 	@Column(name = "longitude", precision = 11, scale = 8)
-	private Double longitude; // 경도 (decimal(11,8))
+	private BigDecimal longitude; // 경도 (decimal(11,8))
 
 	@Column(name = "type", length = 100)
 	private String type; // 업종/유형

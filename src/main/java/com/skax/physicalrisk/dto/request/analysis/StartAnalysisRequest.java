@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * 분석 시작 요청 DTO
  *
@@ -22,11 +24,11 @@ public class StartAnalysisRequest {
 
 	@Schema(description = "위도", example = "37.5665", required = true)
 	@NotNull(message = "위도는 필수입니다")
-	private Double latitude;
+	private BigDecimal latitude;
 
 	@Schema(description = "경도", example = "126.9780", required = true)
 	@NotNull(message = "경도는 필수입니다")
-	private Double longitude;
+	private BigDecimal longitude;
 
 	@Schema(description = "도로명 주소", example = "서울특별시 강남구 테헤란로 123")
 	private String roadAddress;

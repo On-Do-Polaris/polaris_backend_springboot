@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * 사업장 생성 요청 DTO
  *
@@ -28,10 +30,10 @@ public class CreateSiteRequest {
 	private String jibunAddress;
 
 	@Schema(description = "위도", example = "37.5665")
-	private Double latitude;
+	private BigDecimal latitude;
 
 	@Schema(description = "경도", example = "126.978")
-	private Double longitude;
+	private BigDecimal longitude;
 
 	@Schema(description = "사업장 유형", example = "data_center", required = true)
 	@NotBlank(message = "사업장 유형은 필수입니다")

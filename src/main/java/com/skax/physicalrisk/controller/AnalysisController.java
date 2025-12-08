@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 /**
  * 분석 컨트롤러
@@ -172,8 +173,8 @@ public class AnalysisController {
 	@lombok.NoArgsConstructor
 	@lombok.AllArgsConstructor
 	public static class StartAnalysisRequest {
-		private Double latitude;
-		private Double longitude;
+		private BigDecimal latitude;
+		private BigDecimal longitude;
 		private String industryType;
 	}
 }
