@@ -21,7 +21,8 @@ public enum ErrorCode {
 
 	// 인증/인가 에러
 	UNAUTHORIZED("UNAUTHORIZED", "인증이 필요합니다"),
-	INVALID_CREDENTIALS("INVALID_CREDENTIALS", "이메일 또는 비밀번호가 올바르지 않습니다"),
+	ACCOUNT_NOT_FOUND("ACCOUNT_NOT_FOUND", "계정이 존재하지 않습니다"),
+	INVALID_CREDENTIALS("INVALID_CREDENTIALS", "아이디 또는 비밀번호가 올바르지 않습니다"),
 	INVALID_TOKEN("INVALID_TOKEN", "유효하지 않은 토큰입니다"),
 	TOKEN_EXPIRED("TOKEN_EXPIRED", "토큰이 만료되었습니다"),
 	ACCESS_DENIED("ACCESS_DENIED", "접근 권한이 없습니다"),

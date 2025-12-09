@@ -99,8 +99,8 @@ public class AuthService {
 		// 사용자 조회
 		User user = userRepository.findByEmail(request.getEmail())
 			.orElseThrow(() -> {
-				log.error("User not found: {}", request.getEmail());
-				return new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS);
+				log.error("Account not found: {}", request.getEmail());
+				return new UnauthorizedException(ErrorCode.ACCOUNT_NOT_FOUND);
 			});
 
 		// 비밀번호 확인
