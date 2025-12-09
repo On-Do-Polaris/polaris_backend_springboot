@@ -4,7 +4,7 @@ info:
   description: 사업장 기후 물리적 리스크 관리 시스템 백엔드 API
   version: 1.0.0
 servers:
-- url: http://localhost:8080
+- url: http://api.on-do.site
   description: Generated server url
 security:
 - Bearer Authentication: []
@@ -175,6 +175,12 @@ paths:
       tags:
       - auth-controller
       operationId: resetPasswordRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -189,6 +195,12 @@ paths:
       tags:
       - auth-controller
       operationId: resetPasswordConfirm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -569,8 +581,6 @@ components:
   schemas:
     CreateSiteRequest:
       required:
-      - address
-      - location
       - name
       - type
       type: object
@@ -579,18 +589,26 @@ components:
           type: string
           description: 사업장 이름
           example: 서울 본사
-        location:
+        roadAddress:
           type: string
-          description: 위치 (시군구 단위)
-          example: 서울특별시 강남구
-        address:
-          type: string
-          description: 주소 (도로명 또는 지번)
+          description: 도로명 주소
           example: 서울특별시 강남구 테헤란로 123
+        jibunAddress:
+          type: string
+          description: 지번 주소
+          example: 서울특별시 강남구 역삼동 123-45
+        latitude:
+          type: number
+          description: 위도
+          example: 37.5665
+        longitude:
+          type: number
+          description: 경도
+          example: 126.978
         type:
           type: string
           description: 사업장 유형
-          example: 공장
+          example: data_center
       description: 사업장 생성 요청
     SiteInfo:
       type: object
@@ -617,10 +635,8 @@ components:
       properties:
         latitude:
           type: number
-          format: double
         longitude:
           type: number
-          format: double
         industryType:
           type: string
     AnalysisJobStatusResponse:
@@ -676,12 +692,10 @@ components:
         latitude:
           type: number
           description: 이전될 위치의 위도
-          format: double
           example: 37.5665
         longitude:
           type: number
           description: 이전될 위치의 경도
-          format: double
           example: 126.978
         roadAddress:
           type: string
@@ -879,6 +893,32 @@ components:
           description: 사용자 ID (이메일)
           example: user@example.com
       description: 로그인 응답
+    PasswordResetRequest:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: 이메일
+          example: user@example.com
+      description: 비밀번호 재설정 요청
+    PasswordResetConfirmRequest:
+      required:
+      - newPassword
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+          description: 재설정 토큰
+        newPassword:
+          maxLength: 2147483647
+          minLength: 8
+          type: string
+          description: 새 비밀번호
+          example: newPassword123!
+      description: 비밀번호 재설정 확인 요청
     LoginRequest:
       required:
       - email
@@ -931,18 +971,26 @@ components:
           type: string
           description: 사업장 이름
           example: 서울 본사
-        location:
+        roadAddress:
           type: string
-          description: 위치 (시군구 단위)
-          example: 서울특별시 강남구
-        address:
-          type: string
-          description: 주소 (도로명 또는 지번)
+          description: 도로명 주소
           example: 서울특별시 강남구 테헤란로 123
+        jibunAddress:
+          type: string
+          description: 지번 주소
+          example: 서울특별시 강남구 역삼동 123-45
+        latitude:
+          type: number
+          description: 위도
+          example: 37.5665
+        longitude:
+          type: number
+          description: 경도
+          example: 126.978
         type:
           type: string
           description: 사업장 유형
-          example: 공장
+          example: data_center
       description: 사업장 수정 요청
     SiteResponse:
       type: object
