@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +42,12 @@ public class DashboardSummaryResponse {
 
 		@Schema(description = "사업장 유형", example = "공장")
 		private String siteType;
+
+		@Schema(description = "위도", example = "37.36633726")
+		private BigDecimal latitude;
+
+		@Schema(description = "경도", example = "127.10661717")
+		private BigDecimal longitude;
 
 		@Schema(description = "위치", example = "서울특별시 강남구")
 		private String location;

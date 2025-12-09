@@ -319,4 +319,184 @@ public class FastApiClient {
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
 	}
+
+	// ============================================================
+	// 추가 데이터 관리 API (Additional Data Management)
+	// ============================================================
+
+	/**
+	 * 추가 데이터 업로드
+	 *
+	 * POST /api/sites/{siteId}/additional-data
+	 *
+	 * @param siteId 사업장 ID
+	 * @param request 추가 데이터 입력
+	 * @return 업로드 응답
+	 */
+	public Mono<Map<String, Object>> uploadAdditionalData(UUID siteId, Map<String, Object> request) {
+		log.info("FastAPI 추가 데이터 업로드: siteId={}", siteId);
+		return webClient.post()
+			.uri("/api/sites/{siteId}/additional-data", siteId)
+			.header("X-API-Key", apiKey)
+			.bodyValue(request)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF)
+			.doOnSuccess(response -> log.info("추가 데이터 업로드 성공: {}", response))
+			.doOnError(error -> log.error("추가 데이터 업로드 실패", error));
+	}
+
+	/**
+	 * 추가 데이터 조회 (특정 카테고리)
+	 *
+	 * GET /api/sites/{siteId}/additional-data?dataCategory={category}
+	 *
+	 * @param siteId 사업장 ID
+	 * @param dataCategory 데이터 카테고리
+	 * @return 추가 데이터 응답
+	 */
+	public Mono<Map<String, Object>> getAdditionalData(UUID siteId, String dataCategory) {
+		log.info("FastAPI 추가 데이터 조회: siteId={}, dataCategory={}", siteId, dataCategory);
+		return webClient.get()
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/sites/{siteId}/additional-data")
+				.queryParam("dataCategory", dataCategory)
+				.build(siteId))
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 추가 데이터 삭제
+	 *
+	 * DELETE /api/sites/{siteId}/additional-data/{dataId}
+	 *
+	 * @param siteId 사업장 ID
+	 * @param dataId 데이터 ID
+	 * @return 삭제 결과
+	 */
+	public Mono<Map<String, Object>> deleteAdditionalData(UUID siteId, UUID dataId) {
+		log.info("FastAPI 추가 데이터 삭제: siteId={}, dataId={}", siteId, dataId);
+		return webClient.delete()
+			.uri("/api/sites/{siteId}/additional-data/{dataId}", siteId, dataId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 정형화된 데이터 조회
+	 *
+	 * GET /api/sites/{siteId}/additional-data/{dataId}/structured
+	 *
+	 * @param siteId 사업장 ID
+	 * @param dataId 데이터 ID
+	 * @return 정형화된 데이터
+	 */
+	public Mono<Map<String, Object>> getStructuredData(UUID siteId, UUID dataId) {
+		log.info("FastAPI 정형화 데이터 조회: siteId={}, dataId={}", siteId, dataId);
+		return webClient.get()
+			.uri("/api/sites/{siteId}/additional-data/{dataId}/structured", siteId, dataId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	// ============================================================
+	// 재해 이력 API (Disaster History)
+	// ============================================================
+
+	/**
+	 * 재해 이력 목록 조회
+	 *
+	 * GET /api/disaster-history?adminCode={code}&year={year}&disasterType={type}&page={page}&pageSize={size}
+	 *
+	 * @param adminCode 행정구역 코드 (옵션)
+	 * @param year 연도 (옵션)
+	 * @param disasterType 재해 유형 (옵션)
+	 * @param page 페이지 번호
+	 * @param pageSize 페이지당 개수
+	 * @return 재해 이력 목록
+	 */
+	public Mono<Map<String, Object>> getDisasterHistory(
+		String adminCode,
+		Integer year,
+		String disasterType,
+		Integer page,
+		Integer pageSize
+	) {
+		log.info("FastAPI 재해 이력 조회: adminCode={}, year={}, disasterType={}, page={}, pageSize={}",
+			adminCode, year, disasterType, page, pageSize);
+		return webClient.get()
+			.uri(uriBuilder -> {
+				var builder = uriBuilder.path("/api/disaster-history");
+				if (adminCode != null) builder.queryParam("adminCode", adminCode);
+				if (year != null) builder.queryParam("year", year);
+				if (disasterType != null) builder.queryParam("disasterType", disasterType);
+				if (page != null) builder.queryParam("page", page);
+				if (pageSize != null) builder.queryParam("pageSize", pageSize);
+				return builder.build();
+			})
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	// ============================================================
+	// 후보지 추천 배치 API (Recommendation Batch)
+	// ============================================================
+
+	/**
+	 * 후보지 추천 배치 시작
+	 *
+	 * POST /api/recommendation
+	 *
+	 * @param request 배치 요청
+	 * @return 배치 작업 응답
+	 */
+	public Mono<Map<String, Object>> startRecommendationBatch(Map<String, Object> request) {
+		log.info("FastAPI 후보지 추천 배치 시작: jobName={}", request.get("jobName"));
+		return webClient.post()
+			.uri("/api/recommendation")
+			.header("X-API-Key", apiKey)
+			.bodyValue(request)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF)
+			.doOnSuccess(response -> log.info("배치 작업 시작 성공: {}", response))
+			.doOnError(error -> log.error("배치 작업 시작 실패", error));
+	}
+
+	/**
+	 * 배치 작업 진행 상황 조회
+	 *
+	 * GET /api/recommendation/{batchJobId}/progress
+	 *
+	 * @param batchJobId 배치 작업 ID
+	 * @return 진행 상황
+	 */
+	public Mono<Map<String, Object>> getBatchProgress(UUID batchJobId) {
+		log.info("FastAPI 배치 작업 진행 상황 조회: batchJobId={}", batchJobId);
+		return webClient.get()
+			.uri("/api/recommendation/{batchJobId}/progress", batchJobId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
+
+	/**
+	 * 배치 작업 결과 조회
+	 *
+	 * GET /api/recommendation/{batchJobId}/result
+	 *
+	 * @param batchJobId 배치 작업 ID
+	 * @return 추천 결과
+	 */
+	public Mono<Map<String, Object>> getRecommendationResult(UUID batchJobId) {
+		log.info("FastAPI 배치 작업 결과 조회: batchJobId={}", batchJobId);
+		return webClient.get()
+			.uri("/api/recommendation/{batchJobId}/result", batchJobId)
+			.header("X-API-Key", apiKey)
+			.retrieve()
+			.bodyToMono(MAP_TYPE_REF);
+	}
 }

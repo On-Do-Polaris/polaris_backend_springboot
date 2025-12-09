@@ -51,7 +51,10 @@ public class SiteService {
 			.map(site -> SiteResponse.SiteInfo.builder()
 				.siteId(site.getId())
 				.siteName(site.getName())
-				.location(site.getRoadAddress() != null ? site.getRoadAddress() : site.getJibunAddress())
+				.latitude(site.getLatitude())
+				.longitude(site.getLongitude())
+				.jibunAddress(site.getJibunAddress())
+				.roadAddress(site.getRoadAddress())
 				.siteType(site.getType())
 				.build())
 			.collect(Collectors.toList());

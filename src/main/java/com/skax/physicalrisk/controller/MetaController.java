@@ -60,7 +60,12 @@ public class MetaController {
 	@GetMapping("/ssp-scenarios")
 	public ResponseEntity<List<String>> getSspScenarios() {
 		log.info("GET /api/meta/ssp-scenarios - Fetching SSP scenarios");
-		List<String> scenarios = List.of("SSP1-2.6", "SSP2-4.5", "SSP5-8.5");
+		List<String> scenarios = List.of(
+			"SSP1-2.6",  // Sustainability
+			"SSP2-4.5",  // Middle of the Road
+			"SSP3-7.0",  // Regional Rivalry
+			"SSP5-8.5"   // Fossil-fueled Development
+		);
 		return ResponseEntity.ok(scenarios);
 	}
 }

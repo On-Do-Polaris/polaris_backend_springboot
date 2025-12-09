@@ -3,17 +3,27 @@ package com.skax.physicalrisk.service.simulation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.client.fastapi.dto.AalAnalysisData;
+import com.skax.physicalrisk.domain.site.entity.Site;
+import com.skax.physicalrisk.domain.site.repository.SiteRepository;
+import com.skax.physicalrisk.domain.user.entity.User;
+import com.skax.physicalrisk.domain.user.repository.UserRepository;
 import com.skax.physicalrisk.dto.request.simulation.ClimateSimulationRequest;
 import com.skax.physicalrisk.dto.request.simulation.RelocationSimulationRequest;
 import com.skax.physicalrisk.dto.response.simulation.ClimateSimulationResponse;
 import com.skax.physicalrisk.dto.response.simulation.RelocationSimulationResponse;
+import com.skax.physicalrisk.exception.ErrorCode;
+import com.skax.physicalrisk.exception.ResourceNotFoundException;
+import com.skax.physicalrisk.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 시뮬레이션 서비스
@@ -32,6 +42,8 @@ import java.util.Map;
 public class SimulationService {
 
 	private final FastApiClient fastApiClient;
+	private final SiteRepository siteRepository;
+	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
 
 	/**
@@ -62,16 +74,41 @@ public class SimulationService {
 	/**
 	 * 기후 시뮬레이션
 	 *
-	 * @param request 기후 시뮬레이션 요청
+	 * 현재 사용자의 모든 사업장에 대해 2020-2100년 기간의 시뮬레이션을 자동 실행
+	 *
+	 * @param request 기후 시뮬레이션 요청 (scenario, hazardType만 포함)
 	 * @return 시뮬레이션 결과
 	 */
 	public ClimateSimulationResponse runClimateSimulation(ClimateSimulationRequest request) {
-		log.info("Running climate simulation: scenario={}, hazardType={}",
-			request.getScenario(), request.getHazardType());
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Running climate simulation for user: {}, scenario={}, hazardType={}",
+			userId, request.getScenario(), request.getHazardType());
 
-		// DTO를 Map으로 변환
-		Map<String, Object> requestMap = objectMapper.convertValue(request, Map.class);
+		// 사용자 조회 및 검증
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
+		// 사용자의 모든 사업장 조회
+		List<Site> sites = siteRepository.findByUser(user);
+		if (sites.isEmpty()) {
+			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND, "사용자의 사업장이 없습니다");
+		}
+
+		// 사업장 ID 목록 추출
+		List<UUID> siteIds = sites.stream()
+			.map(Site::getId)
+			.collect(Collectors.toList());
+
+		log.info("Fetched {} sites for climate simulation", siteIds.size());
+
+		// FastAPI 요청 데이터 생성 (모든 사업장 + 전체 연도 범위)
+		Map<String, Object> requestMap = new HashMap<>();
+		requestMap.put("scenario", request.getScenario());
+		requestMap.put("hazardType", request.getHazardType());
+		requestMap.put("siteIds", siteIds);
+		requestMap.put("startYear", 2020);  // 전체 기간: 2020-2100
+
+		// FastAPI 호출
 		Map<String, Object> response = fastApiClient.runClimateSimulation(requestMap).block();
 		return convertToDto(response, ClimateSimulationResponse.class);
 	}
