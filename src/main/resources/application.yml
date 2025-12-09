@@ -64,6 +64,7 @@ cors:
 # 서버 포트 설정
 server:
   port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework  # Nginx 프록시 헤더 신뢰
 
 # Actuator (Health Check)
 management:
