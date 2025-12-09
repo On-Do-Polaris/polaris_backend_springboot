@@ -5,6 +5,8 @@ import com.skax.physicalrisk.dto.request.simulation.RelocationSimulationRequest;
 import com.skax.physicalrisk.dto.response.simulation.ClimateSimulationResponse;
 import com.skax.physicalrisk.dto.response.simulation.RelocationSimulationResponse;
 import com.skax.physicalrisk.service.simulation.SimulationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/simulation")
 @RequiredArgsConstructor
+@Tag(name = "시뮬레이션", description = "기후 시뮬레이션 및 사업장 이전 분석 API")
 public class SimulationController {
 
 	private final SimulationService simulationService;
@@ -55,6 +58,10 @@ public class SimulationController {
 	 * @return 시뮬레이션 결과
 	 */
 	@PostMapping("/climate")
+	@Operation(
+		summary = "기후 시뮬레이션 실행",
+		description = "현재 사용자의 모든 사업장에 대해 SSP 시나리오 기반 기후 변화 시뮬레이션을 실행합니다 (2020-2100년)"
+	)
 	public ResponseEntity<ClimateSimulationResponse> runClimateSimulation(
 		@Valid @RequestBody ClimateSimulationRequest request
 	) {

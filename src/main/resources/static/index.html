@@ -364,7 +364,7 @@
                 <div class="auth-section">
                     <h3>API 설정</h3>
                     <label>Base URL</label>
-                    <input type="text" id="baseUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+                    <input type="text" id="baseUrl" value="" placeholder="http://localhost:8080">
                 </div>
             </div>
 
@@ -728,7 +728,12 @@
         }
 
         // 초기화
-        updateAuthUI();
+        document.addEventListener('DOMContentLoaded', function() {
+            // 현재 페이지의 origin을 baseUrl로 설정
+            const currentOrigin = window.location.origin;
+            document.getElementById('baseUrl').value = currentOrigin;
+            updateAuthUI();
+        });
     </script>
 </body>
 </html>

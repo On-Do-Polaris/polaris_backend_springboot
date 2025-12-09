@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 분석 서비스
@@ -112,7 +114,38 @@ public class AnalysisService {
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		Map<String, Object> response = fastApiClient.getDashboardSummary(userId).block();
-		return convertToDto(response, DashboardSummaryResponse.class);
+		DashboardSummaryResponse dashboardResponse = convertToDto(response, DashboardSummaryResponse.class);
+
+		// Enrich with coordinates from database
+		enrichWithCoordinates(dashboardResponse, user);
+
+		return dashboardResponse;
+	}
+
+	/**
+	 * 대시보드 응답에 좌표 정보 추가
+	 *
+	 * @param response 대시보드 응답
+	 * @param user 사용자
+	 */
+	private void enrichWithCoordinates(DashboardSummaryResponse response, User user) {
+		if (response.getSites() == null) {
+			return;
+		}
+
+		// Get all user's sites from database
+		List<Site> sites = siteRepository.findByUser(user);
+		Map<UUID, Site> siteMap = sites.stream()
+			.collect(Collectors.toMap(Site::getId, Function.identity()));
+
+		// Enrich each site summary with coordinates
+		response.getSites().forEach(siteSummary -> {
+			Site site = siteMap.get(siteSummary.getSiteId());
+			if (site != null) {
+				siteSummary.setLatitude(site.getLatitude());
+				siteSummary.setLongitude(site.getLongitude());
+			}
+		});
 	}
 
 	/**
