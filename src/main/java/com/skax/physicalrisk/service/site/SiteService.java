@@ -94,7 +94,10 @@ public class SiteService {
 		return SiteResponse.SiteInfo.builder()
 			.siteId(savedSite.getId())
 			.siteName(savedSite.getName())
-			.location(savedSite.getRoadAddress() != null ? savedSite.getRoadAddress() : savedSite.getJibunAddress())
+			.latitude(savedSite.getLatitude())
+			.longitude(savedSite.getLongitude())
+			.jibunAddress(savedSite.getJibunAddress())
+			.roadAddress(savedSite.getRoadAddress())
 			.siteType(savedSite.getType())
 			.build();
 	}
@@ -143,7 +146,10 @@ public class SiteService {
 		return SiteResponse.SiteInfo.builder()
 			.siteId(savedSite.getId())
 			.siteName(savedSite.getName())
-			.location(savedSite.getRoadAddress() != null ? savedSite.getRoadAddress() : savedSite.getJibunAddress())
+			.latitude(savedSite.getLatitude())
+			.longitude(savedSite.getLongitude())
+			.jibunAddress(savedSite.getJibunAddress())
+			.roadAddress(savedSite.getRoadAddress())
 			.siteType(savedSite.getType())
 			.build();
 	}
