@@ -113,7 +113,7 @@ public class AnalysisService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		Map<String, Object> response = fastApiClient.getDashboardSummary(userId).block();
+		Map<String, Object> response = fastApiClient.getDashboardSummary().block();
 		DashboardSummaryResponse dashboardResponse = convertToDto(response, DashboardSummaryResponse.class);
 
 		// Enrich with coordinates from database
