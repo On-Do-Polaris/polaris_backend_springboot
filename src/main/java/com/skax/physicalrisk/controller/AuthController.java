@@ -41,10 +41,10 @@ public class AuthController {
 	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
 	 */
 	@PostMapping("/register-email")
-	public ResponseEntity<Map<String, String>> registerEmail(@Valid @RequestBody RegisterEmailRequest request) {
+	public ResponseEntity<Map<String, Object>> registerEmail(@Valid @RequestBody RegisterEmailRequest request) {
 		log.info("POST /api/auth/register-email - Email: {}", request.getEmail());
 		authService.sendRegisterEmail(request.getEmail());
-		return ResponseEntity.ok(Map.of("message", "인증번호가 발송되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -55,10 +55,10 @@ public class AuthController {
 	 * @throws ValidationException 인증번호가 일치하지 않거나 만료된 경우 (422)
 	 */
 	@PostMapping("/register-verificationCode")
-	public ResponseEntity<Map<String, String>> registerVerificationCode(@Valid @RequestBody VerifyCodeRequest request) {
+	public ResponseEntity<Map<String, Object>> registerVerificationCode(@Valid @RequestBody VerifyCodeRequest request) {
 		log.info("POST /api/auth/register-verificationCode - Email: {}", request.getEmail());
 		authService.verifyRegisterCode(request.getEmail(), request.getVerificationCode());
-		return ResponseEntity.ok(Map.of("message", "인증이 완료되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -70,10 +70,10 @@ public class AuthController {
 	 * @throws ValidationException 이메일 인증이 완료되지 않은 경우 (422)
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
+	public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
 		authService.register(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회원가입이 완료되었습니다"));
+		return ResponseEntity.status(HttpStatus.CREATED).body(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -97,11 +97,11 @@ public class AuthController {
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 */
 	@PostMapping("/logout")
-	public ResponseEntity<Map<String, String>> logout() {
+	public ResponseEntity<Map<String, Object>> logout() {
 		log.info("POST /api/auth/logout");
 		String userId = SecurityUtil.getCurrentUserId().toString();
 		authService.logout(userId);
-		return ResponseEntity.ok(Map.of("message", "로그아웃되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -127,10 +127,10 @@ public class AuthController {
 	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
 	 */
 	@PostMapping("/password/reset-email")
-	public ResponseEntity<Map<String, String>> resetPasswordEmail(@Valid @RequestBody PasswordResetEmailRequest request) {
+	public ResponseEntity<Map<String, Object>> resetPasswordEmail(@Valid @RequestBody PasswordResetEmailRequest request) {
 		log.info("POST /api/auth/password/reset-email - Email: {}", request.getEmail());
 		authService.sendPasswordResetEmail(request.getEmail());
-		return ResponseEntity.ok(Map.of("message", "인증번호가 발송되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -142,10 +142,10 @@ public class AuthController {
 	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
 	 */
 	@PostMapping("/password/reset-request")
-	public ResponseEntity<Map<String, String>> resetPasswordRequest(@Valid @RequestBody PasswordResetRequest request) {
+	public ResponseEntity<Map<String, Object>> resetPasswordRequest(@Valid @RequestBody PasswordResetRequest request) {
 		log.info("POST /api/auth/password/reset-request - Email: {}", request.getEmail());
 		authService.requestPasswordReset(request);
-		return ResponseEntity.ok(Map.of("message", "비밀번호 재설정 이메일이 발송되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
@@ -157,9 +157,9 @@ public class AuthController {
 	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
 	 */
 	@PostMapping("/password/reset-confirm")
-	public ResponseEntity<Map<String, String>> resetPasswordConfirm(@Valid @RequestBody PasswordResetConfirmRequest request) {
+	public ResponseEntity<Map<String, Object>> resetPasswordConfirm(@Valid @RequestBody PasswordResetConfirmRequest request) {
 		log.info("POST /api/auth/password/reset-confirm");
 		authService.confirmPasswordReset(request);
-		return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 }

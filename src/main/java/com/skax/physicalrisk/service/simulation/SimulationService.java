@@ -47,14 +47,45 @@ public class SimulationService {
 	private final ObjectMapper objectMapper;
 
 	/**
-	 * 사업장 이전 시뮬레이션 (현재지 vs 이전지 비교)
+	 * 위치 시뮬레이션 후보지 조회
+	 *
+	 * @param siteId 사업장 ID
+	 * @return 추천 후보지 3개 및 리스크 정보
+	 */
+	public RelocationSimulationResponse getLocationRecommendation(String siteId) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Getting location recommendation for siteId={}, userId={}", siteId, userId);
+
+		// 사용자 조회 및 검증
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		// 사업장 조회 및 권한 검증
+		Site site = siteRepository.findById(UUID.fromString(siteId))
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND));
+
+		if (!site.getUser().getId().equals(userId)) {
+			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND, "해당 사업장에 대한 권한이 없습니다");
+		}
+
+		// TODO: FastAPI 팀이 getLocationRecommendation 엔드포인트 구현 후 활성화
+		// Map<String, Object> response = fastApiClient.getLocationRecommendation(siteId).block();
+		// return convertToRelocationResponse(response);
+
+		// 임시로 더미 데이터 반환 (FastAPI 엔드포인트 구현 전까지)
+		log.info("Returning dummy location recommendation data for siteId={}", siteId);
+		return new RelocationSimulationResponse();
+	}
+
+	/**
+	 * 위치 시뮬레이션 비교 (현재지 vs 신규 후보지)
 	 * AAL v11: aal_analysis에서 final_aal_percentage를 가져와 0-1 스케일로 변환
 	 *
-	 * @param request 이전 시뮬레이션 요청
+	 * @param request 비교 시뮬레이션 요청
 	 * @return 비교 결과
 	 */
-	public RelocationSimulationResponse compareRelocation(RelocationSimulationRequest request) {
-		log.info("Comparing relocation: currentSiteId={}, newLocation=({}, {})",
+	public RelocationSimulationResponse compareLocation(RelocationSimulationRequest request) {
+		log.info("Comparing location: currentSiteId={}, newLocation=({}, {})",
 			request.getCurrentSiteId(), request.getLatitude(), request.getLongitude());
 
 		// DTO를 Map으로 변환

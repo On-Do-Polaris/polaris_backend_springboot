@@ -33,19 +33,44 @@ public class SimulationController {
 	private final SimulationService simulationService;
 
 	/**
-	 * 사업장 이전 시뮬레이션 (비교)
+	 * 위치 시뮬레이션 후보지 조회
 	 *
-	 * POST /api/simulation/relocation/compare
+	 * GET /api/simulation/location/recommendation
 	 *
-	 * @param request 이전 시뮬레이션 요청
+	 * @param siteId 사업장 ID
+	 * @return 추천 후보지 3개 및 리스크 정보
+	 */
+	@GetMapping("/location/recommendation")
+	@Operation(
+		summary = "위치 시뮬레이션 후보지 조회",
+		description = "특정 사업장과 같은 유형의 추천 후보지 상위 3개를 조회합니다"
+	)
+	public ResponseEntity<RelocationSimulationResponse> getLocationRecommendation(
+		@RequestParam String siteId
+	) {
+		log.info("GET /api/simulation/location/recommendation - siteId: {}", siteId);
+		RelocationSimulationResponse response = simulationService.getLocationRecommendation(siteId);
+		return ResponseEntity.ok(response);
+	}
+
+	/**
+	 * 위치 시뮬레이션 비교
+	 *
+	 * POST /api/simulation/location/compare
+	 *
+	 * @param request 비교 시뮬레이션 요청
 	 * @return 비교 결과
 	 */
-	@PostMapping("/relocation/compare")
-	public ResponseEntity<RelocationSimulationResponse> compareRelocation(
+	@PostMapping("/location/compare")
+	@Operation(
+		summary = "위치 시뮬레이션 비교",
+		description = "특정 주소를 입력하면 특정 사업장과 비교하는 시뮬레이션"
+	)
+	public ResponseEntity<RelocationSimulationResponse> compareLocation(
 		@Valid @RequestBody RelocationSimulationRequest request
 	) {
-		log.info("POST /api/simulation/relocation/compare");
-		RelocationSimulationResponse response = simulationService.compareRelocation(request);
+		log.info("POST /api/simulation/location/compare");
+		RelocationSimulationResponse response = simulationService.compareLocation(request);
 		return ResponseEntity.ok(response);
 	}
 

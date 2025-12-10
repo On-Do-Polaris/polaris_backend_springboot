@@ -1,12 +1,7 @@
 package com.skax.physicalrisk.service.report;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.domain.user.entity.User;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
-import com.skax.physicalrisk.dto.request.report.CreateReportRequest;
-import com.skax.physicalrisk.dto.response.report.ReportPdfResponse;
-import com.skax.physicalrisk.dto.response.report.ReportWebViewResponse;
 import com.skax.physicalrisk.exception.ErrorCode;
 import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import com.skax.physicalrisk.security.SecurityUtil;
@@ -35,65 +30,45 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ReportService {
 
-	private final FastApiClient fastApiClient;
 	private final UserRepository userRepository;
-	private final ObjectMapper objectMapper;
 
 	/**
-	 * 리포트 생성
+	 * 통합 리포트 조회
 	 *
-	 * @param request 리포트 생성 요청
-	 * @return 생성된 리포트 ID
+	 * @return 통합 리포트 내용 (ceosummry, Governance, strategy, riskmanagement, goal)
 	 */
-	@Transactional
-	public Map<String, Object> createReport(CreateReportRequest request) {
+	public Map<String, String> getReport() {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Creating report for user: {}, siteId: {}", userId, request.getSiteId());
+		log.info("Fetching report for userId={}", userId);
 
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// FastAPI로 리포트 생성 요청
-		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("userId", userId);
-		requestMap.put("siteId", request.getSiteId());
+		// TODO: FastAPI 팀이 getReport 엔드포인트 구현 후 활성화
+		// try {
+		// 	Map<String, Object> response = fastApiClient.getReportByUserId(userId).block();
+		// 	return Map.of(
+		// 		"ceosummry", (String) response.get("ceosummry"),
+		// 		"Governance", (String) response.get("Governance"),
+		// 		"strategy", (String) response.get("strategy"),
+		// 		"riskmanagement", (String) response.get("riskmanagement"),
+		// 		"goal", (String) response.get("goal")
+		// 	);
+		// } catch (Exception e) {
+		// 	log.error("Failed to fetch report: {}", e.getMessage());
+		// 	throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
+		// 		"리포트 조회에 실패했습니다: " + e.getMessage());
+		// }
 
-		Map<String, Object> response = fastApiClient.createReport(requestMap).block();
-
-		log.info("Report created successfully: reportId={}", response.get("reportId"));
-		return response;
-	}
-
-	/**
-	 * 리포트 웹 뷰 조회
-	 *
-	 * @return 웹 뷰 리포트 (이미지 페이지들)
-	 */
-	public ReportWebViewResponse getReportWebView() {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching web view report for userId={}", userId);
-
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
-
-		Map<String, Object> response = fastApiClient.getReportWebViewByUserId(userId).block();
-		return convertToDto(response, ReportWebViewResponse.class);
-	}
-
-	/**
-	 * 리포트 PDF 다운로드 정보 조회
-	 *
-	 * @return PDF 다운로드 정보
-	 */
-	public ReportPdfResponse getReportPdf() {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching PDF report for userId={}", userId);
-
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
-
-		Map<String, Object> response = fastApiClient.getReportPdfByUserId(userId).block();
-		return convertToDto(response, ReportPdfResponse.class);
+		// 임시로 더미 데이터 반환 (FastAPI 엔드포인트 구현 전까지)
+		log.info("Returning dummy report data for userId={}", userId);
+		return Map.of(
+			"ceosummry", "회사는 현재 기후 관련 위험을 면밀히 분석했습니다",
+			"Governance", "기후 거버넌스는 당사의 지속 가능한 운영과 자산 가치를 극대화하기 위한 필수 요소입니다.",
+			"strategy", "기후 변화에 대한 포괄적 접근 방식을 통해 우리는 지속 가능한 운영을 도모합니다.",
+			"riskmanagement", "리스크 관리의 일환으로 당사는 여러 프로세스를 도입했습니다.",
+			"goal", "현재 기후 리스크로 인해 예상되는 손실과 당사의 목표입니다."
+		);
 	}
 
 	/**
@@ -125,32 +100,5 @@ public class ReportService {
 
 		// 임시로 로컬에 저장 (FastAPI 엔드포인트 구현 전까지)
 		log.info("Report data stored locally for userId={}: {}", userId, requestMap);
-	}
-
-	/**
-	 * 리포트 삭제
-	 */
-	@Transactional
-	public void deleteReport() {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Deleting report for userId={}", userId);
-
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
-
-		fastApiClient.deleteReportByUserId(userId).block();
-		log.info("Report deleted successfully for userId={}", userId);
-	}
-
-	/**
-	 * Map을 DTO로 변환
-	 */
-	private <T> T convertToDto(Map<String, Object> map, Class<T> clazz) {
-		try {
-			return objectMapper.convertValue(map, clazz);
-		} catch (Exception e) {
-			log.error("Failed to convert response to {}: {}", clazz.getSimpleName(), e.getMessage());
-			throw new RuntimeException("응답 변환 실패: " + e.getMessage(), e);
-		}
 	}
 }

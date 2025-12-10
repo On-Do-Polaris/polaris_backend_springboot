@@ -100,9 +100,9 @@ public class SiteController {
 	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
 	@DeleteMapping
-	public ResponseEntity<Map<String, String>> deleteSite(@RequestParam UUID siteId) {
+	public ResponseEntity<Map<String, Object>> deleteSite(@RequestParam UUID siteId) {
 		log.info("DELETE /api/sites?siteId={} - Deleting site", siteId);
 		siteService.deleteSite(siteId);
-		return ResponseEntity.ok(Map.of("message", "사업장이 삭제되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 }

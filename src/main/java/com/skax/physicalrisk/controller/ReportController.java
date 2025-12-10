@@ -31,22 +31,18 @@ public class ReportController {
 	private final ReportService reportService;
 
 	/**
-	 * 리포트 생성
+	 * 통합 리포트 조회
 	 *
-	 * POST /api/report
+	 * GET /api/report
 	 *
-	 * @param request 리포트 생성 요청
-	 * @return 생성된 리포트 정보
+	 * @return 통합 리포트 내용 (ceosummry, Governance, strategy, riskmanagement, goal)
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
-	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
-	@PostMapping
-	public ResponseEntity<Map<String, Object>> createReport(
-		@Valid @RequestBody CreateReportRequest request
-	) {
-		log.info("POST /api/report - siteId: {}", request.getSiteId());
-		Map<String, Object> response = reportService.createReport(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	@GetMapping
+	public ResponseEntity<Map<String, String>> getReport() {
+		log.info("GET /api/report");
+		Map<String, String> response = reportService.getReport();
+		return ResponseEntity.ok(response);
 	}
 
 	/**
@@ -60,53 +56,11 @@ public class ReportController {
 	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
 	@PostMapping("/data")
-	public ResponseEntity<Map<String, String>> registerReportData(
+	public ResponseEntity<Map<String, Object>> registerReportData(
 		@Valid @RequestBody Map<String, Object> request
 	) {
 		log.info("POST /api/report/data - request: {}", request);
 		reportService.registerReportData(request);
-		return ResponseEntity.ok(Map.of("message", "리포트 데이터가 등록되었습니다"));
-	}
-
-	/**
-	 * 리포트 웹 뷰 조회
-	 *
-	 * GET /api/reports/web
-	 *
-	 * @return 웹 뷰 리포트
-	 */
-	@GetMapping("/web")
-	public ResponseEntity<ReportWebViewResponse> getReportWebView() {
-		log.info("GET /api/reports/web");
-		ReportWebViewResponse response = reportService.getReportWebView();
-		return ResponseEntity.ok(response);
-	}
-
-	/**
-	 * 리포트 PDF 다운로드 정보 조회
-	 *
-	 * GET /api/reports/pdf
-	 *
-	 * @return PDF 다운로드 정보
-	 */
-	@GetMapping("/pdf")
-	public ResponseEntity<ReportPdfResponse> getReportPdf() {
-		log.info("GET /api/reports/pdf");
-		ReportPdfResponse response = reportService.getReportPdf();
-		return ResponseEntity.ok(response);
-	}
-
-	/**
-	 * 리포트 삭제
-	 *
-	 * DELETE /api/reports
-	 *
-	 * @return 성공 메시지
-	 */
-	@DeleteMapping
-	public ResponseEntity<Map<String, String>> deleteReport() {
-		log.info("DELETE /api/reports");
-		reportService.deleteReport();
-		return ResponseEntity.ok(Map.of("message", "리포트가 삭제되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 }

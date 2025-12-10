@@ -32,7 +32,8 @@
       "Bash(powershell.exe -Command \"Stop-Process -Id 31468 -Force\")",
       "Bash(git reset HEAD .claude/settings.local.json nul)",
       "Bash(mvn test:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\controller\\DisasterHistoryController.java\")"
     ],
     "deny": [],
     "ask": []

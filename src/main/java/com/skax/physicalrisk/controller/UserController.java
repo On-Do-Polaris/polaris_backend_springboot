@@ -57,10 +57,10 @@ public class UserController {
 	 * @return 성공 메시지
 	 */
 	@DeleteMapping("/me")
-	public ResponseEntity<Map<String, String>> deleteUser() {
+	public ResponseEntity<Map<String, Object>> deleteUser() {
 		log.info("DELETE /api/users/me - Deleting user");
 		userService.deleteUser();
-		return ResponseEntity.ok(Map.of("message", "사용자가 삭제되었습니다"));
+		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
 
 	/**
