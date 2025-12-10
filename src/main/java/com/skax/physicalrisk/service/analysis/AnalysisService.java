@@ -67,16 +67,14 @@ public class AnalysisService {
 		// 사업장 조회 및 권한 확인
 		Site site = getSiteWithAuth(siteId, userId);
 
-		// FastAPI 요청 DTO 생성 (사업장 ID, 위경도, 유형)
-		SiteInfoDto siteInfo = SiteInfoDto.builder()
-			.id(siteId)
-			.latitude(latitude)
-			.longitude(longitude)
-			.industry(industryType)
-			.build();
+		// FastAPI 요청 DTO 생성 - SiteInfoDto.from()을 사용하여 모든 필드와 매핑 로직 적용
+		SiteInfoDto siteInfo = SiteInfoDto.from(site);
 
+		// hazardTypes는 빈 리스트로 초기화 (FastAPI 필수 필드)
 		StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
 			.site(siteInfo)
+			.hazardTypes(List.of())  // 빈 리스트로 초기화
+			.priority("normal")      // 기본 우선순위
 			.build();
 
 		// WebClient 호출 후 block()으로 동기 변환
