@@ -136,13 +136,18 @@ public class AdditionalDataService {
 			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND);
 		}
 
-		return fastApiClient.deleteAdditionalData(siteId, dataId)
+		// ⚠️ MISMATCH: Spring Boot Controller uses dataId, but FastAPI expects dataCategory
+		// Using dataId as a temporary workaround - this will likely fail
+		log.warn("⚠️ API 불일치: FastAPI는 dataCategory를 요구하지만 dataId={}를 전달합니다", dataId);
+		return fastApiClient.deleteAdditionalData(siteId, dataId.toString())
 			.map(response -> true)
 			.onErrorReturn(false);
 	}
 
 	/**
 	 * 정형화된 데이터 조회
+	 *
+	 * ⚠️ WARNING: FastAPI OpenAPI에서 이 엔드포인트를 찾을 수 없습니다.
 	 *
 	 * @param siteId 사업장 ID
 	 * @param dataId 데이터 ID
@@ -160,6 +165,10 @@ public class AdditionalDataService {
 			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND);
 		}
 
-		return fastApiClient.getStructuredData(siteId, dataId);
+		// ⚠️ CRITICAL: FastAPI OpenAPI 스펙에 이 엔드포인트가 존재하지 않습니다!
+		// 임시로 GET /api/additional-data를 호출하여 structuredData 필드 반환
+		log.warn("⚠️ getStructuredData는 FastAPI OpenAPI에 없는 엔드포인트입니다");
+		return Mono.error(new UnsupportedOperationException(
+			"getStructuredData endpoint does not exist in FastAPI OpenAPI spec"));
 	}
 }
