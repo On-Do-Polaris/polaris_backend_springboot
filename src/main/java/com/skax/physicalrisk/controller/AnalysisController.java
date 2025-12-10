@@ -186,7 +186,7 @@ public class AnalysisController {
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
 	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
 	@GetMapping("/physical-risk")
-	public ResponseEntity<java.util.Map<String, Object>> getPhysicalRisk(
+	public ResponseEntity<PhysicalRiskScoreResponse> getPhysicalRisk(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId,
 		@Parameter(description = "기간", required = true, example = "long")
@@ -195,8 +195,7 @@ public class AnalysisController {
 		@RequestParam String hazardType
 	) {
 		log.info("GET /api/analysis/physical-risk?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
-		// TODO: 서비스 메서드 구현 필요
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(analysisService.getPhysicalRiskScores(siteId, hazardType));
 	}
 
 	/**
@@ -227,7 +226,7 @@ public class AnalysisController {
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
 	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
 	@GetMapping("/aal")
-	public ResponseEntity<java.util.Map<String, Object>> getAal(
+	public ResponseEntity<FinancialImpactResponse> getAal(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId,
 		@Parameter(description = "기간", required = true, example = "long")
@@ -236,8 +235,7 @@ public class AnalysisController {
 		@RequestParam String hazardType
 	) {
 		log.info("GET /api/analysis/aal?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
-		// TODO: 서비스 메서드 구현 필요
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(analysisService.getFinancialImpact(siteId));
 	}
 
 	/**
