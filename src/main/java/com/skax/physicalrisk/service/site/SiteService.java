@@ -155,6 +155,34 @@ public class SiteService {
 	}
 
 	/**
+	 * 사업장 이름으로 검색 (v0.2 신규)
+	 *
+	 * @param siteName 사업장명
+	 * @return 사업장 정보
+	 */
+	public SiteResponse.SiteInfo getSiteByName(String siteName) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Searching site by name: {} for user: {}", siteName, userId);
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		// 사용자의 사업장 중 이름으로 검색
+		Site site = siteRepository.findByNameAndUser(siteName, user)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.SITE_NAME_NOT_FOUND));
+
+		return SiteResponse.SiteInfo.builder()
+			.siteId(site.getId())
+			.siteName(site.getName())
+			.latitude(site.getLatitude())
+			.longitude(site.getLongitude())
+			.jibunAddress(site.getJibunAddress())
+			.roadAddress(site.getRoadAddress())
+			.siteType(site.getType())
+			.build();
+	}
+
+	/**
 	 * 사업장 삭제
 	 *
 	 * @param siteId 사업장 ID

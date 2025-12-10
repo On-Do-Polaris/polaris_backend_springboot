@@ -1,0 +1,1673 @@
+openapi: 3.0.0
+info:
+  title: Polaris Climate Risk API
+  version: 1.0.0
+  description: Polaris 기후 리스크 분석/시뮬레이션 서비스 API
+
+tags:
+  - name: Authentication
+    description: 인증 관련 API
+  - name: Site Management
+    description: 사업장 관리 API
+  - name: Dashboard
+    description: 대시보드 API
+  - name: Analysis
+    description: 분석 관련 API
+  - name: Simulation
+    description: 시뮬레이션 API
+  - name: Report
+    description: 리포트 API
+  - name: User Management
+    description: 사용자 관리 API
+  - name: Metadata
+    description: 메타데이터 조회 API
+
+paths:
+  /api/auth/register-email:
+    post:
+      tags:
+        - Authentication
+      summary: 회원가입 이메일 인증
+      description: |
+        회원가입을 위한 이메일 인증.
+        이메일 입력으로 받아서 백엔드에서 해당 이메일로 인증번호를 발송하고 처리 결과를 반환한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+            example:
+              email: "user@example.com"
+      responses:
+        "200":
+          description: 이메일 발송 처리 결과
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/auth/register-verificationCode:
+    post:
+      tags:
+        - Authentication
+      summary: 회원가입 인증번호 확인
+      description: |
+        회원가입을 위한 인증번호 확인 (회원가입3 화면).
+        이메일 발송 후 인증번호를 입력받아 확인 버튼을 누르면,
+        백엔드에서 인증번호가 맞는지 검증 후 결과를 반환한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                verificationCode:
+                  type: string
+              required:
+                - email
+                - verificationCode
+            example:
+              email: "user@example.com"
+              verificationCode: "123456"
+      responses:
+        "200":
+          description: 인증번호 검증 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: 회원가입
+      description: |
+        회원가입 엔드포인트.
+        이메일 인증 이후 호출되며, 인증코드는 전송하지 않는다.
+        백엔드에서 해당 이메일이 인증이 완료된 상태인지 확인 후 회원가입 로직을 처리한다.
+        실패 시 서버 문제, 이메일 미인증 등 실패 사유를 포함해야 한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - name
+                - password
+            example:
+              email: "user@example.com"
+              name: "홍길동"
+              password: "password123!"
+      responses:
+        "200":
+          description: 회원가입 결과 값
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 로그인
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+                - email
+                - password
+            example:
+              email: "user@example.com"
+              password: "password123!"
+      responses:
+        "200":
+          description: 로그인 성공 및 토큰 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  userId:
+                    type: string
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                userId: "user@example.com"
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: 토큰 재발급
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required:
+                - refreshToken
+            example:
+              refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: 새로운 액세스/리프레시 토큰 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  userId:
+                    type: string
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                userId: "user@example.com"
+
+  /api/auth/password/reset-email:
+    post:
+      tags:
+        - Authentication
+      summary: 비밀번호 재설정 이메일 발송
+      description: 비밀번호 재설정을 위해 이메일을 발송하는 엔드포인트.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+            example:
+              email: "user@example.com"
+      responses:
+        "200":
+          description: 메일 전송 결과값
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/site:
+    post:
+      tags:
+        - Site Management
+      summary: 사업장 등록
+      description: 사업장 등록하는 엔드포인트.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                latitude:
+                  type: number
+                  format: double
+                longitude:
+                  type: number
+                  format: double
+                jibunAddress:
+                  type: string
+                roadAddress:
+                  type: string
+                type:
+                  type: string
+              required:
+                - name
+                - latitude
+                - longitude
+                - jibunAddress
+                - roadAddress
+                - type
+            example:
+              name: "sk u타워"
+              latitude: 37.36633726
+              longitude: 127.10661717
+              jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+              roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+              type: "office"
+      responses:
+        "200":
+          description: 사업장 등록 결과
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  siteName:
+                    type: string
+                  latitude:
+                    type: number
+                    format: double
+                  longitude:
+                    type: number
+                    format: double
+                  jibunAddress:
+                    type: string
+                  roadAddress:
+                    type: string
+                  siteType:
+                    type: string
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                siteName: "서울 본사"
+                latitude: 37.36633726
+                longitude: 127.10661717
+                jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                siteType: "공장"
+
+    patch:
+      tags:
+        - Site Management
+      summary: 사업장 수정
+      description: 특정 사업장 정보를 수정하는 엔드포인트.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                latitude:
+                  type: number
+                  format: double
+                longitude:
+                  type: number
+                  format: double
+                jibunAddress:
+                  type: string
+                roadAddress:
+                  type: string
+                type:
+                  type: string
+            example:
+              name: "sk u타워"
+              latitude: 37.36633726
+              longitude: 127.10661717
+              jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+              roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+              type: "data_center"
+      responses:
+        "200":
+          description: 수정된 사업장 정보 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  latitude:
+                    type: number
+                    format: double
+                  longitude:
+                    type: number
+                    format: double
+                  jibunAddress:
+                    type: string
+                  roadAddress:
+                    type: string
+                  type:
+                    type: string
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                name: "sk u타워"
+                latitude: 37.36633726
+                longitude: 127.10661717
+                jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                type: "data_center"
+
+    delete:
+      tags:
+        - Site Management
+      summary: 사업장 삭제
+      description: 특정 사업장을 삭제하는 엔드포인트.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          description: 사업장 삭제 처리 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+
+    get:
+      tags:
+        - Site Management
+      summary: 특정 사업장 조회
+      description: 특정 사업장의 정보를 조회한다.
+      parameters:
+        - in: query
+          name: siteName
+          schema:
+            type: string
+          required: true
+          example: "sk u 타워"
+      responses:
+        "200":
+          description: 사업장 정보 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  siteName:
+                    type: string
+                  latitude:
+                    type: number
+                    format: double
+                  longitude:
+                    type: number
+                    format: double
+                  jibunAddress:
+                    type: string
+                  roadAddress:
+                    type: string
+                  siteType:
+                    type: string
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                siteName: "sk u 타워"
+                latitude: 37.36633726
+                longitude: 127.10661717
+                jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                siteType: "data_center"
+
+  /api/sites:
+    get:
+      tags:
+        - Site Management
+      summary: 전체 사업장 조회
+      description: 전체 사업장의 정보를 조회한다.
+      responses:
+        "200":
+          description: 전체 사업장 목록 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sites:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        siteId:
+                          type: string
+                          format: uuid
+                        siteName:
+                          type: string
+                        latitude:
+                          type: number
+                          format: double
+                        longitude:
+                          type: number
+                          format: double
+                        jibunAddress:
+                          type: string
+                        roadAddress:
+                          type: string
+                        siteType:
+                          type: string
+              example:
+                sites:
+                  - siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    siteName: "sk u 타워"
+                    latitude: 37.36633726
+                    longitude: 127.10661717
+                    jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                    roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                    siteType: "data_center"
+                  - siteId: "3fa96f64-5789-6859-b3fc-2c963f23dhi6"
+                    siteName: "판교 데이터 센터"
+                    latitude: 37.4003481203
+                    longitude: 127.1049265705
+                    jibunAddress: "경기도 성남시 분당구 삼평동 612-4 SK 판교캠퍼스 B"
+                    roadAddress: "경기도 성남시 분당구 판교로255번길 38 (삼평동)"
+                    siteType: "data_center"
+
+  /api/dashboard:
+    get:
+      tags:
+        - Dashboard
+      summary: 대시보드/통계
+      description: 메인 대시보드에서 보여 줄 정보.
+      responses:
+        "200":
+          description: 대시보드 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mainClimateRisk:
+                    type: string
+                  sites:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        siteId:
+                          type: string
+                          format: uuid
+                        siteName:
+                          type: string
+                        latitude:
+                          type: number
+                          format: double
+                        longitude:
+                          type: number
+                          format: double
+                        jibunAddress:
+                          type: string
+                        roadAddress:
+                          type: string
+                        siteType:
+                          type: string
+                        totalRiskScore:
+                          type: number
+              example:
+                mainClimateRisk: "극심한 고온"
+                sites:
+                  - siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    siteName: "sk u 타워"
+                    latitude: 37.36633726
+                    longitude: 127.10661717
+                    jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                    roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                    siteType: "data_center"
+                    totalRiskScore: 75
+                  - siteId: "3fa96f64-5789-6859-b3fc-2c963f23dhi6"
+                    siteName: "판교 데이터 센터"
+                    latitude: 37.4003481203
+                    longitude: 127.1049265705
+                    jibunAddress: "경기도 성남시 분당구 삼평동 612-4 SK 판교캠퍼스 B"
+                    roadAddress: "경기도 성남시 분당구 판교로255번길 38 (삼평동)"
+                    siteType: "data_center"
+                    totalRiskScore: 75
+
+  /api/analysis/start:
+    post:
+      tags:
+        - Analysis
+      summary: 분석 시작 (통합 jobId)
+      description: |
+        회원가입 후 첫 로그인 시 사업장 등록 후 분석을 위해 호출할 API.
+        사업장 등록5 화면에서 완료 버튼 누를 때 호출되며,
+        모든 사업장을 대상으로 통합 분석을 수행하고 사용자 단위의 통합 jobId를 반환한다.
+        모든 사업장의 분석 결과가 다 나올 때까지 로딩을 띄울 것이며 해당 엔드포인트 반환 값은 무시할 예정.
+        해당 값을 각 사업장 별 jobid를 받는 것이 좋을지, 아니면 어차피 모든 사업장에 대해 분석하고 통합 보고서 하나만 나오니 사용자id에 대해 잡 id 하나만 만들어서 그걸 받아두는 게 좋을지 검토 필요.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sites:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      siteId:
+                        type: string
+                        format: uuid
+                  minItems: 1
+            example:
+              sites:
+                - siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                - siteId: "3fa96f64-5789-6859-b3fc-2c963f23dhi6"
+      responses:
+        "200":
+          description: 통합 분석 jobId 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobid:
+                    type: string
+              example:
+                jobid: "54892-f52370-df345095d-352df3"
+
+  /api/analysis/status:
+    get:
+      tags:
+        - Analysis
+      summary: 분석 상태 확인
+      description: |
+        회원가입 후 첫 로그인 시 사업장 등록 후 수행된 분석의 진행 상태를 확인하는 API.
+        모든 사업장의 분석 결과가 다 나올 때까지 로딩을 띄울 건데 분석 결과가 나왔는지 확인하는 api.
+        입력은 없거나 jobid.
+      parameters:
+        - in: query
+          name: jobid
+          schema:
+            type: string
+          required: false
+          description: 통합 또는 개별 분석 jobId (선택)
+      responses:
+        "200":
+          description: 현재 분석 상태 반환. 현재 상태를 알려주는 값이 있어야 함.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: 분석 상태 값(예 ing, done 등)
+              example:
+                status: "ing"
+
+  /api/analysis/summary:
+    get:
+      tags:
+        - Analysis
+      summary: 분석 개요
+      description: |
+        분석 개요 페이지에 보여줄 값 필요.
+        보여주는 값은 ssp2-2024 값.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          description: 분석 개요 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mainClimateRisk:
+                    type: string
+                    description: db 코드도 상관 없음
+                  mainClimateRiskScore:
+                    type: number
+                  mainClimateRiskAAL:
+                    type: number
+                  physical-risk-scores:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        type: number
+                  aal-scores:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        type: number
+              example:
+                mainClimateRisk: "태풍"
+                mainClimateRiskScore: 70
+                mainClimateRiskAAL: 17
+                physical-risk-scores:
+                  - extreme_heat: 10
+                    extreme_cold: 20
+                    river_flood: 30
+                    urban_flood: 40
+                    drought: 50
+                    water_stress: 60
+                    sea_level_rise: 50
+                    typhoon: 70
+                    wildfire: 60
+                aal-scores:
+                  - extreme_heat: 9
+                    extreme_cold: 10
+                    river_flood: 11
+                    urban_flood: 12
+                    drought: 13
+                    water_stress: 14
+                    sea_level_rise: 15
+                    typhoon: 17
+                    wildfire: 16
+
+  /api/analysis/physical-risk:
+    get:
+      tags:
+        - Analysis
+      summary: 물리적 리스크 값
+      description: |
+        물리적 리스크 값(현 ssp 탭).
+        사업장, 기간(term), 리스크 종류(hazardType)에 따라 시나리오-연도 값 반환.
+        단 시나리오는 변하지 않으니, 시나리오를 키값으로 지정.
+        중기 그래프의 경우 point5까지 포함될 수 있다.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        - in: query
+          name: term
+          schema:
+            type: string
+          required: true
+          example: "long"
+        - in: query
+          name: hazardType
+          schema:
+            type: string
+          required: true
+          example: "극심한 고온"
+      responses:
+        "200":
+          description: 물리적 리스크 시나리오별 값
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  term:
+                    type: string
+                  hazardType:
+                    type: string
+                  scenarios1:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                        description: year2020s도 가능
+                      point2:
+                        type: number
+                        description: year2030s도 가능
+                      point3:
+                        type: number
+                        description: year2040s도 가능
+                      point4:
+                        type: number
+                        description: year2050s도 가능
+                  scenarios2:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  scenarios3:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  scenarios4:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  Strategy:
+                    type: string
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                term: "long"
+                hazardType: "극심한 고온"
+                scenarios1:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios2:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios3:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios4:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                Strategy: "냉각 시스템 강화 및 단열재 보강"
+
+  /api/analysis/aal:
+    get:
+      tags:
+        - Analysis
+      summary: AAL 리스크 값
+      description: |
+        AAL 리스크 값(현 재무 영향 탭).
+        사업장, 기간(term), 리스크 종류(hazardType)에 따라 시나리오-연도 값 반환.
+        단 시나리오는 변하지 않으니, 시나리오를 키값으로 지정.
+        중기 그래프의 경우 point5까지 포함될 수 있다.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        - in: query
+          name: term
+          schema:
+            type: string
+          required: true
+          example: "long"
+        - in: query
+          name: hazardType
+          schema:
+            type: string
+          required: true
+          example: "극심한 고온"
+      responses:
+        "200":
+          description: AAL 시나리오별 값
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  term:
+                    type: string
+                  hazardType:
+                    type: string
+                  scenarios1:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                        description: year2020s도 가능
+                      point2:
+                        type: number
+                        description: year2030s도 가능
+                      point3:
+                        type: number
+                        description: year2040s도 가능
+                      point4:
+                        type: number
+                        description: year2050s도 가능
+                  scenarios2:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  scenarios3:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  scenarios4:
+                    type: object
+                    properties:
+                      point1:
+                        type: number
+                      point2:
+                        type: number
+                      point3:
+                        type: number
+                      point4:
+                        type: number
+                  reason:
+                    type: string
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                term: "long"
+                hazardType: "극심한 고온"
+                scenarios1:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios2:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios3:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                scenarios4:
+                  point1: 72
+                  point2: 78
+                  point3: 84
+                  point4: 89
+                reason: "태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실"
+
+  /api/analysis/vulnerability:
+    get:
+      tags:
+        - Analysis
+      summary: 분석 취약성 탭
+      description: |
+        특정 사업장에 대한 취약성 점수, 사업장 정보, 취약성 유형 및 값을 반환한다.
+        현재는 리스크별 점수를 보여주지만 없애고 사업장 정보를 더 보여줌 그리고 하단에 ai 요약으로 변경.
+        현재 api는 종합 점수가 없음 만약 넣는다면 추가 필요.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          description: 취약성 및 사업장 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  siteName:
+                    type: string
+                  latitude:
+                    type: number
+                    format: double
+                  longitude:
+                    type: number
+                    format: double
+                  jibunAddress:
+                    type: string
+                  roadAddress:
+                    type: string
+                  siteType:
+                    type: string
+                  siteInfo:
+                    type: object
+                    properties:
+                      useAprDay:
+                        type: string
+                        description: 사용 승인일
+                      area:
+                        type: number
+                        description: 면적
+                      grndflrCnt:
+                        type: integer
+                        description: 지상 층수
+                      ugrnFlrCnt:
+                        type: integer
+                        description: 지하 층수
+                      rserthqkDsgnApplyYn:
+                        type: string
+                        description: 내진 설계 적용 여부
+                  aisummry:
+                    type: string
+                    description: AI 요약
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                siteName: "sk u 타워"
+                latitude: 37.36633726
+                longitude: 127.10661717
+                jibunAddress: "경기도 성남시 분당구 정자동 25-1"
+                roadAddress: "경기도 성남시 분당구 성남대로343번길 9"
+                siteType: "data_center"
+                siteInfo:
+                  useAprDay: "2020-01-01"
+                  area: 1228.5
+                  grndflrCnt: 5
+                  ugrnFlrCnt: 1
+                  rserthqkDsgnApplyYn: "Y"
+                aisummry: "해당 건물은 내진 설계가 되어 있어 지진에 대한 리스크가 없습니다."
+
+  /api/simulation/location/recommendation:
+    get:
+      tags:
+        - Simulation
+      summary: 위치 시뮬레이션 후보지
+      description: |
+        위치 시뮬레이션 중 후보지 조회.
+        후보지는 사업장이 등록되었을 때 백엔드에서 자동 작업 후 저장해두고,
+        API 요청 시 저장된 값을 가져와서 보여준다.
+        후보지 추천은 특정 사업장과 같은 유형일 때 추천하는 장소 상위 3개이다.
+      parameters:
+        - in: query
+          name: siteId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          description: 추천 후보지 3개 및 리스크 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  site:
+                    type: object
+                    properties:
+                      siteId:
+                        type: string
+                        format: uuid
+                      candidate1:
+                        $ref: "#/components/schemas/CandidateLocation"
+                      candidate2:
+                        $ref: "#/components/schemas/CandidateLocation"
+                      candidate3:
+                        $ref: "#/components/schemas/CandidateLocation"
+              example:
+                site:
+                  siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  candidate1:
+                    candidateId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    candidateName: "세종 데이터 센터 부지"
+                    latitude: 36.5040736
+                    longitude: 127.2494855
+                    jibunAddress: "세종특별자치시 보람동 660"
+                    roadAddress: "세종특별자치시 한누리대로 2130 (보람동)"
+                    riskscore: 70
+                    aalscore: 20
+                    physical-risk-scores:
+                      extreme_heat: 10
+                      extreme_cold: 20
+                      river_flood: 30
+                      urban_flood: 40
+                      drought: 50
+                      water_stress: 60
+                      sea_level_rise: 50
+                      typhoon: 70
+                      wildfire: 60
+                    aal-scores:
+                      extreme_heat: 9
+                      extreme_cold: 10
+                      river_flood: 11
+                      urban_flood: 12
+                      drought: 13
+                      water_stress: 14
+                      sea_level_rise: 15
+                      typhoon: 17
+                      wildfire: 16
+                    pros: "홍수 위험 62% 감소한다"
+                    cons: "초기 구축 비용 증가한다"
+                  candidate2:
+                    candidateId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    candidateName: "당진 산업단지"
+                    latitude: 36.5040736
+                    longitude: 127.2494855
+                    jibunAddress: "세종특별자치시 보람동 660"
+                    roadAddress: "세종특별자치시 한누리대로 2130 (보람동)"
+                    riskscore: 70
+                    aalscore: 20
+                    physical-risk-scores:
+                      extreme_heat: 10
+                      extreme_cold: 20
+                      river_flood: 30
+                      urban_flood: 40
+                      drought: 50
+                      water_stress: 60
+                      sea_level_rise: 50
+                      typhoon: 70
+                      wildfire: 60
+                    aal-scores:
+                      extreme_heat: 9
+                      extreme_cold: 10
+                      river_flood: 11
+                      urban_flood: 12
+                      drought: 13
+                      water_stress: 14
+                      sea_level_rise: 15
+                      typhoon: 17
+                      wildfire: 16
+                    pros: "홍수 위험 62% 감소한다"
+                    cons: "초기 구축 비용 증가한다"
+                  candidate3:
+                    candidateId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    candidateName: "구미 국가산단"
+                    latitude: 36.5040736
+                    longitude: 127.2494855
+                    jibunAddress: "세종특별자치시 보람동 660"
+                    roadAddress: "세종특별자치시 한누리대로 2130 (보람동)"
+                    riskscore: 70
+                    aalscore: 20
+                    physical-risk-scores:
+                      extreme_heat: 10
+                      extreme_cold: 20
+                      river_flood: 30
+                      urban_flood: 40
+                      drought: 50
+                      water_stress: 60
+                      sea_level_rise: 50
+                      typhoon: 70
+                      wildfire: 60
+                    aal-scores:
+                      extreme_heat: 9
+                      extreme_cold: 10
+                      river_flood: 11
+                      urban_flood: 12
+                      drought: 13
+                      water_stress: 14
+                      sea_level_rise: 15
+                      typhoon: 17
+                      wildfire: 16
+                    pros: "홍수 위험 62% 감소한다"
+                    cons: "초기 구축 비용 증가한다"
+
+  /api/simulation/location/compare:
+    post:
+      tags:
+        - Simulation
+      summary: 위치 시뮬레이션 비교
+      description: |
+        특정 주소를 입력하면 특정 사업장과 비교하는 시뮬레이션.
+        새 후보지는 특정 사업장과 같은 유형이라고 가정한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                siteId:
+                  type: string
+                  format: uuid
+                candidate:
+                  type: object
+                  properties:
+                    latitude:
+                      type: number
+                      format: double
+                    longitude:
+                      type: number
+                      format: double
+                    jibunAddress:
+                      type: string
+                    roadAddress:
+                      type: string
+              required:
+                - siteId
+                - candidate
+            example:
+              siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              candidate:
+                latitude: 36.5040736
+                longitude: 127.2494855
+                jibunAddress: "세종특별자치시 보람동 660"
+                roadAddress: "세종특별자치시 한누리대로 2130 (보람동)"
+      responses:
+        "200":
+          description: 비교 대상 후보지의 리스크 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  candidate:
+                    $ref: "#/components/schemas/CandidateLocation"
+              example:
+                siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                candidate:
+                  candidateId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  latitude: 36.5040736
+                  longitude: 127.2494855
+                  jibunAddress: "세종특별자치시 보람동 660"
+                  roadAddress: "세종특별자치시 한누리대로 2130 (보람동)"
+                  riskscore: 70
+                  aalscore: 20
+                  physical-risk-scores:
+                    extreme_heat: 10
+                    extreme_cold: 20
+                    river_flood: 30
+                    urban_flood: 40
+                    drought: 50
+                    water_stress: 60
+                    sea_level_rise: 50
+                    typhoon: 70
+                    wildfire: 60
+                  aal-scores:
+                    extreme_heat: 9
+                    extreme_cold: 10
+                    river_flood: 11
+                    urban_flood: 12
+                    drought: 13
+                    water_stress: 14
+                    sea_level_rise: 15
+                    typhoon: 17
+                    wildfire: 16
+                  pros: "홍수 위험 62% 감소한다"
+                  cons: "초기 구축 비용 증가한다"
+
+  /api/simulation/climate:
+    post:
+      tags:
+        - Simulation
+      summary: 기후 시뮬레이션
+      description: |
+        SSP 시나리오와 기후 변수에 따라 연도별 모든 사업장 값을 반환한다.
+        대응 방안은 현재 API에 존재하지 않으며, 추후 필요 시 필드 추가가 필요하다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scenario:
+                  type: string
+                hazardType:
+                  type: string
+              required:
+                - scenario
+                - hazardType
+            example:
+              scenario: "SSP2-4.5"
+              hazardType: "극심한 고온"
+      responses:
+        "200":
+          description: 시나리오별, 연도별 사업장 기후 데이터
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scenario:
+                    type: string
+                  riskType:
+                    type: string
+                  yearlyData:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        year:
+                          type: integer
+                        nationalAverageTemperature:
+                          type: number
+                          description: 사업장 평균 값
+                        sites:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              siteId:
+                                type: string
+                                format: uuid
+                              siteName:
+                                type: string
+                              Temperature:
+                                type: number
+                                description: 평균 기온
+                              riskincrease:
+                                type: number
+                                description: 리스크 증가 값
+              example:
+                scenario: "SSP2-4.5"
+                riskType: "극심한 고온"
+                yearlyData:
+                  - year: 2030
+                    nationalAverageTemperature: 14.5
+                    sites:
+                      - siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        siteName: "sk u 타워"
+                        Temperature: 15
+                        riskincrease: 15.2
+                      - siteId: "3fa96f64-5789-6859-b3fc-2c963f23dhi6"
+                        siteName: "판교 데이터 센터"
+                        Temperature: 14.8
+                        riskincrease: 18
+                  - year: 2040
+                    nationalAverageTemperature: 16.5
+                    sites:
+                      - siteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                        siteName: "sk u 타워"
+                        Temperature: 17
+                        riskincrease: 17.2
+                      - siteId: "3fa96f64-5789-6859-b3fc-2c963f23dhi6"
+                        siteName: "판교 데이터 센터"
+                        Temperature: 15.8
+                        riskincrease: 19
+
+  /api/report:
+    get:
+      tags:
+        - Report
+      summary: 통합 리포트 조회
+      description: |
+        통합 리포트를 받아오는 엔드포인트.
+        현재는 자세한 구현이 되어 있지 않으며, 추후 상세 구조가 필요하다.
+      responses:
+        "200":
+          description: 통합 리포트 내용
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    type: string
+              example:
+                report: "내용"
+
+  /api/users/me:
+    get:
+      tags:
+        - User Management
+      summary: 사용자 정보 조회
+      description: 사용자 페이지에서 사용할 현재 로그인 사용자 정보 조회.
+      responses:
+        "200":
+          description: 사용자 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email
+                  name:
+                    type: string
+                  language:
+                    type: string
+              example:
+                email: "user@example.com"
+                name: "홍길동"
+                language: "ko"
+
+    patch:
+      tags:
+        - User Management
+      summary: 사용자 정보 수정
+      description: 사용자 정보 중 언어 정보를 수정한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language:
+                  type: string
+              required:
+                - language
+            example:
+              language: "ko"
+      responses:
+        "200":
+          description: 수정된 사용자 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email
+                  name:
+                    type: string
+                  language:
+                    type: string
+              example:
+                email: "user@example.com"
+                name: "홍길동"
+                language: "ko"
+
+    delete:
+      tags:
+        - User Management
+      summary: 계정 삭제
+      description: 계정을 삭제하는 엔드포인트.
+      responses:
+        "200":
+          description: 계정 삭제 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/meta/ssp-scenarios:
+    get:
+      tags:
+        - Metadata
+      summary: SSP 시나리오 목록 조회
+      description: SSP(공통사회경제경로) 시나리오 코드 목록 조회.
+      responses:
+        "200":
+          description: SSP 시나리오 코드 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - "SSP1-2.6"
+                - "SSP2-4.5"
+                - "SSP3-7.0"
+                - "SSP5-8.5"
+
+  /api/meta/industries:
+    get:
+      tags:
+        - Metadata
+      summary: 산업 분류 목록 조회
+      description: 산업(Industry) 코드/이름/설명 목록 조회.
+      responses:
+        "200":
+          description: 산업 분류 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    code:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+              example:
+                - id: 1
+                  code: "data_center"
+                  name: "데이터센터"
+                  description: "서버 및 IT 인프라 운영 시설"
+                - id: 2
+                  code: "manufacturing"
+                  name: "제조업"
+                  description: "공장 및 생산 시설"
+                - id: 3
+                  code: "logistics"
+                  name: "물류/창고"
+                  description: "물류 센터 및 창고 시설"
+                - id: 4
+                  code: "retail"
+                  name: "유통/판매"
+                  description: "유통 매장 및 판매 시설"
+                - id: 5
+                  code: "office"
+                  name: "사무/오피스"
+                  description: "사무실 및 업무 시설"
+                - id: 6
+                  code: "healthcare"
+                  name: "의료/복지"
+                  description: "병원 및 의료 시설"
+                - id: 7
+                  code: "education"
+                  name: "교육"
+                  description: "학교 및 교육 시설"
+                - id: 8
+                  code: "energy"
+                  name: "에너지/발전"
+                  description: "발전소 및 에너지 시설"
+                - id: 9
+                  code: "finance"
+                  name: "금융"
+                  description: "은행 및 금융 시설"
+                - id: 10
+                  code: "hospitality"
+                  name: "숙박/관광"
+                  description: "호텔 및 관광 시설"
+                - id: 11
+                  code: "agriculture"
+                  name: "농업/축산"
+                  description: "농장 및 축산 시설"
+                - id: 12
+                  code: "chemical"
+                  name: "화학/정유"
+                  description: "화학 공장 및 정유 시설"
+                - id: 13
+                  code: "food"
+                  name: "식품/음료"
+                  description: "식품 제조 및 음료 시설"
+                - id: 14
+                  code: "pharmaceutical"
+                  name: "제약/바이오"
+                  description: "제약 및 바이오 시설"
+                - id: 15
+                  code: "transportation"
+                  name: "교통/운송"
+                  description: "교통 및 운송 시설"
+                - id: 16
+                  code: "other"
+                  name: "기타"
+                  description: "기타 업종"
+
+  /api/meta/hazards:
+    get:
+      tags:
+        - Metadata
+      summary: 재해 유형 목록 조회
+      description: 재해 유형(HazardType) 코드/이름/카테고리 목록 조회.
+      responses:
+        "200":
+          description: 재해 유형 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    code:
+                      type: string
+                    name:
+                      type: string
+                    nameEn:
+                      type: string
+                    category:
+                      type: string
+                    description:
+                      type: string
+              example:
+                - id: 1
+                  code: "extreme_heat"
+                  name: "극심한 고온"
+                  nameEn: "Extreme Heat"
+                  category: "TEMPERATURE"
+                  description: "폭염 및 열파로 인한 위험"
+                - id: 2
+                  code: "extreme_cold"
+                  name: "극심한 한파"
+                  nameEn: "Extreme Cold"
+                  category: "TEMPERATURE"
+                  description: "한파 및 동파로 인한 위험"
+                - id: 3
+                  code: "wildfire"
+                  name: "산불"
+                  nameEn: "Wildfire"
+                  category: "OTHER"
+                  description: "산불 발생 및 확산 위험"
+                - id: 4
+                  code: "drought"
+                  name: "가뭄"
+                  nameEn: "Drought"
+                  category: "WATER"
+                  description: "가뭄으로 인한 용수 부족 위험"
+                - id: 5
+                  code: "water_stress"
+                  name: "물부족"
+                  nameEn: "Water Stress"
+                  category: "WATER"
+                  description: "수자원 스트레스 위험"
+                - id: 6
+                  code: "sea_level_rise"
+                  name: "해수면 상승"
+                  nameEn: "Sea Level Rise"
+                  category: "WATER"
+                  description: "해수면 상승으로 인한 침수 위험"
+                - id: 7
+                  code: "river_flood"
+                  name: "하천 홍수"
+                  nameEn: "River Flood"
+                  category: "WATER"
+                  description: "하천 범람으로 인한 홍수 위험"
+                - id: 8
+                  code: "urban_flood"
+                  name: "도시 홍수"
+                  nameEn: "Urban Flood"
+                  category: "WATER"
+                  description: "도시 내수 침수 위험"
+                - id: 9
+                  code: "typhoon"
+                  name: "태풍"
+                  nameEn: "Typhoon"
+                  category: "WIND"
+                  description: "태풍으로 인한 강풍 및 폭우 위험"
+
+components:
+  schemas:
+    CandidateLocation:
+      type: object
+      properties:
+        candidateId:
+          type: string
+          format: uuid
+        candidateName:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        jibunAddress:
+          type: string
+        roadAddress:
+          type: string
+        riskscore:
+          type: number
+          description: 시나리오2-2040 리스크 점수
+        aalscore:
+          type: number
+          description: 시나리오2-2040 AAL 점수
+        physical-risk-scores:
+          type: object
+          additionalProperties:
+            type: number
+        aal-scores:
+          type: object
+          additionalProperties:
+            type: number
+        pros:
+          type: string
+        cons:
+          type: string

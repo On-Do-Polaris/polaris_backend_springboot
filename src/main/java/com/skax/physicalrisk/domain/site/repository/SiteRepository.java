@@ -78,4 +78,13 @@ public interface SiteRepository extends JpaRepository<Site, UUID> {
 	 * @return 사업장 수
 	 */
 	long countByUser(User user);
+
+	/**
+	 * 사용자의 사업장 이름으로 조회 (v0.2 신규)
+	 *
+	 * @param name 사업장명
+	 * @param user 사용자
+	 * @return 사업장 Optional
+	 */
+	Optional<Site> findByNameAndUser(String name, User user);
 }

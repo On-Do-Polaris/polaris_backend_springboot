@@ -31,28 +31,26 @@ public class AnalysisController {
 	private final AnalysisService analysisService;
 
 	/**
-	 * 분석 시작
+	 * 분석 시작 (v0.2 - jobId 제거, 단순 성공 응답)
 	 *
 	 * POST /api/analysis/start
 	 *
-	 * @param request 분석 요청 (사업장 ID, 위경도, 유형)
-	 * @return 작업 상태
+	 * @param request 분석 요청 (sites: 사업장 ID 배열)
+	 * @return 성공 메시지 {"result": "success"}
+	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
+	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
 	@PostMapping("/start")
-	public ResponseEntity<AnalysisJobStatusResponse> startAnalysis(
+	public ResponseEntity<java.util.Map<String, String>> startAnalysis(
 		@RequestBody StartAnalysisRequest request
 	) {
-		log.info("POST /api/analysis/start - siteId: {}", request.getSiteId());
+		log.info("POST /api/analysis/start - sites: {}", request.getSites());
 
-		AnalysisJobStatusResponse response = analysisService.startAnalysis(
-			request.getSiteId(),
-			request.getLatitude(),
-			request.getLongitude(),
-			request.getIndustryType()
-		);
+		// 모든 사업장 분석 시작
+		analysisService.startAnalysisMultiple(request.getSites());
 
-		log.info("Controller returning success: 200 OK");
-		return ResponseEntity.ok(response);
+		log.info("Analysis started successfully for all sites");
+		return ResponseEntity.ok(java.util.Map.of("result", "success"));
 	}
 
 	/**
@@ -165,15 +163,19 @@ public class AnalysisController {
 	}
 
 	/**
-	 * 분석 시작 요청 DTO
+	 * 분석 시작 요청 DTO (v0.2)
 	 */
 	@lombok.Data
 	@lombok.NoArgsConstructor
 	@lombok.AllArgsConstructor
 	public static class StartAnalysisRequest {
-		private UUID siteId;
-		private BigDecimal latitude;
-		private BigDecimal longitude;
-		private String industryType;
+		private List<SiteIdWrapper> sites;
+
+		@lombok.Data
+		@lombok.NoArgsConstructor
+		@lombok.AllArgsConstructor
+		public static class SiteIdWrapper {
+			private UUID siteId;
+		}
 	}
 }

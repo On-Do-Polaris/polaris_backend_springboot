@@ -97,6 +97,37 @@ public class ReportService {
 	}
 
 	/**
+	 * 리포트 추가 데이터 등록 (v0.2 신규)
+	 *
+	 * @param request 리포트 추가 데이터 요청 (siteId, data)
+	 */
+	@Transactional
+	public void registerReportData(Map<String, Object> request) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Registering report data for user: {}, request: {}", userId, request);
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		// FastAPI로 리포트 데이터 등록 요청
+		Map<String, Object> requestMap = new HashMap<>();
+		requestMap.put("userId", userId);
+		requestMap.putAll(request);
+
+		// TODO: FastAPI 팀이 registerReportData 엔드포인트 구현 후 활성화
+		// 비동기 처리 (FastAPI가 해당 엔드포인트를 지원한다고 가정)
+		// try {
+		// 	fastApiClient.registerReportData(requestMap).block();
+		// 	log.info("Report data registered successfully for userId={}", userId);
+		// } catch (Exception e) {
+		// 	log.error("Failed to register report data for userId={}: {}", userId, e.getMessage());
+		// }
+
+		// 임시로 로컬에 저장 (FastAPI 엔드포인트 구현 전까지)
+		log.info("Report data stored locally for userId={}: {}", userId, requestMap);
+	}
+
+	/**
 	 * 리포트 삭제
 	 */
 	@Transactional

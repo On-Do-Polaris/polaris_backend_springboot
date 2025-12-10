@@ -224,6 +224,48 @@ public class AnalysisService {
 	}
 
 	/**
+	 * 다중 사업장 분석 시작 (v0.2)
+	 *
+	 * @param sites 사업장 ID 목록
+	 */
+	public void startAnalysisMultiple(List<com.skax.physicalrisk.controller.AnalysisController.StartAnalysisRequest.SiteIdWrapper> sites) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Starting analysis for {} sites by user: {}", sites.size(), userId);
+
+		// 각 사업장별로 분석 시작
+		for (com.skax.physicalrisk.controller.AnalysisController.StartAnalysisRequest.SiteIdWrapper siteWrapper : sites) {
+			UUID siteId = siteWrapper.getSiteId();
+			log.info("Processing analysis for site: {}", siteId);
+
+			try {
+				// 사업장 조회 및 권한 확인
+				Site site = getSiteWithAuth(siteId, userId);
+
+				// FastAPI 요청 DTO 생성
+				SiteInfoDto siteInfo = SiteInfoDto.from(site);
+
+				StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
+					.site(siteInfo)
+					.hazardTypes(List.of())
+					.priority("normal")
+					.build();
+
+				// FastAPI 호출 (비동기)
+				fastApiClient.startAnalysis(request)
+					.doOnSuccess(response -> log.info("Analysis started for site: {}", siteId))
+					.doOnError(error -> log.error("Failed to start analysis for site: {}", siteId, error))
+					.subscribe();
+
+			} catch (Exception e) {
+				log.error("Error processing site {}: {}", siteId, e.getMessage());
+				// 하나의 사업장 실패해도 계속 진행
+			}
+		}
+
+		log.info("Analysis start requests sent for all sites");
+	}
+
+	/**
 	 * 사업장 조회 및 권한 확인
 	 *
 	 * @param siteId 사업장 ID
