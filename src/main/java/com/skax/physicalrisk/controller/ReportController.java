@@ -15,16 +15,16 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 리포트 컨트롤러
+ * 리포트 컨트롤러 (v0.2)
  *
- * 최종 수정일: 2025-11-20
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-10
+ * 파일 버전: v02
  *
  * @author SKAX Team
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/api/report")
 @RequiredArgsConstructor
 public class ReportController {
 
@@ -33,18 +33,39 @@ public class ReportController {
 	/**
 	 * 리포트 생성
 	 *
-	 * POST /api/reports
+	 * POST /api/report
 	 *
 	 * @param request 리포트 생성 요청
 	 * @return 생성된 리포트 정보
+	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
+	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createReport(
 		@Valid @RequestBody CreateReportRequest request
 	) {
-		log.info("POST /api/reports - siteId: {}", request.getSiteId());
+		log.info("POST /api/report - siteId: {}", request.getSiteId());
 		Map<String, Object> response = reportService.createReport(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	/**
+	 * 리포트 추가 데이터 등록 (v0.2 신규)
+	 *
+	 * POST /api/report/data
+	 *
+	 * @param request 리포트 추가 데이터 요청 (siteId, data 객체)
+	 * @return 빈 응답 (성공)
+	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
+	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
+	 */
+	@PostMapping("/data")
+	public ResponseEntity<Map<String, String>> registerReportData(
+		@Valid @RequestBody Map<String, Object> request
+	) {
+		log.info("POST /api/report/data - request: {}", request);
+		reportService.registerReportData(request);
+		return ResponseEntity.ok(Map.of("message", "리포트 데이터가 등록되었습니다"));
 	}
 
 	/**

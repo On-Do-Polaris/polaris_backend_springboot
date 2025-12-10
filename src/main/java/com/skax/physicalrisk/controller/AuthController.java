@@ -1,10 +1,6 @@
 package com.skax.physicalrisk.controller;
 
-import com.skax.physicalrisk.dto.request.auth.LoginRequest;
-import com.skax.physicalrisk.dto.request.auth.PasswordResetConfirmRequest;
-import com.skax.physicalrisk.dto.request.auth.PasswordResetRequest;
-import com.skax.physicalrisk.dto.request.auth.RefreshTokenRequest;
-import com.skax.physicalrisk.dto.request.auth.RegisterRequest;
+import com.skax.physicalrisk.dto.request.auth.*;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
 import com.skax.physicalrisk.service.user.AuthService;
@@ -37,23 +33,55 @@ public class AuthController {
 	private final AuthService authService;
 
 	/**
-	 * 회원가입
+	 * 회원가입 이메일 인증 요청 (1단계)
 	 *
-	 * @param request 회원가입 요청
-	 * @return 생성된 사용자 ID (이메일)
+	 * @param request 이메일 요청 (email: 이메일 주소)
+	 * @return 빈 응답 (성공)
+	 * @throws DuplicateResourceException 이메일이 이미 존재하는 경우 (409)
+	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
+	 */
+	@PostMapping("/register-email")
+	public ResponseEntity<Map<String, String>> registerEmail(@Valid @RequestBody RegisterEmailRequest request) {
+		log.info("POST /api/auth/register-email - Email: {}", request.getEmail());
+		authService.sendRegisterEmail(request.getEmail());
+		return ResponseEntity.ok(Map.of("message", "인증번호가 발송되었습니다"));
+	}
+
+	/**
+	 * 회원가입 인증번호 확인 (2단계)
+	 *
+	 * @param request 인증번호 확인 요청 (email: 이메일 주소, verificationCode: 6자리 인증번호)
+	 * @return 빈 응답 (성공)
+	 * @throws ValidationException 인증번호가 일치하지 않거나 만료된 경우 (422)
+	 */
+	@PostMapping("/register-verificationCode")
+	public ResponseEntity<Map<String, String>> registerVerificationCode(@Valid @RequestBody VerifyCodeRequest request) {
+		log.info("POST /api/auth/register-verificationCode - Email: {}", request.getEmail());
+		authService.verifyRegisterCode(request.getEmail(), request.getVerificationCode());
+		return ResponseEntity.ok(Map.of("message", "인증이 완료되었습니다"));
+	}
+
+	/**
+	 * 회원가입 (3단계)
+	 *
+	 * @param request 회원가입 요청 (email: 이메일 주소, name: 사용자 이름, password: 비밀번호)
+	 * @return 빈 응답 (성공)
+	 * @throws DuplicateResourceException 이메일이 이미 존재하는 경우 (409)
+	 * @throws ValidationException 이메일 인증이 완료되지 않은 경우 (422)
 	 */
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
-		String userId = authService.register(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("userId", userId));
+		authService.register(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회원가입이 완료되었습니다"));
 	}
 
 	/**
 	 * 로그인
 	 *
-	 * @param request 로그인 요청
-	 * @return 토큰 및 사용자 정보
+	 * @param request 로그인 요청 (email: 이메일 주소, password: 비밀번호)
+	 * @return 토큰 및 사용자 정보 (accessToken: 액세스 토큰, refreshToken: 리프레시 토큰, userId: 사용자 ID)
+	 * @throws UnauthorizedException 이메일이 존재하지 않거나 비밀번호가 일치하지 않는 경우 (401)
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -66,6 +94,7 @@ public class AuthController {
 	 * 로그아웃
 	 *
 	 * @return 성공 메시지
+	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 */
 	@PostMapping("/logout")
 	public ResponseEntity<Map<String, String>> logout() {
@@ -78,8 +107,9 @@ public class AuthController {
 	/**
 	 * 토큰 갱신
 	 *
-	 * @param request 리프레시 토큰 요청
-	 * @return 갱신된 액세스 토큰 및 리프레시 토큰
+	 * @param request 리프레시 토큰 요청 (refreshToken: 리프레시 토큰)
+	 * @return 갱신된 액세스 토큰 및 리프레시 토큰 (accessToken: 새 액세스 토큰, refreshToken: 새 리프레시 토큰, userId: 사용자 ID)
+	 * @throws UnauthorizedException 리프레시 토큰이 유효하지 않거나 만료된 경우 (401)
 	 */
 	@PostMapping("/refresh")
 	public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
@@ -89,10 +119,27 @@ public class AuthController {
 	}
 
 	/**
-	 * 비밀번호 재설정 요청
+	 * 비밀번호 재설정 이메일 인증 요청
 	 *
-	 * @param request 비밀번호 재설정 요청
+	 * @param request 비밀번호 재설정 이메일 요청 (email: 이메일 주소)
 	 * @return 성공 메시지
+	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
+	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
+	 */
+	@PostMapping("/password/reset-email")
+	public ResponseEntity<Map<String, String>> resetPasswordEmail(@Valid @RequestBody PasswordResetEmailRequest request) {
+		log.info("POST /api/auth/password/reset-email - Email: {}", request.getEmail());
+		authService.sendPasswordResetEmail(request.getEmail());
+		return ResponseEntity.ok(Map.of("message", "인증번호가 발송되었습니다"));
+	}
+
+	/**
+	 * 비밀번호 재설정 요청 (기존 토큰 방식 - 호환성 유지)
+	 *
+	 * @param request 비밀번호 재설정 요청 (email: 이메일 주소)
+	 * @return 성공 메시지
+	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
+	 * @throws BusinessException 이메일 발송에 실패한 경우 (503)
 	 */
 	@PostMapping("/password/reset-request")
 	public ResponseEntity<Map<String, String>> resetPasswordRequest(@Valid @RequestBody PasswordResetRequest request) {
@@ -104,8 +151,10 @@ public class AuthController {
 	/**
 	 * 비밀번호 재설정 확인
 	 *
-	 * @param request 비밀번호 재설정 확인 요청
+	 * @param request 비밀번호 재설정 확인 요청 (email: 이메일 주소, verificationCode: 인증번호, newPassword: 새 비밀번호)
 	 * @return 성공 메시지
+	 * @throws ValidationException 인증번호가 일치하지 않거나 만료된 경우 (422)
+	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
 	 */
 	@PostMapping("/password/reset-confirm")
 	public ResponseEntity<Map<String, String>> resetPasswordConfirm(@Valid @RequestBody PasswordResetConfirmRequest request) {
