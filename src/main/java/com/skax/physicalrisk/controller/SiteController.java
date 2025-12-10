@@ -81,6 +81,34 @@ public class SiteController {
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 * @throws ValidationException 사업장 데이터가 유효하지 않은 경우 (422)
 	 */
+	@Operation(
+		summary = "사업장 등록",
+		description = "사업장 등록하는 엔드포인트."
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "사업장 정보",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = CreateSiteRequest.class),
+			examples = @ExampleObject(
+				value = "{\"name\": \"sk u타워\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"type\": \"office\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "사업장 등록 결과",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = SiteResponse.SiteInfo.class),
+			examples = @ExampleObject(
+				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"siteName\": \"서울 본사\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"siteType\": \"공장\"}"
+			)
+		)
+	)
+	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(responseCode = "422", description = "사업장 데이터가 유효하지 않음")
 	@PostMapping
 	public ResponseEntity<SiteResponse.SiteInfo> createSite(@Valid @RequestBody CreateSiteRequest request) {
 		log.info("POST /api/sites - Name: {}", request.getName());
@@ -98,8 +126,38 @@ public class SiteController {
 	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 * @throws ValidationException 사업장 데이터가 유효하지 않은 경우 (422)
 	 */
+	@Operation(
+		summary = "사업장 수정",
+		description = "특정 사업장 정보를 수정하는 엔드포인트."
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "수정할 사업장 정보",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = UpdateSiteRequest.class),
+			examples = @ExampleObject(
+				value = "{\"name\": \"sk u타워\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"type\": \"data_center\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "수정된 사업장 정보 반환",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = SiteResponse.SiteInfo.class),
+			examples = @ExampleObject(
+				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"name\": \"sk u타워\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"type\": \"data_center\"}"
+			)
+		)
+	)
+	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(responseCode = "422", description = "사업장 데이터가 유효하지 않음")
 	@PatchMapping
 	public ResponseEntity<SiteResponse.SiteInfo> updateSite(
+		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId,
 		@RequestBody UpdateSiteRequest request
 	) {
@@ -116,8 +174,26 @@ public class SiteController {
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
+	@Operation(
+		summary = "사업장 삭제",
+		description = "특정 사업장을 삭제하는 엔드포인트."
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "사업장 삭제 처리 결과 반환",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = Map.class),
+			examples = @ExampleObject(value = "{}")
+		)
+	)
+	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> deleteSite(@RequestParam UUID siteId) {
+	public ResponseEntity<Map<String, Object>> deleteSite(
+		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+		@RequestParam UUID siteId
+	) {
 		log.info("DELETE /api/sites?siteId={} - Deleting site", siteId);
 		siteService.deleteSite(siteId);
 		return ResponseEntity.ok(java.util.Collections.emptyMap());

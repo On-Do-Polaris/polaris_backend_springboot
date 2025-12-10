@@ -163,6 +163,31 @@ public class AuthController {
 	 * @return 토큰 및 사용자 정보 (accessToken: 액세스 토큰, refreshToken: 리프레시 토큰, userId: 사용자 ID)
 	 * @throws UnauthorizedException 이메일이 존재하지 않거나 비밀번호가 일치하지 않는 경우 (401)
 	 */
+	@Operation(
+		summary = "로그인"
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "로그인 정보",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = LoginRequest.class),
+			examples = @ExampleObject(
+				value = "{\"email\": \"user@example.com\", \"password\": \"password123!\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "로그인 성공 및 토큰 반환",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = LoginResponse.class),
+			examples = @ExampleObject(
+				value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"user@example.com\"}"
+			)
+		)
+	)
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 		log.info("POST /api/auth/login - Email: {}", request.getEmail());
@@ -204,6 +229,31 @@ public class AuthController {
 	 * @return 갱신된 액세스 토큰 및 리프레시 토큰 (accessToken: 새 액세스 토큰, refreshToken: 새 리프레시 토큰, userId: 사용자 ID)
 	 * @throws UnauthorizedException 리프레시 토큰이 유효하지 않거나 만료된 경우 (401)
 	 */
+	@Operation(
+		summary = "토큰 재발급"
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "리프레시 토큰",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = RefreshTokenRequest.class),
+			examples = @ExampleObject(
+				value = "{\"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "새로운 액세스/리프레시 토큰 반환",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = LoginResponse.class),
+			examples = @ExampleObject(
+				value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"user@example.com\"}"
+			)
+		)
+	)
 	@PostMapping("/refresh")
 	public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
 		log.info("POST /api/auth/refresh");
