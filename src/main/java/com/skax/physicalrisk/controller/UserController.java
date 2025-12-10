@@ -62,15 +62,4 @@ public class UserController {
 		userService.deleteUser();
 		return ResponseEntity.ok(java.util.Collections.emptyMap());
 	}
-
-	/**
-	 * 비밀번호 변경 (미구현)
-	 *
-	 * @return 성공 메시지
-	 */
-	@PatchMapping("/me/password")
-	public ResponseEntity<Map<String, String>> changePassword() {
-		log.info("PATCH /api/users/me/password - Not implemented yet");
-		return ResponseEntity.ok(Map.of("message", "Not implemented yet"));
-	}
 }
