@@ -59,18 +59,18 @@ public class RecommendationController {
 	/**
 	 * 배치 작업 진행 상황 조회
 	 *
-	 * @param batchJobId 배치 작업 ID
+	 * @param batchJobId 배치 작업 ID (쿼리 파라미터)
 	 * @return 진행 상황
 	 */
-	@GetMapping("/{batchJobId}/progress")
+	@GetMapping("/progress")
 	@Operation(
 		summary = "배치 작업 진행 상황 조회",
 		description = "배치 작업의 현재 진행 상황을 조회합니다"
 	)
 	public Mono<ResponseEntity<BatchProgressResponse>> getBatchProgress(
-		@Parameter(description = "배치 작업 ID", required = true) @PathVariable UUID batchJobId
+		@Parameter(description = "배치 작업 ID", required = true) @RequestParam UUID batchJobId
 	) {
-		log.info("GET /api/recommendation/{}/progress", batchJobId);
+		log.info("GET /api/recommendation/progress?batchJobId={}", batchJobId);
 
 		return recommendationService.getBatchProgress(batchJobId)
 			.map(ResponseEntity::ok);
@@ -79,18 +79,18 @@ public class RecommendationController {
 	/**
 	 * 배치 작업 결과 조회
 	 *
-	 * @param batchJobId 배치 작업 ID
+	 * @param batchJobId 배치 작업 ID (쿼리 파라미터)
 	 * @return 추천 결과
 	 */
-	@GetMapping("/{batchJobId}/result")
+	@GetMapping("/result")
 	@Operation(
 		summary = "배치 작업 결과 조회",
 		description = "완료된 배치 작업의 후보지 추천 결과를 조회합니다"
 	)
 	public Mono<ResponseEntity<SiteRecommendationResultResponse>> getRecommendationResult(
-		@Parameter(description = "배치 작업 ID", required = true) @PathVariable UUID batchJobId
+		@Parameter(description = "배치 작업 ID", required = true) @RequestParam UUID batchJobId
 	) {
-		log.info("GET /api/recommendation/{}/result", batchJobId);
+		log.info("GET /api/recommendation/result?batchJobId={}", batchJobId);
 
 		return recommendationService.getRecommendationResult(batchJobId)
 			.map(ResponseEntity::ok);

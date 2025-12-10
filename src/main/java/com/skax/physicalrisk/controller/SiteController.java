@@ -58,16 +58,16 @@ public class SiteController {
 	/**
 	 * 사업장 수정
 	 *
-	 * @param siteId  사업장 ID
+	 * @param siteId  사업장 ID (쿼리 파라미터)
 	 * @param request 수정 요청
 	 * @return 수정된 사업장 정보
 	 */
-	@PatchMapping("/{siteId}")
+	@PatchMapping
 	public ResponseEntity<SiteResponse.SiteInfo> updateSite(
-		@PathVariable UUID siteId,
+		@RequestParam UUID siteId,
 		@RequestBody UpdateSiteRequest request
 	) {
-		log.info("PATCH /api/sites/{} - Updating site", siteId);
+		log.info("PATCH /api/sites?siteId={} - Updating site", siteId);
 		SiteResponse.SiteInfo response = siteService.updateSite(siteId, request);
 		return ResponseEntity.ok(response);
 	}
@@ -75,12 +75,12 @@ public class SiteController {
 	/**
 	 * 사업장 삭제
 	 *
-	 * @param siteId 사업장 ID
+	 * @param siteId 사업장 ID (쿼리 파라미터)
 	 * @return 성공 메시지
 	 */
-	@DeleteMapping("/{siteId}")
-	public ResponseEntity<Map<String, String>> deleteSite(@PathVariable UUID siteId) {
-		log.info("DELETE /api/sites/{} - Deleting site", siteId);
+	@DeleteMapping
+	public ResponseEntity<Map<String, String>> deleteSite(@RequestParam UUID siteId) {
+		log.info("DELETE /api/sites?siteId={} - Deleting site", siteId);
 		siteService.deleteSite(siteId);
 		return ResponseEntity.ok(Map.of("message", "사업장이 삭제되었습니다"));
 	}

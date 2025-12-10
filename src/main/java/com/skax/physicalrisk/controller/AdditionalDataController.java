@@ -29,7 +29,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/sites/{siteId}/additional-data")
+@RequestMapping("/api/additional-data")
 @RequiredArgsConstructor
 @Tag(name = "추가 데이터 관리", description = "사업장 추가 데이터 업로드 및 조회 API")
 public class AdditionalDataController {
@@ -39,17 +39,17 @@ public class AdditionalDataController {
 	/**
 	 * 추가 데이터 업로드
 	 *
-	 * @param siteId 사업장 ID
+	 * @param siteId 사업장 ID (쿼리 파라미터)
 	 * @param input 추가 데이터 입력
 	 * @return 업로드 응답
 	 */
 	@PostMapping
 	@Operation(summary = "추가 데이터 업로드", description = "사업장에 추가 데이터(건물정보, 자산정보 등)를 업로드합니다")
 	public Mono<ResponseEntity<AdditionalDataUploadResponse>> uploadAdditionalData(
-		@Parameter(description = "사업장 ID", required = true) @PathVariable UUID siteId,
+		@Parameter(description = "사업장 ID", required = true) @RequestParam UUID siteId,
 		@Valid @RequestBody AdditionalDataInput input
 	) {
-		log.info("POST /api/sites/{}/additional-data - dataCategory: {}", siteId, input.getDataCategory());
+		log.info("POST /api/additional-data?siteId={} - dataCategory: {}", siteId, input.getDataCategory());
 		return additionalDataService.uploadAdditionalData(siteId, input)
 			.map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
 	}
@@ -64,11 +64,11 @@ public class AdditionalDataController {
 	@GetMapping
 	@Operation(summary = "추가 데이터 조회", description = "특정 카테고리의 추가 데이터를 조회합니다")
 	public Mono<ResponseEntity<AdditionalDataGetResponse>> getAdditionalData(
-		@Parameter(description = "사업장 ID", required = true) @PathVariable UUID siteId,
+		@Parameter(description = "사업장 ID", required = true) @RequestParam UUID siteId,
 		@Parameter(description = "데이터 카테고리 (building/asset/power/insurance/custom)", required = true)
 		@RequestParam String dataCategory
 	) {
-		log.info("GET /api/sites/{}/additional-data - dataCategory: {}", siteId, dataCategory);
+		log.info("GET /api/additional-data?siteId={}&dataCategory={}", siteId, dataCategory);
 		DataCategory category = DataCategory.fromCode(dataCategory);
 		return additionalDataService.getAdditionalData(siteId, category)
 			.map(ResponseEntity::ok);
@@ -81,13 +81,13 @@ public class AdditionalDataController {
 	 * @param dataId 데이터 ID
 	 * @return 삭제 성공 여부
 	 */
-	@DeleteMapping("/{dataId}")
+	@DeleteMapping
 	@Operation(summary = "추가 데이터 삭제", description = "특정 추가 데이터를 삭제합니다")
 	public Mono<ResponseEntity<Map<String, Object>>> deleteAdditionalData(
-		@Parameter(description = "사업장 ID", required = true) @PathVariable UUID siteId,
-		@Parameter(description = "데이터 ID", required = true) @PathVariable UUID dataId
+		@Parameter(description = "사업장 ID", required = true) @RequestParam UUID siteId,
+		@Parameter(description = "데이터 ID", required = true) @RequestParam UUID dataId
 	) {
-		log.info("DELETE /api/sites/{}/additional-data/{}", siteId, dataId);
+		log.info("DELETE /api/additional-data?siteId={}&dataId={}", siteId, dataId);
 		return additionalDataService.deleteAdditionalData(siteId, dataId)
 			.map(success -> ResponseEntity.ok(Map.of("success", success, "message", "삭제되었습니다")));
 	}
@@ -99,13 +99,13 @@ public class AdditionalDataController {
 	 * @param dataId 데이터 ID
 	 * @return 정형화된 데이터
 	 */
-	@GetMapping("/{dataId}/structured")
+	@GetMapping("/structured")
 	@Operation(summary = "정형화된 데이터 조회", description = "AI가 추출한 정형화된 데이터를 조회합니다")
 	public Mono<ResponseEntity<Map<String, Object>>> getStructuredData(
-		@Parameter(description = "사업장 ID", required = true) @PathVariable UUID siteId,
-		@Parameter(description = "데이터 ID", required = true) @PathVariable UUID dataId
+		@Parameter(description = "사업장 ID", required = true) @RequestParam UUID siteId,
+		@Parameter(description = "데이터 ID", required = true) @RequestParam UUID dataId
 	) {
-		log.info("GET /api/sites/{}/additional-data/{}/structured", siteId, dataId);
+		log.info("GET /api/additional-data/structured?siteId={}&dataId={}", siteId, dataId);
 		return additionalDataService.getStructuredData(siteId, dataId)
 			.map(ResponseEntity::ok);
 	}

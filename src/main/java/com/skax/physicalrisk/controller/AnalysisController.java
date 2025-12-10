@@ -24,7 +24,7 @@ import java.math.BigDecimal;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/sites/{siteId}/analysis")
+@RequestMapping("/api/analysis")
 @RequiredArgsConstructor
 public class AnalysisController {
 
@@ -33,21 +33,19 @@ public class AnalysisController {
 	/**
 	 * 분석 시작
 	 *
-	 * POST /api/sites/{siteId}/analysis/start
+	 * POST /api/analysis/start
 	 *
-	 * @param siteId  사업장 ID
-	 * @param request 분석 요청 (위경도, 유형)
+	 * @param request 분석 요청 (사업장 ID, 위경도, 유형)
 	 * @return 작업 상태
 	 */
 	@PostMapping("/start")
 	public ResponseEntity<AnalysisJobStatusResponse> startAnalysis(
-		@PathVariable UUID siteId,
 		@RequestBody StartAnalysisRequest request
 	) {
-		log.info("POST /api/sites/{}/analysis/start", siteId);
+		log.info("POST /api/analysis/start - siteId: {}", request.getSiteId());
 
 		AnalysisJobStatusResponse response = analysisService.startAnalysis(
-			siteId,
+			request.getSiteId(),
 			request.getLatitude(),
 			request.getLongitude(),
 			request.getIndustryType()
@@ -60,18 +58,18 @@ public class AnalysisController {
 	/**
 	 * 분석 작업 상태 조회
 	 *
-	 * GET /api/sites/{siteId}/analysis/status/{jobId}
+	 * GET /api/analysis/status?siteId={siteId}&jobId={jobId}
 	 *
 	 * @param siteId 사업장 ID
 	 * @param jobId  작업 ID
 	 * @return 작업 상태
 	 */
-	@GetMapping("/status/{jobId}")
+	@GetMapping("/status")
 	public ResponseEntity<AnalysisJobStatusResponse> getAnalysisStatus(
-		@PathVariable UUID siteId,
-		@PathVariable UUID jobId
+		@RequestParam UUID siteId,
+		@RequestParam UUID jobId
 	) {
-		log.info("GET /api/sites/{}/analysis/status/{}", siteId, jobId);
+		log.info("GET /api/analysis/status?siteId={}&jobId={}", siteId, jobId);
 		return ResponseEntity.ok(analysisService.getAnalysisStatus(siteId, jobId));
 	}
 
@@ -91,7 +89,7 @@ public class AnalysisController {
 	/**
 	 * 물리적 리스크 점수 조회
 	 *
-	 * GET /api/sites/{siteId}/analysis/physical-risk-scores
+	 * GET /api/analysis/physical-risk-scores?siteId={siteId}&hazardType={hazardType}
 	 *
 	 * @param siteId     사업장 ID
 	 * @param hazardType 위험 유형 (옵션)
@@ -99,59 +97,59 @@ public class AnalysisController {
 	 */
 	@GetMapping("/physical-risk-scores")
 	public ResponseEntity<PhysicalRiskScoreResponse> getPhysicalRiskScores(
-		@PathVariable UUID siteId,
+		@RequestParam UUID siteId,
 		@RequestParam(required = false) String hazardType
 	) {
-		log.info("GET /api/sites/{}/analysis/physical-risk-scores?hazardType={}", siteId, hazardType);
+		log.info("GET /api/analysis/physical-risk-scores?siteId={}&hazardType={}", siteId, hazardType);
 		return ResponseEntity.ok(analysisService.getPhysicalRiskScores(siteId, hazardType));
 	}
 
 	/**
 	 * 과거 재난 이력 조회
 	 *
-	 * GET /api/sites/{siteId}/analysis/past-events
+	 * GET /api/analysis/past-events?siteId={siteId}
 	 *
 	 * @param siteId 사업장 ID
 	 * @return 과거 이벤트
 	 */
 	@GetMapping("/past-events")
-	public ResponseEntity<PastEventsResponse> getPastEvents(@PathVariable UUID siteId) {
-		log.info("GET /api/sites/{}/analysis/past-events", siteId);
+	public ResponseEntity<PastEventsResponse> getPastEvents(@RequestParam UUID siteId) {
+		log.info("GET /api/analysis/past-events?siteId={}", siteId);
 		return ResponseEntity.ok(analysisService.getPastEvents(siteId));
 	}
 
 	/**
 	 * 재무 영향 분석
 	 *
-	 * GET /api/sites/{siteId}/analysis/financial-impacts
+	 * GET /api/analysis/financial-impacts?siteId={siteId}
 	 *
 	 * @param siteId 사업장 ID
 	 * @return 재무 영향
 	 */
 	@GetMapping("/financial-impacts")
-	public ResponseEntity<FinancialImpactResponse> getFinancialImpact(@PathVariable UUID siteId) {
-		log.info("GET /api/sites/{}/analysis/financial-impacts", siteId);
+	public ResponseEntity<FinancialImpactResponse> getFinancialImpact(@RequestParam UUID siteId) {
+		log.info("GET /api/analysis/financial-impacts?siteId={}", siteId);
 		return ResponseEntity.ok(analysisService.getFinancialImpact(siteId));
 	}
 
 	/**
 	 * 취약성 분석
 	 *
-	 * GET /api/sites/{siteId}/analysis/vulnerability
+	 * GET /api/analysis/vulnerability?siteId={siteId}
 	 *
 	 * @param siteId 사업장 ID
 	 * @return 취약성 분석
 	 */
 	@GetMapping("/vulnerability")
-	public ResponseEntity<VulnerabilityResponse> getVulnerability(@PathVariable UUID siteId) {
-		log.info("GET /api/sites/{}/analysis/vulnerability", siteId);
+	public ResponseEntity<VulnerabilityResponse> getVulnerability(@RequestParam UUID siteId) {
+		log.info("GET /api/analysis/vulnerability?siteId={}", siteId);
 		return ResponseEntity.ok(analysisService.getVulnerability(siteId));
 	}
 
 	/**
 	 * 통합 분석 결과
 	 *
-	 * GET /api/sites/{siteId}/analysis/total
+	 * GET /api/analysis/total?siteId={siteId}&hazardType={hazardType}
 	 *
 	 * @param siteId     사업장 ID
 	 * @param hazardType 위험 유형
@@ -159,10 +157,10 @@ public class AnalysisController {
 	 */
 	@GetMapping("/total")
 	public ResponseEntity<AnalysisTotalResponse> getTotalAnalysis(
-		@PathVariable UUID siteId,
+		@RequestParam UUID siteId,
 		@RequestParam String hazardType
 	) {
-		log.info("GET /api/sites/{}/analysis/total?hazardType={}", siteId, hazardType);
+		log.info("GET /api/analysis/total?siteId={}&hazardType={}", siteId, hazardType);
 		return ResponseEntity.ok(analysisService.getTotalAnalysis(siteId, hazardType));
 	}
 
@@ -173,6 +171,7 @@ public class AnalysisController {
 	@lombok.NoArgsConstructor
 	@lombok.AllArgsConstructor
 	public static class StartAnalysisRequest {
+		private UUID siteId;
 		private BigDecimal latitude;
 		private BigDecimal longitude;
 		private String industryType;
