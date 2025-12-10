@@ -2,6 +2,7 @@ package com.skax.physicalrisk.client.fastapi;
 
 import com.skax.physicalrisk.client.fastapi.dto.SiteInfoDto;
 import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
+import com.skax.physicalrisk.util.HazardTypeMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -9,8 +10,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,18 +55,48 @@ public class FastApiClient {
 	 * @return 작업 상태 응답
 	 */
 	public Mono<Map<String, Object>> startAnalysis(StartAnalysisRequestDto request) {
+		// 1. Industry 값 검증 및 변환 (SiteInfoDto.from()에서 이미 처리됨)
+
+		// 2. HazardType 값 변환 (영문 → 한글)
+		List<String> convertedHazardTypes = HazardTypeMapper.toFastApiValues(request.getHazardTypes());
+
+		// 3. Priority 값 소문자 변환
+		String normalizedPriority = request.getPriority() != null
+			? request.getPriority().toLowerCase()
+			: "normal";
+
+		// 4. 변환된 요청 생성
+		StartAnalysisRequestDto convertedRequest = StartAnalysisRequestDto.builder()
+			.site(request.getSite())
+			.hazardTypes(convertedHazardTypes)
+			.priority(normalizedPriority)
+			.options(request.getOptions())
+			.build();
+
 		log.info("FastAPI 분석 시작 요청: siteId={}, hazardTypes={}, priority={}",
-			request.getSite().getId(), request.getHazardTypes(), request.getPriority());
-		log.debug("전체 요청 본문: {}", request);
+			convertedRequest.getSite().getId(),
+			convertedRequest.getHazardTypes(),
+			convertedRequest.getPriority());
+		log.debug("전체 요청 본문: {}", convertedRequest);
 
 		return webClient.post()
 			.uri("/api/analysis/start")
 			.header("X-API-Key", apiKey)
-			.bodyValue(request)
+			.bodyValue(convertedRequest)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF)
 			.doOnSuccess(response -> log.info("분석 시작 성공: {}", response))
-			.doOnError(error -> log.error("분석 시작 실패", error));
+			.doOnError(error -> {
+				log.error("분석 시작 실패", error);
+				// 422 에러 발생 시 요청/응답 본문 로깅
+				if (error instanceof WebClientResponseException) {
+					WebClientResponseException ex = (WebClientResponseException) error;
+					if (ex.getStatusCode().value() == 422) {
+						log.error("422 Validation Error - 요청 본문: {}", convertedRequest);
+						log.error("422 Validation Error - 응답 본문: {}", ex.getResponseBodyAsString());
+					}
+				}
+			});
 	}
 
 	/**
