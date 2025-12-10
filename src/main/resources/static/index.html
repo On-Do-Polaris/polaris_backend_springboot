@@ -453,7 +453,7 @@
                         <h3>리스크 분석</h3>
 
                         <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/sites/{siteId}/analysis/start</h4>
+                            <h4><span class="method post">POST</span>/api/analysis/start</h4>
 
                             <label>사업장 ID (UUID)</label>
                             <input type="text" id="analysisSiteId" placeholder="사업장 ID 입력 또는 위에서 생성">
@@ -483,7 +483,7 @@
                         </div>
 
                         <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/sites/{siteId}/analysis/status/{jobId}</h4>
+                            <h4><span class="method get">GET</span>/api/analysis/status?siteId={siteId}&jobId={jobId}</h4>
 
                             <label>사업장 ID</label>
                             <input type="text" id="statusSiteId" placeholder="사업장 ID">
@@ -674,12 +674,13 @@
             try {
                 const siteId = document.getElementById('analysisSiteId').value;
                 const requestBody = {
+                    siteId: siteId,  // siteId를 body에 포함
                     latitude: document.getElementById('analysisLatitude').value,
                     longitude: document.getElementById('analysisLongitude').value,
                     industryType: document.getElementById('analysisIndustryType').value
                 };
 
-                const response = await fetch(`${getBaseUrl()}/api/sites/${siteId}/analysis/start`, {
+                const response = await fetch(`${getBaseUrl()}/api/analysis/start`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(requestBody)
@@ -702,7 +703,8 @@
                 const siteId = document.getElementById('statusSiteId').value;
                 const jobId = document.getElementById('statusJobId').value;
 
-                const response = await fetch(`${getBaseUrl()}/api/sites/${siteId}/analysis/status/${jobId}`, {
+                // Query parameters로 변경
+                const response = await fetch(`${getBaseUrl()}/api/analysis/status?siteId=${siteId}&jobId=${jobId}`, {
                     headers: getAuthHeaders()
                 });
 
