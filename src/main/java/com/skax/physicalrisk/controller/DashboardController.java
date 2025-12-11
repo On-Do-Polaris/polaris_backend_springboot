@@ -1,5 +1,6 @@
 package com.skax.physicalrisk.controller;
 
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.analysis.DashboardSummaryResponse;
 import com.skax.physicalrisk.service.analysis.AnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +51,15 @@ public class DashboardController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401", 		
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping
 	public ResponseEntity<DashboardSummaryResponse> getDashboard() {
 		log.info("GET /api/dashboard - Fetching dashboard info");

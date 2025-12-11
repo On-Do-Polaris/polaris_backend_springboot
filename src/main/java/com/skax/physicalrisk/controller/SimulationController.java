@@ -2,6 +2,7 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.simulation.ClimateSimulationRequest;
 import com.skax.physicalrisk.dto.request.simulation.RelocationSimulationRequest;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.simulation.ClimateSimulationResponse;
 import com.skax.physicalrisk.dto.response.simulation.RelocationSimulationResponse;
 import com.skax.physicalrisk.service.simulation.SimulationService;
@@ -57,8 +58,24 @@ public class SimulationController {
 			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse.class)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/location/recommendation")
 	public ResponseEntity<com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse> getLocationRecommendation(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
@@ -103,8 +120,24 @@ public class SimulationController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/location/compare")
 	public ResponseEntity<RelocationSimulationResponse> compareLocation(
 		@Valid @RequestBody RelocationSimulationRequest request
@@ -148,7 +181,15 @@ public class SimulationController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/climate")
 	public ResponseEntity<ClimateSimulationResponse> runClimateSimulation(
 		@Valid @RequestBody ClimateSimulationRequest request
