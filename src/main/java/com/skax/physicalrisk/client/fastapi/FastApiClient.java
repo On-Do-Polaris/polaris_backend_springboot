@@ -493,7 +493,7 @@ public class FastApiClient {
 	/**
 	 * 과거 재해 이력 조회
 	 *
-	 * GET /api/past?year={year}&disasterType={disasterType}&severity={severity}
+	 * GET /api/past?year={year}&disaster_type={disaster_type}&severity={severity}
 	 *
 	 * @param year 연도
 	 * @param disasterType 재해 유형
@@ -501,13 +501,13 @@ public class FastApiClient {
 	 * @return 과거 재해 이력
 	 */
 	public Mono<Map<String, Object>> getPastDisasters(int year, String disasterType, String severity) {
-		log.info("FastAPI 과거 재해 조회: year={}, disasterType={}, severity={}",
+		log.info("FastAPI 과거 재해 조회: year={}, disaster_type={}, severity={}",
 			year, disasterType, severity);
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/api/past")
 				.queryParam("year", year)
-				.queryParam("disasterType", disasterType)
+				.queryParam("disaster_type", disasterType)
 				.queryParam("severity", severity)
 				.build())
 			.header("X-API-Key", apiKey)
