@@ -87,4 +87,14 @@ public interface SiteRepository extends JpaRepository<Site, UUID> {
 	 * @return 사업장 Optional
 	 */
 	Optional<Site> findByNameAndUser(String name, User user);
+
+	/**
+	 * 사용자의 동일한 위경도를 가진 사업장 조회
+	 *
+	 * @param latitude 위도
+	 * @param longitude 경도
+	 * @param user 사용자
+	 * @return 사업장 Optional
+	 */
+	Optional<Site> findByLatitudeAndLongitudeAndUser(java.math.BigDecimal latitude, java.math.BigDecimal longitude, User user);
 }

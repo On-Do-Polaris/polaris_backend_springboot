@@ -134,6 +134,15 @@ public class SiteController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "409",
+		description = "동일한 위경도를 가진 사업장이 이미 존재함",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"동일한 위경도를 가진 사업장이 이미 존재합니다.\", \"errorCode\": \"DUPLICATE_SITE_COORDINATES\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "422",
 		description = "사업장 데이터가 유효하지 않음",
 		content = @Content(

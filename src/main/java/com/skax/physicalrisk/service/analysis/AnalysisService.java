@@ -90,13 +90,14 @@ public class AnalysisService {
 	 */
 	public AnalysisJobStatusResponse getAnalysisStatus(UUID jobid) {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching analysis status for job: {}", jobid);
+		log.info("Fetching analysis status for userId: {}, jobid: {}", userId, jobid);
 
 		// 사용자 인증 확인
 		userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		Map<String, Object> response = fastApiClient.getAnalysisStatus(jobid).block();
+		// userId를 FastAPI로 전달
+		Map<String, Object> response = fastApiClient.getAnalysisStatus(userId, jobid).block();
 		return convertToDto(response, AnalysisJobStatusResponse.class);
 	}
 
@@ -131,7 +132,7 @@ public class AnalysisService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		Map<String, Object> response = fastApiClient.getDashboardSummary().block();
+		Map<String, Object> response = fastApiClient.getDashboardSummary(userId).block();
 		DashboardSummaryResponse dashboardResponse = convertToDto(response, DashboardSummaryResponse.class);
 
 		// Enrich with coordinates from database

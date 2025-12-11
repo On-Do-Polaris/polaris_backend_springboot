@@ -52,6 +52,7 @@ public enum ErrorCode {
 	DUPLICATE_EMAIL("DUPLICATE_EMAIL", "이미 존재하는 이메일입니다"),
 	EMAIL_ALREADY_EXISTS("EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다"),
 	DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", "중복된 리소스입니다"),
+	DUPLICATE_SITE_COORDINATES("DUPLICATE_SITE_COORDINATES", "동일한 위경도를 가진 사업장이 이미 존재합니다"),
 
 	// 검증 관련 에러
 	INVALID_EMAIL_FORMAT("INVALID_EMAIL_FORMAT", "유효하지 않은 이메일 형식입니다"),
