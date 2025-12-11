@@ -78,6 +78,22 @@ public class SiteService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
+		// 동일한 위경도를 가진 사업장이 이미 존재하는지 확인
+		if (request.getLatitude() != null && request.getLongitude() != null) {
+			siteRepository.findByLatitudeAndLongitudeAndUser(
+				request.getLatitude(),
+				request.getLongitude(),
+				user
+			).ifPresent(existingSite -> {
+				log.warn("Duplicate site coordinates detected: lat={}, lon={} for user={}",
+					request.getLatitude(), request.getLongitude(), userId);
+				throw new com.skax.physicalrisk.exception.BusinessException(
+					ErrorCode.DUPLICATE_SITE_COORDINATES,
+					"동일한 위경도를 가진 사업장이 이미 존재합니다"
+				);
+			});
+		}
+
 		Site site = Site.builder()
 			.user(user)
 			.name(request.getName())

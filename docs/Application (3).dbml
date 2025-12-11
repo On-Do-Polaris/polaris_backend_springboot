@@ -1,15 +1,15 @@
 // ================================================================
 // SKALA Physical Risk AI - Application ERD
 // ================================================================
-// Database: skala_application (Port: 5435)
+// Database: application (Port: 5432)
 // Service: SpringBoot
 // Total Tables: 9
 //
 // Last Modified: 2025-12-08
-// Version: v03
+// Version: v04
 // ================================================================
 
-Project skala_application {
+Project application {
   database_type: 'PostgreSQL'
   Note: '''
     SKALA Physical Risk AI 시스템 애플리케이션 DB
@@ -40,6 +40,7 @@ Table password_reset_tokens {
   token varchar(255) [unique, not null, note: '재설정 토큰']
   expires_at timestamp [not null, note: '만료 시간']
   created_at timestamp [not null, default: `now()`, note: '생성 시간']
+  used boolean [not null, default: false, note: '사용 여부']
 
   Note: '비밀번호 재설정 토큰 (basic.dbml 기준)'
 

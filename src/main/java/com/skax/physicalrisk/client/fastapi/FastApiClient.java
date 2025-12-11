@@ -102,17 +102,21 @@ public class FastApiClient {
 	/**
 	 * 분석 작업 상태 조회
 	 *
-	 * GET /api/analysis/status?jobid={jobid}
+	 * GET /api/analysis/status?userId={userId}&jobid={jobid}
 	 *
-	 * @param jobid 작업 ID
+	 * @param userId 사용자 ID (필수)
+	 * @param jobid 작업 ID (선택)
 	 * @return 작업 상태
 	 */
-	public Mono<Map<String, Object>> getAnalysisStatus(UUID jobid) {
-		log.info("FastAPI 분석 상태 조회: jobid={}", jobid);
+	public Mono<Map<String, Object>> getAnalysisStatus(UUID userId, UUID jobid) {
+		log.info("FastAPI 분석 상태 조회: userId={}, jobid={}", userId, jobid);
 
 		return webClient.get()
 			.uri(uriBuilder -> {
 				var builder = uriBuilder.path("/api/analysis/status");
+				if (userId != null) {
+					builder.queryParam("userId", userId);
+				}
 				if (jobid != null) {
 					builder.queryParam("jobid", jobid);
 				}
@@ -126,13 +130,18 @@ public class FastApiClient {
 	/**
 	 * 대시보드 요약 조회 (전체 사업장)
 	 *
-	 * GET /api/dashboard/summary
+	 * GET /api/dashboard/summary?userId={userId}
 	 *
+	 * @param userId 사용자 ID
 	 * @return 대시보드 요약
 	 */
-	public Mono<Map<String, Object>> getDashboardSummary() {
+	public Mono<Map<String, Object>> getDashboardSummary(UUID userId) {
+		log.info("FastAPI 대시보드 요약 조회: userId={}", userId);
 		return webClient.get()
-			.uri("/api/dashboard/summary")
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/dashboard/summary")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
@@ -383,13 +392,18 @@ public class FastApiClient {
 	/**
 	 * 리포트 삭제
 	 *
-	 * DELETE /api/reports
+	 * DELETE /api/reports?userId={userId}
 	 *
+	 * @param userId 사용자 ID
 	 * @return 삭제 결과
 	 */
-	public Mono<Map<String, Object>> deleteReport() {
+	public Mono<Map<String, Object>> deleteReport(UUID userId) {
+		log.info("FastAPI 리포트 삭제: userId={}", userId);
 		return webClient.delete()
-			.uri("/api/reports")
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/reports")
+				.queryParam("userId", userId)
+				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
@@ -398,16 +412,16 @@ public class FastApiClient {
 	/**
 	 * 리포트 삭제 (사용자 ID 기반) - DEPRECATED
 	 *
-	 * ⚠️ WARNING: FastAPI DELETE /api/reports는 파라미터를 받지 않습니다.
+	 * ⚠️ WARNING: 이 메서드는 deprecated되었습니다. deleteReport(userId) 사용 권장
 	 *
-	 * @param userId 사용자 ID (무시됨)
+	 * @param userId 사용자 ID
 	 * @return 삭제 결과
-	 * @deprecated FastAPI OpenAPI 스펙과 불일치. deleteReport() 사용 권장
+	 * @deprecated deleteReport(UUID userId) 사용 권장
 	 */
 	@Deprecated
 	public Mono<Map<String, Object>> deleteReportByUserId(UUID userId) {
-		log.warn("⚠️ deleteReportByUserId는 deprecated됨. FastAPI는 파라미터 없이 DELETE /api/reports를 호출하지만 userId={}가 전달됨", userId);
-		return deleteReport();
+		log.warn("⚠️ deleteReportByUserId는 deprecated됨. deleteReport(userId) 사용 권장");
+		return deleteReport(userId);
 	}
 
 	/**
