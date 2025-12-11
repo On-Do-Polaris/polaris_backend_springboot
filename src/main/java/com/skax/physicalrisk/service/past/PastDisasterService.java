@@ -51,27 +51,16 @@ public class PastDisasterService {
 			throw new BusinessException(ErrorCode.INVALID_REQUEST, "유효하지 않은 연도입니다");
 		}
 
-		// TODO: FastAPI 팀이 getPastDisasters 엔드포인트 구현 후 활성화
-		// try {
-		// 	// FastAPI로 과거 재해 데이터 요청
-		// 	Map<String, Object> response = fastApiClient.getPastDisasters(year, disasterType, severity).block();
-		// 	// 응답을 DTO로 변환
-		// 	return convertToDto(response, PastDisasterResponse.class);
-		// } catch (Exception e) {
-		// 	log.error("Failed to fetch past disasters: {}", e.getMessage());
-		// 	throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
-		// 		"과거 재해 데이터 조회에 실패했습니다: " + e.getMessage());
-		// }
-
-		// 임시로 더미 데이터 반환 (FastAPI 엔드포인트 구현 전까지)
-		log.info("Returning dummy past disaster data for year={}, disasterType={}, severity={}",
-			year, disasterType, severity);
-
-		return PastDisasterResponse.builder()
-			.data(PastDisasterResponse.DataWrapper.builder()
-				.items(java.util.Collections.emptyList())
-				.build())
-			.build();
+		try {
+			// FastAPI로 과거 재해 데이터 요청
+			Map<String, Object> response = fastApiClient.getPastDisasters(year, disasterType, severity).block();
+			// 응답을 DTO로 변환
+			return convertToDto(response, PastDisasterResponse.class);
+		} catch (Exception e) {
+			log.error("Failed to fetch past disasters: {}", e.getMessage());
+			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
+				"과거 재해 데이터 조회에 실패했습니다: " + e.getMessage());
+		}
 	}
 
 	/**
