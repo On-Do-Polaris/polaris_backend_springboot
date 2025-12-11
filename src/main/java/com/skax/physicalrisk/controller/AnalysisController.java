@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.analysis.*;
 import com.skax.physicalrisk.service.analysis.AnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,16 +67,31 @@ public class AnalysisController {
 		description = "분석 시작 결과",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = java.util.Map.class),
 			examples = @ExampleObject(
-				value = "{\"result\": \"success\"}"
+				value = "{\"result\": \"success\", \"message\": \"분석이 시작되었습니다.\"}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/start")
-	public ResponseEntity<java.util.Map<String, String>> startAnalysis(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> startAnalysis(
 		@RequestBody StartAnalysisRequest request
 	) {
 		log.info("POST /api/analysis/start - sites: {}", request.getSites());
@@ -84,7 +100,7 @@ public class AnalysisController {
 		analysisService.startAnalysisMultiple(request.getSites());
 
 		log.info("Analysis started successfully for all sites");
-		return ResponseEntity.ok(java.util.Map.of("result", "success"));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석이 시작되었습니다."));
 	}
 
 	/**
@@ -105,20 +121,27 @@ public class AnalysisController {
 		description = "현재 분석 상태 반환. 현재 상태를 알려주는 값이 있어야 함.",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = AnalysisJobStatusResponse.class),
 			examples = @ExampleObject(
-				value = "{\"status\": \"ing\"}"
+				value = "{\"result\": \"success\", \"data\": {\"status\": \"ing\"}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/status")
-	public ResponseEntity<AnalysisJobStatusResponse> getAnalysisStatus(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<AnalysisJobStatusResponse>> getAnalysisStatus(
 		@Parameter(description = "통합 또는 개별 분석 jobId (선택)", required = false)
 		@RequestParam(required = false) UUID jobid
 	) {
 		log.info("GET /api/analysis/status?jobid={}", jobid);
-		return ResponseEntity.ok(analysisService.getAnalysisStatus(jobid));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getAnalysisStatus(jobid)));
 	}
 
 	/**
@@ -138,21 +161,36 @@ public class AnalysisController {
 		description = "분석 개요 정보",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = java.util.Map.class),
 			examples = @ExampleObject(
-				value = "{\"mainClimateRisk\": \"태풍\", \"mainClimateRiskScore\": 70, \"mainClimateRiskAAL\": 17, \"physical-risk-scores\": [{\"extreme_heat\": 10, \"extreme_cold\": 20, \"river_flood\": 30, \"urban_flood\": 40, \"drought\": 50, \"water_stress\": 60, \"sea_level_rise\": 50, \"typhoon\": 70, \"wildfire\": 60}], \"aal-scores\": [{\"extreme_heat\": 9, \"extreme_cold\": 10, \"river_flood\": 11, \"urban_flood\": 12, \"drought\": 13, \"water_stress\": 14, \"sea_level_rise\": 15, \"typhoon\": 17, \"wildfire\": 16}]}"
+				value = "{\"result\": \"success\", \"data\": {\"mainClimateRisk\": \"태풍\", \"mainClimateRiskScore\": 70, \"mainClimateRiskAAL\": 17, \"physical-risk-scores\": {\"extreme_heat\": 10, \"extreme_cold\": 20, \"river_flood\": 30, \"urban_flood\": 40, \"drought\": 50, \"water_stress\": 60, \"sea_level_rise\": 50, \"typhoon\": 70, \"wildfire\": 60}, \"aal-scores\": {\"extreme_heat\": 9, \"extreme_cold\": 10, \"river_flood\": 11, \"urban_flood\": 12, \"drought\": 13, \"water_stress\": 14, \"sea_level_rise\": 15, \"typhoon\": 17, \"wildfire\": 16}}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/summary")
-	public ResponseEntity<java.util.Map<String, Object>> getAnalysisSummary(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<java.util.Map<String, Object>>> getAnalysisSummary(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId
 	) {
 		log.info("GET /api/analysis/summary?siteId={}", siteId);
-		return ResponseEntity.ok(analysisService.getAnalysisSummary(siteId));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getAnalysisSummary(siteId)));
 	}
 
 	/**
@@ -174,16 +212,31 @@ public class AnalysisController {
 		description = "물리적 리스크 시나리오별 값",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = java.util.Map.class),
 			examples = @ExampleObject(
-				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}"
+				value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/physical-risk")
-	public ResponseEntity<PhysicalRiskScoreResponse> getPhysicalRisk(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<PhysicalRiskScoreResponse>> getPhysicalRisk(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId,
 		@Parameter(description = "기간", required = true, example = "long")
@@ -192,7 +245,7 @@ public class AnalysisController {
 		@RequestParam String hazardType
 	) {
 		log.info("GET /api/analysis/physical-risk?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
-		return ResponseEntity.ok(analysisService.getPhysicalRiskScores(siteId, hazardType));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getPhysicalRiskScores(siteId, hazardType)));
 	}
 
 	/**
@@ -214,16 +267,31 @@ public class AnalysisController {
 		description = "AAL 시나리오별 값",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = java.util.Map.class),
 			examples = @ExampleObject(
-				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}"
+				value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/aal")
-	public ResponseEntity<FinancialImpactResponse> getAal(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<FinancialImpactResponse>> getAal(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId,
 		@Parameter(description = "기간", required = true, example = "long")
@@ -232,7 +300,7 @@ public class AnalysisController {
 		@RequestParam String hazardType
 	) {
 		log.info("GET /api/analysis/aal?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
-		return ResponseEntity.ok(analysisService.getFinancialImpact(siteId));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getFinancialImpact(siteId)));
 	}
 
 	/**
@@ -252,21 +320,36 @@ public class AnalysisController {
 		description = "취약성 및 사업장 정보",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = VulnerabilityResponse.class),
 			examples = @ExampleObject(
-				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"siteName\": \"sk u 타워\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"siteType\": \"data_center\", \"useAprDay\": \"2020-01-01\", \"area\": 1228.5, \"grndflrCnt\": 5, \"ugrnFlrCnt\": 1, \"rserthqkDsgnApplyYn\": \"Y\", \"aisummry\": \"해당 건물은 내진 설계가 되어 있어 지진에 대한 리스크가 없습니다.\"}"
+				value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"siteName\": \"sk u 타워\", \"latitude\": 37.36633726, \"longitude\": 127.10661717, \"jibunAddress\": \"경기도 성남시 분당구 정자동 25-1\", \"roadAddress\": \"경기도 성남시 분당구 성남대로343번길 9\", \"siteType\": \"data_center\", \"useAprDay\": \"2020-01-01\", \"area\": 1228.5, \"grndflrCnt\": 5, \"ugrnFlrCnt\": 1, \"rserthqkDsgnApplyYn\": \"Y\", \"aisummry\": \"해당 건물은 내진 설계가 되어 있어 지진에 대한 리스크가 없습니다.\"}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/vulnerability")
-	public ResponseEntity<VulnerabilityResponse> getVulnerability(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<VulnerabilityResponse>> getVulnerability(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId
 	) {
 		log.info("GET /api/analysis/vulnerability?siteId={}", siteId);
-		return ResponseEntity.ok(analysisService.getVulnerability(siteId));
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getVulnerability(siteId)));
 	}
 
 

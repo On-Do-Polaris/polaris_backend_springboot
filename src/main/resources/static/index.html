@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -54,10 +54,14 @@
             background: #f8f9fa;
             padding: 30px;
             border-right: 1px solid #e0e0e0;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
         }
 
         .main {
             padding: 30px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
         }
 
         .auth-section {
@@ -211,6 +215,7 @@
             font-size: 13px;
             max-height: 400px;
             overflow-y: auto;
+            display: none;
         }
 
         .response pre {
@@ -246,68 +251,24 @@
             gap: 10px;
         }
 
-        .api-list {
-            list-style: none;
-        }
-
-        .api-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .api-list li:last-child {
-            border-bottom: none;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.6s linear infinite;
-            margin-left: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 10px;
-            border: 1px solid #f5c6cb;
-        }
-
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 10px;
-            border: 1px solid #c3e6cb;
-        }
-
         .tab-buttons {
             display: flex;
-            gap: 10px;
+            gap: 5px;
             margin-bottom: 20px;
             border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
         }
 
         .tab-button {
             background: none;
             color: #666;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             cursor: pointer;
             font-weight: 600;
             border-bottom: 3px solid transparent;
             width: auto;
+            font-size: 13px;
         }
 
         .tab-button.active {
@@ -328,7 +289,7 @@
     <div class="container">
         <div class="header">
             <h1>🌍 SKAX Physical Risk Management API</h1>
-            <p>기후 물리적 리스크 관리 시스템 API 테스트 도구</p>
+            <p>FastAPI 호출 API 전체 테스트 도구 (13개 엔드포인트)</p>
         </div>
 
         <div class="content">
@@ -366,14 +327,24 @@
                     <label>Base URL</label>
                     <input type="text" id="baseUrl" value="" placeholder="http://localhost:8080">
                 </div>
+
+                <div class="auth-section">
+                    <h3>현재 사업장 ID</h3>
+                    <input type="text" id="globalSiteId" placeholder="사업장 생성 후 자동 입력" readonly style="background: #f0f0f0;">
+                    <button onclick="fillAllSiteIds()" class="button-secondary" style="font-size: 12px; padding: 8px;">모든 폼에 적용</button>
+                </div>
             </div>
 
             <!-- 메인 콘텐츠 -->
             <div class="main">
                 <div class="tab-buttons">
-                    <button class="tab-button active" onclick="switchTab('auth')">인증 API</button>
-                    <button class="tab-button" onclick="switchTab('sites')">사업장 API</button>
-                    <button class="tab-button" onclick="switchTab('analysis')">분석 API</button>
+                    <button class="tab-button active" onclick="switchTab('auth')">인증</button>
+                    <button class="tab-button" onclick="switchTab('sites')">사업장</button>
+                    <button class="tab-button" onclick="switchTab('analysis')">분석</button>
+                    <button class="tab-button" onclick="switchTab('dashboard')">대시보드</button>
+                    <button class="tab-button" onclick="switchTab('simulation')">시뮬레이션</button>
+                    <button class="tab-button" onclick="switchTab('report')">리포트</button>
+                    <button class="tab-button" onclick="switchTab('past')">과거재해</button>
                 </div>
 
                 <!-- 인증 API 탭 -->
@@ -393,7 +364,7 @@
                             <input type="password" id="regPassword" placeholder="비밀번호 (8자 이상)">
 
                             <button onclick="register()">회원가입</button>
-                            <div id="registerResponse" class="response" style="display: none;"><pre></pre></div>
+                            <div id="registerResponse" class="response"><pre></pre></div>
                         </div>
                     </div>
                 </div>
@@ -406,7 +377,7 @@
                         <div class="api-endpoint">
                             <h4><span class="method get">GET</span>/api/sites</h4>
                             <button onclick="getSites()">사업장 목록 조회</button>
-                            <div id="getSitesResponse" class="response" style="display: none;"><pre></pre></div>
+                            <div id="getSitesResponse" class="response"><pre></pre></div>
                         </div>
 
                         <div class="api-endpoint">
@@ -424,16 +395,17 @@
                             <div class="grid-2">
                                 <div>
                                     <label>위도</label>
-                                    <input type="text" id="siteLatitude" placeholder="37.5665">
+                                    <input type="text" id="siteLatitude" value="37.5665" placeholder="37.5665">
                                 </div>
                                 <div>
                                     <label>경도</label>
-                                    <input type="text" id="siteLongitude" placeholder="126.9780">
+                                    <input type="text" id="siteLongitude" value="126.9780" placeholder="126.9780">
                                 </div>
                             </div>
 
                             <label>산업 유형</label>
                             <select id="siteType">
+                                <option value="data_center">데이터센터</option>
                                 <option value="manufacturing">제조업</option>
                                 <option value="logistics">물류</option>
                                 <option value="retail">유통</option>
@@ -442,7 +414,7 @@
                             </select>
 
                             <button onclick="createSite()">사업장 생성</button>
-                            <div id="createSiteResponse" class="response" style="display: none;"><pre></pre></div>
+                            <div id="createSiteResponse" class="response"><pre></pre></div>
                         </div>
                     </div>
                 </div>
@@ -456,43 +428,245 @@
                             <h4><span class="method post">POST</span>/api/analysis/start</h4>
 
                             <label>사업장 ID (UUID)</label>
-                            <input type="text" id="analysisSiteId" placeholder="사업장 ID 입력 또는 위에서 생성">
-
-                            <div class="grid-2">
-                                <div>
-                                    <label>위도</label>
-                                    <input type="text" id="analysisLatitude" placeholder="37.5665">
-                                </div>
-                                <div>
-                                    <label>경도</label>
-                                    <input type="text" id="analysisLongitude" placeholder="126.9780">
-                                </div>
-                            </div>
-
-                            <label>산업 유형</label>
-                            <select id="analysisIndustryType">
-                                <option value="manufacturing">제조업</option>
-                                <option value="logistics">물류</option>
-                                <option value="retail">유통</option>
-                                <option value="technology">기술</option>
-                                <option value="finance">금융</option>
-                            </select>
+                            <input type="text" class="site-id-field" id="analysisSiteId" placeholder="사업장 ID">
 
                             <button onclick="startAnalysis()">분석 시작</button>
-                            <div id="startAnalysisResponse" class="response" style="display: none;"><pre></pre></div>
+                            <div id="startAnalysisResponse" class="response"><pre></pre></div>
                         </div>
 
                         <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/status?siteId={siteId}&jobId={jobId}</h4>
+                            <h4><span class="method get">GET</span>/api/analysis/status?jobid={jobid}</h4>
 
-                            <label>사업장 ID</label>
-                            <input type="text" id="statusSiteId" placeholder="사업장 ID">
-
-                            <label>작업 ID</label>
+                            <label>작업 ID (jobid)</label>
                             <input type="text" id="statusJobId" placeholder="작업 ID">
 
                             <button onclick="getAnalysisStatus()">분석 상태 조회</button>
-                            <div id="analysisStatusResponse" class="response" style="display: none;"><pre></pre></div>
+                            <div id="analysisStatusResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/analysis/summary?siteId={siteId}</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="summarySiteId" placeholder="UUID">
+
+                            <button onclick="getAnalysisSummary()">분석 개요 조회</button>
+                            <div id="summaryResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/analysis/physical-risk</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="physicalRiskSiteId" placeholder="UUID">
+
+                            <label>기간 (term)</label>
+                            <select id="physicalRiskTerm">
+                                <option value="long">장기 (long)</option>
+                                <option value="mid">중기 (mid)</option>
+                                <option value="short">단기 (short)</option>
+                            </select>
+
+                            <label>재해 유형 (hazardType)</label>
+                            <select id="physicalRiskHazardType">
+                                <option value="극심한 고온">극심한 고온</option>
+                                <option value="극심한 한파">극심한 한파</option>
+                                <option value="하천 홍수">하천 홍수</option>
+                                <option value="도시 홍수">도시 홍수</option>
+                                <option value="가뭄">가뭄</option>
+                                <option value="물 부족">물 부족</option>
+                                <option value="해수면 상승">해수면 상승</option>
+                                <option value="태풍">태풍</option>
+                                <option value="산불">산불</option>
+                            </select>
+
+                            <button onclick="getPhysicalRisk()">물리적 리스크 조회</button>
+                            <div id="physicalRiskResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/analysis/aal</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="aalSiteId" placeholder="UUID">
+
+                            <label>기간 (term)</label>
+                            <select id="aalTerm">
+                                <option value="long">장기 (long)</option>
+                                <option value="mid">중기 (mid)</option>
+                                <option value="short">단기 (short)</option>
+                            </select>
+
+                            <label>재해 유형 (hazardType)</label>
+                            <select id="aalHazardType">
+                                <option value="극심한 고온">극심한 고온</option>
+                                <option value="극심한 한파">극심한 한파</option>
+                                <option value="하천 홍수">하천 홍수</option>
+                                <option value="도시 홍수">도시 홍수</option>
+                                <option value="가뭄">가뭄</option>
+                                <option value="물 부족">물 부족</option>
+                                <option value="해수면 상승">해수면 상승</option>
+                                <option value="태풍">태풍</option>
+                                <option value="산불">산불</option>
+                            </select>
+
+                            <button onclick="getAal()">재무 영향 조회</button>
+                            <div id="aalResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/analysis/vulnerability?siteId={siteId}</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="vulnerabilitySiteId" placeholder="UUID">
+
+                            <button onclick="getVulnerability()">취약성 분석 조회</button>
+                            <div id="vulnerabilityResponse" class="response"><pre></pre></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 대시보드 API 탭 -->
+                <div id="dashboardTab" class="tab-content">
+                    <div class="api-section">
+                        <h3>대시보드</h3>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/dashboard</h4>
+                            <button onclick="getDashboard()">대시보드 조회</button>
+                            <div id="dashboardResponse" class="response"><pre></pre></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시뮬레이션 API 탭 -->
+                <div id="simulationTab" class="tab-content">
+                    <div class="api-section">
+                        <h3>시뮬레이션</h3>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/simulation/location/recommendation</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="recSiteId" placeholder="UUID">
+
+                            <button onclick="getLocationRecommendation()">위치 추천 조회</button>
+                            <div id="recommendationResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method post">POST</span>/api/simulation/location/compare</h4>
+
+                            <label>현재 사업장 ID</label>
+                            <input type="text" class="site-id-field" id="compareCurrentSiteId" placeholder="UUID">
+
+                            <div class="grid-2">
+                                <div>
+                                    <label>후보지 위도</label>
+                                    <input type="text" id="compareLatitude" value="36.5040736" placeholder="36.5040736">
+                                </div>
+                                <div>
+                                    <label>후보지 경도</label>
+                                    <input type="text" id="compareLongitude" value="127.2494855" placeholder="127.2494855">
+                                </div>
+                            </div>
+
+                            <label>후보지 도로명 주소 (선택)</label>
+                            <input type="text" id="compareRoadAddr" value="세종특별자치시 한누리대로 2130" placeholder="세종특별자치시 한누리대로 2130">
+
+                            <label>후보지 지번 주소 (선택)</label>
+                            <input type="text" id="compareJibunAddr" value="세종특별자치시 보람동 660" placeholder="세종특별자치시 보람동 660">
+
+                            <button onclick="compareLocation()">위치 비교</button>
+                            <div id="compareResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method post">POST</span>/api/simulation/climate</h4>
+
+                            <label>시나리오</label>
+                            <select id="climateScenario">
+                                <option value="SSP2-4.5">SSP2-4.5</option>
+                                <option value="SSP5-8.5">SSP5-8.5</option>
+                                <option value="SSP1-2.6">SSP1-2.6</option>
+                            </select>
+
+                            <label>재해 유형</label>
+                            <select id="climateHazardType">
+                                <option value="극심한 고온">극심한 고온</option>
+                                <option value="극심한 한파">극심한 한파</option>
+                                <option value="하천 홍수">하천 홍수</option>
+                                <option value="도시 홍수">도시 홍수</option>
+                                <option value="가뭄">가뭄</option>
+                                <option value="물 부족">물 부족</option>
+                                <option value="해수면 상승">해수면 상승</option>
+                                <option value="태풍">태풍</option>
+                                <option value="산불">산불</option>
+                            </select>
+
+                            <button onclick="runClimateSimulation()">기후 시뮬레이션 실행</button>
+                            <div id="climateResponse" class="response"><pre></pre></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 리포트 API 탭 -->
+                <div id="reportTab" class="tab-content">
+                    <div class="api-section">
+                        <h3>리포트</h3>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/report</h4>
+                            <button onclick="getReport()">통합 리포트 조회</button>
+                            <div id="reportResponse" class="response"><pre></pre></div>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method post">POST</span>/api/report/data</h4>
+
+                            <label>사업장 ID</label>
+                            <input type="text" class="site-id-field" id="reportDataSiteId" placeholder="UUID">
+
+                            <label>데이터 (JSON)</label>
+                            <textarea id="reportDataContent" placeholder='{"key": "value", "example": "data"}'></textarea>
+
+                            <button onclick="registerReportData()">리포트 데이터 등록</button>
+                            <div id="reportDataResponse" class="response"><pre></pre></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 과거재해 API 탭 -->
+                <div id="pastTab" class="tab-content">
+                    <div class="api-section">
+                        <h3>과거 재해 이력</h3>
+
+                        <div class="api-endpoint">
+                            <h4><span class="method get">GET</span>/api/past</h4>
+
+                            <label>연도 (year)</label>
+                            <input type="number" id="pastYear" value="2023" placeholder="2023">
+
+                            <label>재해 유형 (disaster_type)</label>
+                            <select id="pastDisasterType">
+                                <option value="호우">호우</option>
+                                <option value="태풍">태풍</option>
+                                <option value="대설">대설</option>
+                                <option value="폭염">폭염</option>
+                                <option value="한파">한파</option>
+                                <option value="지진">지진</option>
+                                <option value="산불">산불</option>
+                            </select>
+
+                            <label>심각도 (severity)</label>
+                            <select id="pastSeverity">
+                                <option value="경보">경보</option>
+                                <option value="주의보">주의보</option>
+                                <option value="특보">특보</option>
+                            </select>
+
+                            <button onclick="getPastDisasters()">과거 재해 조회</button>
+                            <div id="pastResponse" class="response"><pre></pre></div>
                         </div>
                     </div>
                 </div>
@@ -504,6 +678,7 @@
         let accessToken = null;
         let refreshToken = null;
         let currentUser = null;
+        let currentSiteId = null;
 
         function getBaseUrl() {
             return document.getElementById('baseUrl').value;
@@ -572,6 +747,7 @@
                     alert('회원가입 성공! 로그인해주세요.');
                     document.getElementById('loginEmail').value = email;
                     document.getElementById('loginPassword').value = password;
+                    switchTab('auth');
                 }
             } catch (error) {
                 showError('registerResponse', error.message);
@@ -582,6 +758,7 @@
             accessToken = null;
             refreshToken = null;
             currentUser = null;
+            currentSiteId = null;
             updateAuthUI();
         }
 
@@ -617,6 +794,22 @@
             };
         }
 
+        function updateGlobalSiteId(siteId) {
+            currentSiteId = siteId;
+            document.getElementById('globalSiteId').value = siteId;
+        }
+
+        function fillAllSiteIds() {
+            if (!currentSiteId) {
+                alert('사업장 ID가 없습니다. 먼저 사업장을 생성하거나 조회하세요.');
+                return;
+            }
+            document.querySelectorAll('.site-id-field').forEach(input => {
+                input.value = currentSiteId;
+            });
+            alert('모든 사업장 ID 필드에 적용되었습니다!');
+        }
+
         async function getSites() {
             try {
                 const response = await fetch(`${getBaseUrl()}/api/sites`, {
@@ -626,11 +819,10 @@
                 const data = await response.json();
                 showResponse('getSitesResponse', data, !response.ok);
 
-                // 첫 번째 사업장이 있으면 분석 폼에 자동 입력
+                // 첫 번째 사업장 ID 자동 입력
                 if (response.ok && data.sites && data.sites.length > 0) {
-                    const site = data.sites[0];
-                    document.getElementById('analysisSiteId').value = site.id;
-                    document.getElementById('statusSiteId').value = site.id;
+                    updateGlobalSiteId(data.sites[0].id);
+                    fillAllSiteIds();
                 }
             } catch (error) {
                 showError('getSitesResponse', error.message);
@@ -657,13 +849,10 @@
                 const data = await response.json();
                 showResponse('createSiteResponse', data, !response.ok);
 
-                if (response.ok) {
+                if (response.ok && data.id) {
                     alert('사업장 생성 성공!');
-                    // 생성된 사업장 ID를 분석 폼에 자동 입력
-                    document.getElementById('analysisSiteId').value = data.id;
-                    document.getElementById('statusSiteId').value = data.id;
-                    document.getElementById('analysisLatitude').value = data.latitude;
-                    document.getElementById('analysisLongitude').value = data.longitude;
+                    updateGlobalSiteId(data.id);
+                    fillAllSiteIds();
                 }
             } catch (error) {
                 showError('createSiteResponse', error.message);
@@ -673,11 +862,13 @@
         async function startAnalysis() {
             try {
                 const siteId = document.getElementById('analysisSiteId').value;
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
                 const requestBody = {
-                    siteId: siteId,  // siteId를 body에 포함
-                    latitude: document.getElementById('analysisLatitude').value,
-                    longitude: document.getElementById('analysisLongitude').value,
-                    industryType: document.getElementById('analysisIndustryType').value
+                    sites: [{ siteId: siteId }]
                 };
 
                 const response = await fetch(`${getBaseUrl()}/api/analysis/start`, {
@@ -700,11 +891,12 @@
 
         async function getAnalysisStatus() {
             try {
-                const siteId = document.getElementById('statusSiteId').value;
-                const jobId = document.getElementById('statusJobId').value;
+                const jobid = document.getElementById('statusJobId').value;
+                const url = jobid
+                    ? `${getBaseUrl()}/api/analysis/status?jobid=${jobid}`
+                    : `${getBaseUrl()}/api/analysis/status`;
 
-                // Query parameters로 변경
-                const response = await fetch(`${getBaseUrl()}/api/analysis/status?siteId=${siteId}&jobId=${jobId}`, {
+                const response = await fetch(url, {
                     headers: getAuthHeaders()
                 });
 
@@ -712,6 +904,241 @@
                 showResponse('analysisStatusResponse', data, !response.ok);
             } catch (error) {
                 showError('analysisStatusResponse', error.message);
+            }
+        }
+
+        async function getAnalysisSummary() {
+            try {
+                const siteId = document.getElementById('summarySiteId').value;
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                const response = await fetch(`${getBaseUrl()}/api/analysis/summary?siteId=${siteId}`, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('summaryResponse', data, !response.ok);
+            } catch (error) {
+                showError('summaryResponse', error.message);
+            }
+        }
+
+        async function getPhysicalRisk() {
+            try {
+                const siteId = document.getElementById('physicalRiskSiteId').value;
+                const term = document.getElementById('physicalRiskTerm').value;
+                const hazardType = document.getElementById('physicalRiskHazardType').value;
+
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                const url = `${getBaseUrl()}/api/analysis/physical-risk?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
+                const response = await fetch(url, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('physicalRiskResponse', data, !response.ok);
+            } catch (error) {
+                showError('physicalRiskResponse', error.message);
+            }
+        }
+
+        async function getAal() {
+            try {
+                const siteId = document.getElementById('aalSiteId').value;
+                const term = document.getElementById('aalTerm').value;
+                const hazardType = document.getElementById('aalHazardType').value;
+
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                const url = `${getBaseUrl()}/api/analysis/aal?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
+                const response = await fetch(url, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('aalResponse', data, !response.ok);
+            } catch (error) {
+                showError('aalResponse', error.message);
+            }
+        }
+
+        async function getVulnerability() {
+            try {
+                const siteId = document.getElementById('vulnerabilitySiteId').value;
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                const response = await fetch(`${getBaseUrl()}/api/analysis/vulnerability?siteId=${siteId}`, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('vulnerabilityResponse', data, !response.ok);
+            } catch (error) {
+                showError('vulnerabilityResponse', error.message);
+            }
+        }
+
+        async function getDashboard() {
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/dashboard`, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('dashboardResponse', data, !response.ok);
+            } catch (error) {
+                showError('dashboardResponse', error.message);
+            }
+        }
+
+        async function getLocationRecommendation() {
+            try {
+                const siteId = document.getElementById('recSiteId').value;
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                const response = await fetch(`${getBaseUrl()}/api/simulation/location/recommendation?siteId=${siteId}`, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('recommendationResponse', data, !response.ok);
+            } catch (error) {
+                showError('recommendationResponse', error.message);
+            }
+        }
+
+        async function compareLocation() {
+            try {
+                const requestBody = {
+                    currentSiteId: document.getElementById('compareCurrentSiteId').value,
+                    latitude: document.getElementById('compareLatitude').value,
+                    longitude: document.getElementById('compareLongitude').value,
+                    roadAddress: document.getElementById('compareRoadAddr').value,
+                    jibunAddress: document.getElementById('compareJibunAddr').value
+                };
+
+                if (!requestBody.currentSiteId || !requestBody.latitude || !requestBody.longitude) {
+                    alert('필수 필드를 입력하세요.');
+                    return;
+                }
+
+                const response = await fetch(`${getBaseUrl()}/api/simulation/location/compare`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                showResponse('compareResponse', data, !response.ok);
+            } catch (error) {
+                showError('compareResponse', error.message);
+            }
+        }
+
+        async function runClimateSimulation() {
+            try {
+                const requestBody = {
+                    scenario: document.getElementById('climateScenario').value,
+                    hazardType: document.getElementById('climateHazardType').value
+                };
+
+                const response = await fetch(`${getBaseUrl()}/api/simulation/climate`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                showResponse('climateResponse', data, !response.ok);
+            } catch (error) {
+                showError('climateResponse', error.message);
+            }
+        }
+
+        async function getReport() {
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/report`, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('reportResponse', data, !response.ok);
+            } catch (error) {
+                showError('reportResponse', error.message);
+            }
+        }
+
+        async function registerReportData() {
+            try {
+                const siteId = document.getElementById('reportDataSiteId').value;
+                const dataContent = document.getElementById('reportDataContent').value;
+
+                if (!siteId) {
+                    alert('사업장 ID를 입력하세요.');
+                    return;
+                }
+
+                let parsedData;
+                try {
+                    parsedData = dataContent ? JSON.parse(dataContent) : {};
+                } catch (e) {
+                    alert('잘못된 JSON 형식입니다.');
+                    return;
+                }
+
+                const requestBody = {
+                    siteId: siteId,
+                    ...parsedData
+                };
+
+                const response = await fetch(`${getBaseUrl()}/api/report/data`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                showResponse('reportDataResponse', data, !response.ok);
+
+                if (response.ok) {
+                    alert('리포트 데이터 등록 성공!');
+                }
+            } catch (error) {
+                showError('reportDataResponse', error.message);
+            }
+        }
+
+        async function getPastDisasters() {
+            try {
+                const year = document.getElementById('pastYear').value;
+                const disasterType = document.getElementById('pastDisasterType').value;
+                const severity = document.getElementById('pastSeverity').value;
+
+                const url = `${getBaseUrl()}/api/past?year=${year}&disaster_type=${encodeURIComponent(disasterType)}&severity=${encodeURIComponent(severity)}`;
+                const response = await fetch(url, {
+                    headers: getAuthHeaders()
+                });
+
+                const data = await response.json();
+                showResponse('pastResponse', data, !response.ok);
+            } catch (error) {
+                showError('pastResponse', error.message);
             }
         }
 

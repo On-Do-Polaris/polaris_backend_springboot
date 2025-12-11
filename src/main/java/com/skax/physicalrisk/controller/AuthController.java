@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.auth.*;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.auth.LoginResponse;
 import com.skax.physicalrisk.security.SecurityUtil;
 import com.skax.physicalrisk.service.user.AuthService;
@@ -65,17 +66,32 @@ public class AuthController {
 		description = "이메일 발송 성공",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"인증번호가 이메일로 발송되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "409", description = "이메일이 이미 존재함")
-	@ApiResponse(responseCode = "503", description = "이메일 발송 실패")
+	@ApiResponse(
+		responseCode = "409",
+		description = "이메일이 이미 존재함",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이미 존재하는 이메일입니다.\", \"errorCode\": \"EMAIL_ALREADY_EXISTS\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "503",
+		description = "이메일 발송 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 발송에 실패했습니다.\", \"errorCode\": \"EMAIL_SEND_FAILED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/register-email")
-	public ResponseEntity<Map<String, Object>> registerEmail(@Valid @RequestBody RegisterEmailRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerEmail(@Valid @RequestBody RegisterEmailRequest request) {
 		log.info("POST /api/auth/register-email - Email: {}", request.getEmail());
 		authService.sendRegisterEmail(request.getEmail());
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("인증번호가 이메일로 발송되었습니다."));
 	}
 
 	/**
@@ -105,15 +121,23 @@ public class AuthController {
 		description = "인증 성공",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"인증이 완료되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "422", description = "인증번호가 일치하지 않거나 만료됨")
+	@ApiResponse(
+		responseCode = "422",
+		description = "인증번호가 일치하지 않거나 만료됨",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증번호가 일치하지 않거나 만료되었습니다.\", \"errorCode\": \"INVALID_VERIFICATION_CODE\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/register-verificationCode")
-	public ResponseEntity<Map<String, Object>> registerVerificationCode(@Valid @RequestBody VerifyCodeRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerVerificationCode(@Valid @RequestBody VerifyCodeRequest request) {
 		log.info("POST /api/auth/register-verificationCode - Email: {}", request.getEmail());
 		authService.verifyRegisterCode(request.getEmail(), request.getVerificationCode());
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("인증이 완료되었습니다."));
 	}
 
 	/**
@@ -144,16 +168,32 @@ public class AuthController {
 		description = "회원가입 성공",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"회원가입이 완료되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "409", description = "이메일이 이미 존재함")
-	@ApiResponse(responseCode = "422", description = "이메일 인증이 완료되지 않음")
+	@ApiResponse(
+		responseCode = "409",
+		description = "이메일이 이미 존재함",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이미 존재하는 이메일입니다.\", \"errorCode\": \"EMAIL_ALREADY_EXISTS\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "이메일 인증이 완료되지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 인증이 완료되지 않았습니다.\", \"errorCode\": \"EMAIL_NOT_VERIFIED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/register")
-	public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
 		authService.register(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(java.util.Collections.emptyMap());
+		return ResponseEntity.status(HttpStatus.CREATED).body(com.skax.physicalrisk.dto.common.ApiResponse.success("회원가입이 완료되었습니다."));
 	}
 
 	/**
@@ -182,17 +222,25 @@ public class AuthController {
 		description = "로그인 성공 및 토큰 반환",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = LoginResponse.class),
 			examples = @ExampleObject(
-				value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"user@example.com\"}"
+				value = "{\"result\": \"success\", \"message\": \"로그인에 성공했습니다.\", \"data\": {\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}}"
 			)
 		)
 	)
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증 실패 (이메일 또는 비밀번호 불일치)",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 또는 비밀번호가 일치하지 않습니다.\", \"errorCode\": \"INVALID_CREDENTIALS\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
 		log.info("POST /api/auth/login - Email: {}", request.getEmail());
 		LoginResponse response = authService.login(request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("로그인에 성공했습니다.", response));
 	}
 
 	/**
@@ -210,16 +258,24 @@ public class AuthController {
 		description = "로그아웃 성공",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"로그아웃되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/logout")
-	public ResponseEntity<Map<String, Object>> logout() {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> logout() {
 		log.info("POST /api/auth/logout");
 		String userId = SecurityUtil.getCurrentUserId().toString();
 		authService.logout(userId);
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("로그아웃되었습니다."));
 	}
 
 	/**
@@ -248,17 +304,25 @@ public class AuthController {
 		description = "새로운 액세스/리프레시 토큰 반환",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = LoginResponse.class),
 			examples = @ExampleObject(
-				value = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"user@example.com\"}"
+				value = "{\"result\": \"success\", \"message\": \"토큰이 갱신되었습니다.\", \"data\": {\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}}"
 			)
 		)
 	)
+	@ApiResponse(
+		responseCode = "401",
+		description = "리프레시 토큰이 유효하지 않거나 만료됨",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"리프레시 토큰이 유효하지 않거나 만료되었습니다.\", \"errorCode\": \"INVALID_REFRESH_TOKEN\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/refresh")
-	public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
 		log.info("POST /api/auth/refresh");
 		LoginResponse response = authService.refresh(request.getRefreshToken());
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("토큰이 갱신되었습니다.", response));
 	}
 
 	/**
@@ -289,15 +353,31 @@ public class AuthController {
 		description = "이메일 발송 성공",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"비밀번호 재설정 인증번호가 이메일로 발송되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "404", description = "이메일이 존재하지 않음")
-	@ApiResponse(responseCode = "503", description = "이메일 발송 실패")
+	@ApiResponse(
+		responseCode = "404",
+		description = "이메일이 존재하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"존재하지 않는 이메일입니다.\", \"errorCode\": \"USER_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "503",
+		description = "이메일 발송 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 발송에 실패했습니다.\", \"errorCode\": \"EMAIL_SEND_FAILED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/password/reset-email")
-	public ResponseEntity<Map<String, Object>> resetPasswordEmail(@Valid @RequestBody PasswordResetEmailRequest request) {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> resetPasswordEmail(@Valid @RequestBody PasswordResetEmailRequest request) {
 		log.info("POST /api/auth/password/reset-email - Email: {}", request.getEmail());
 		authService.sendPasswordResetEmail(request.getEmail());
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("비밀번호 재설정 인증번호가 이메일로 발송되었습니다."));
 	}
 }

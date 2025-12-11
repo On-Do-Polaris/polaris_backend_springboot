@@ -35,8 +35,10 @@ public class GlobalExceptionHandler {
 		log.error("Business exception occurred: {} - {}", ex.getErrorCode().getCode(), ex.getMessage(), ex);
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ex.getErrorCode().getCode())
+			.result("error")
 			.message(ex.getMessage())
+			.errorCode(ex.getErrorCode().getCode())
+			.code(ex.getErrorCode().getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
@@ -56,8 +58,10 @@ public class GlobalExceptionHandler {
 		log.error("Resource not found: {} - {}", ex.getErrorCode().getCode(), ex.getMessage());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ex.getErrorCode().getCode())
+			.result("error")
 			.message(ex.getMessage())
+			.errorCode(ex.getErrorCode().getCode())
+			.code(ex.getErrorCode().getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
@@ -77,8 +81,10 @@ public class GlobalExceptionHandler {
 		log.error("Unauthorized: {} - {}", ex.getErrorCode().getCode(), ex.getMessage());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ex.getErrorCode().getCode())
+			.result("error")
 			.message(ex.getMessage())
+			.errorCode(ex.getErrorCode().getCode())
+			.code(ex.getErrorCode().getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
@@ -98,8 +104,10 @@ public class GlobalExceptionHandler {
 		log.error("Duplicate resource: {} - {}", ex.getErrorCode().getCode(), ex.getMessage());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ex.getErrorCode().getCode())
+			.result("error")
 			.message(ex.getMessage())
+			.errorCode(ex.getErrorCode().getCode())
+			.code(ex.getErrorCode().getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
@@ -123,8 +131,10 @@ public class GlobalExceptionHandler {
 		log.error("Validation error: {}", message);
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ErrorCode.INVALID_REQUEST.getCode())
+			.result("error")
 			.message(message)
+			.errorCode(ErrorCode.INVALID_REQUEST.getCode())
+			.code(ErrorCode.INVALID_REQUEST.getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
@@ -144,8 +154,10 @@ public class GlobalExceptionHandler {
 		log.error("Unexpected error occurred", ex);
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
-			.code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
+			.result("error")
 			.message(ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
+			.errorCode(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
+			.code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
 			.timestamp(LocalDateTime.now())
 			.build();
 
