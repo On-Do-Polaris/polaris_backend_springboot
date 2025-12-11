@@ -102,21 +102,22 @@ public class FastApiClient {
 	/**
 	 * 분석 작업 상태 조회
 	 *
-	 * GET /api/analysis/status?siteId={siteId}&jobId={jobId}
+	 * GET /api/analysis/status?jobid={jobid}
 	 *
-	 * @param siteId 사업장 ID
-	 * @param jobId 작업 ID
+	 * @param jobid 작업 ID
 	 * @return 작업 상태
 	 */
-	public Mono<Map<String, Object>> getAnalysisStatus(UUID siteId, UUID jobId) {
-		log.info("FastAPI 분석 상태 조회: siteId={}, jobId={}", siteId, jobId);
+	public Mono<Map<String, Object>> getAnalysisStatus(UUID jobid) {
+		log.info("FastAPI 분석 상태 조회: jobid={}", jobid);
 
 		return webClient.get()
-			.uri(uriBuilder -> uriBuilder
-				.path("/api/analysis/status")
-				.queryParam("siteId", siteId)
-				.queryParam("jobId", jobId)
-				.build())
+			.uri(uriBuilder -> {
+				var builder = uriBuilder.path("/api/analysis/status");
+				if (jobid != null) {
+					builder.queryParam("jobid", jobid);
+				}
+				return builder.build();
+			})
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);

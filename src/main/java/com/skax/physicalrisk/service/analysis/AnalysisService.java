@@ -85,17 +85,18 @@ public class AnalysisService {
 	/**
 	 * 분석 작업 상태 조회
 	 *
-	 * @param siteId 사업장 ID
-	 * @param jobId  작업 ID
+	 * @param jobid  작업 ID (선택)
 	 * @return 작업 상태
 	 */
-	public AnalysisJobStatusResponse getAnalysisStatus(UUID siteId, UUID jobId) {
+	public AnalysisJobStatusResponse getAnalysisStatus(UUID jobid) {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching analysis status for site: {}, job: {}", siteId, jobId);
+		log.info("Fetching analysis status for job: {}", jobid);
 
-		// 권한 확인
-		getSiteWithAuth(siteId, userId);
-		Map<String, Object> response = fastApiClient.getAnalysisStatus(siteId, jobId).block();
+		// 사용자 인증 확인
+		userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		Map<String, Object> response = fastApiClient.getAnalysisStatus(jobid).block();
 		return convertToDto(response, AnalysisJobStatusResponse.class);
 	}
 

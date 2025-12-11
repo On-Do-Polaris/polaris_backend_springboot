@@ -1,13 +1,14 @@
 package com.skax.physicalrisk.domain.meta.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
 /**
  * 업종 엔티티
  *
- * 최종 수정일: 2025-11-13
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-11
+ * 파일 버전: v02
  *
  * 시스템에서 지원하는 업종 메타 정보
  *
@@ -20,19 +21,24 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "산업 분류")
 public class Industry {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private Long id; // 고유 ID
+	@Schema(description = "산업 ID", example = "1")
+	private Long id;
 
 	@Column(name = "code", unique = true, nullable = false, length = 50)
-	private String code; // 코드 (예: data_center)
+	@Schema(description = "산업 코드", example = "data_center")
+	private String code;
 
 	@Column(name = "name", nullable = false, length = 100)
-	private String name; // 업종 이름
+	@Schema(description = "산업 이름", example = "데이터센터")
+	private String name;
 
 	@Column(name = "description", columnDefinition = "TEXT")
-	private String description; // 설명
+	@Schema(description = "산업 설명", example = "서버 및 IT 인프라 운영 시설")
+	private String description;
 }

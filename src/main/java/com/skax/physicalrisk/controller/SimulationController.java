@@ -54,18 +54,18 @@ public class SimulationController {
 		description = "추천 후보지 3개와 각 후보지의 리스크 정보",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = RelocationSimulationResponse.class)
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse.class)
 		)
 	)
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
 	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
 	@GetMapping("/location/recommendation")
-	public ResponseEntity<RelocationSimulationResponse> getLocationRecommendation(
+	public ResponseEntity<com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse> getLocationRecommendation(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam String siteId
 	) {
 		log.info("GET /api/simulation/location/recommendation - siteId: {}", siteId);
-		RelocationSimulationResponse response = simulationService.getLocationRecommendation(siteId);
+		com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse response = simulationService.getLocationRecommendation(siteId);
 		return ResponseEntity.ok(response);
 	}
 

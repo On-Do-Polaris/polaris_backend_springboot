@@ -51,7 +51,7 @@ public class PastDisasterResponse {
 		/**
 		 * 재해 ID
 		 */
-		private String id;
+		private Integer id;
 
 		/**
 		 * 발생 날짜

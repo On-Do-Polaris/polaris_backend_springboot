@@ -52,7 +52,7 @@ public class SimulationService {
 	 * @param siteId 사업장 ID
 	 * @return 추천 후보지 3개 및 리스크 정보
 	 */
-	public RelocationSimulationResponse getLocationRecommendation(String siteId) {
+	public com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse getLocationRecommendation(String siteId) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Getting location recommendation for siteId={}, userId={}", siteId, userId);
 
@@ -69,7 +69,7 @@ public class SimulationService {
 		}
 
 		Map<String, Object> response = fastApiClient.getLocationRecommendation(siteId).block();
-		return convertToRelocationResponse(response);
+		return convertToLocationRecommendationResponse(response);
 	}
 
 	/**
@@ -255,5 +255,21 @@ public class SimulationService {
 			"sea_level_rise", "해수면 상승"
 		);
 		return riskNames.getOrDefault(riskType, riskType);
+	}
+
+	/**
+	 * FastAPI 응답을 LocationRecommendationResponse로 변환
+	 *
+	 * @param response FastAPI 응답 Map
+	 * @return 변환된 LocationRecommendationResponse
+	 */
+	@SuppressWarnings("unchecked")
+	private com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse convertToLocationRecommendationResponse(Map<String, Object> response) {
+		try {
+			return objectMapper.convertValue(response, com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse.class);
+		} catch (Exception e) {
+			log.error("Failed to convert location recommendation response: {}", e.getMessage());
+			throw new RuntimeException("위치 추천 응답 변환 실패: " + e.getMessage(), e);
+		}
 	}
 }

@@ -114,13 +114,11 @@ public class AnalysisController {
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
 	@GetMapping("/status")
 	public ResponseEntity<AnalysisJobStatusResponse> getAnalysisStatus(
-		@Parameter(description = "사업장 ID (선택)", required = false)
-		@RequestParam(required = false) UUID siteId,
 		@Parameter(description = "통합 또는 개별 분석 jobId (선택)", required = false)
-		@RequestParam(required = false) UUID jobId
+		@RequestParam(required = false) UUID jobid
 	) {
-		log.info("GET /api/analysis/status?siteId={}&jobId={}", siteId, jobId);
-		return ResponseEntity.ok(analysisService.getAnalysisStatus(siteId, jobId));
+		log.info("GET /api/analysis/status?jobid={}", jobid);
+		return ResponseEntity.ok(analysisService.getAnalysisStatus(jobid));
 	}
 
 	/**
