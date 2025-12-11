@@ -68,13 +68,8 @@ public class SimulationService {
 			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND, "해당 사업장에 대한 권한이 없습니다");
 		}
 
-		// TODO: FastAPI 팀이 getLocationRecommendation 엔드포인트 구현 후 활성화
-		// Map<String, Object> response = fastApiClient.getLocationRecommendation(siteId).block();
-		// return convertToRelocationResponse(response);
-
-		// 임시로 더미 데이터 반환 (FastAPI 엔드포인트 구현 전까지)
-		log.info("Returning dummy location recommendation data for siteId={}", siteId);
-		return new RelocationSimulationResponse();
+		Map<String, Object> response = fastApiClient.getLocationRecommendation(siteId).block();
+		return convertToRelocationResponse(response);
 	}
 
 	/**

@@ -1,7 +1,9 @@
 package com.skax.physicalrisk.service.report;
 
+import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.domain.user.entity.User;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
+import com.skax.physicalrisk.exception.BusinessException;
 import com.skax.physicalrisk.exception.ErrorCode;
 import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import com.skax.physicalrisk.security.SecurityUtil;
@@ -30,6 +32,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ReportService {
 
+	private final FastApiClient fastApiClient;
 	private final UserRepository userRepository;
 
 	/**
@@ -44,31 +47,20 @@ public class ReportService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// TODO: FastAPI 팀이 getReport 엔드포인트 구현 후 활성화
-		// try {
-		// 	Map<String, Object> response = fastApiClient.getReportByUserId(userId).block();
-		// 	return Map.of(
-		// 		"ceosummry", (String) response.get("ceosummry"),
-		// 		"Governance", (String) response.get("Governance"),
-		// 		"strategy", (String) response.get("strategy"),
-		// 		"riskmanagement", (String) response.get("riskmanagement"),
-		// 		"goal", (String) response.get("goal")
-		// 	);
-		// } catch (Exception e) {
-		// 	log.error("Failed to fetch report: {}", e.getMessage());
-		// 	throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
-		// 		"리포트 조회에 실패했습니다: " + e.getMessage());
-		// }
-
-		// 임시로 더미 데이터 반환 (FastAPI 엔드포인트 구현 전까지)
-		log.info("Returning dummy report data for userId={}", userId);
-		return Map.of(
-			"ceosummry", "회사는 현재 기후 관련 위험을 면밀히 분석했습니다",
-			"Governance", "기후 거버넌스는 당사의 지속 가능한 운영과 자산 가치를 극대화하기 위한 필수 요소입니다.",
-			"strategy", "기후 변화에 대한 포괄적 접근 방식을 통해 우리는 지속 가능한 운영을 도모합니다.",
-			"riskmanagement", "리스크 관리의 일환으로 당사는 여러 프로세스를 도입했습니다.",
-			"goal", "현재 기후 리스크로 인해 예상되는 손실과 당사의 목표입니다."
-		);
+		try {
+			Map<String, Object> response = fastApiClient.getReportByUserId(userId).block();
+			return Map.of(
+				"ceosummry", (String) response.get("ceosummry"),
+				"Governance", (String) response.get("Governance"),
+				"strategy", (String) response.get("strategy"),
+				"riskmanagement", (String) response.get("riskmanagement"),
+				"goal", (String) response.get("goal")
+			);
+		} catch (Exception e) {
+			log.error("Failed to fetch report: {}", e.getMessage());
+			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
+				"리포트 조회에 실패했습니다: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -89,16 +81,13 @@ public class ReportService {
 		requestMap.put("userId", userId);
 		requestMap.putAll(request);
 
-		// TODO: FastAPI 팀이 registerReportData 엔드포인트 구현 후 활성화
-		// 비동기 처리 (FastAPI가 해당 엔드포인트를 지원한다고 가정)
-		// try {
-		// 	fastApiClient.registerReportData(requestMap).block();
-		// 	log.info("Report data registered successfully for userId={}", userId);
-		// } catch (Exception e) {
-		// 	log.error("Failed to register report data for userId={}: {}", userId, e.getMessage());
-		// }
-
-		// 임시로 로컬에 저장 (FastAPI 엔드포인트 구현 전까지)
-		log.info("Report data stored locally for userId={}: {}", userId, requestMap);
+		try {
+			fastApiClient.registerReportData(requestMap).block();
+			log.info("Report data registered successfully for userId={}", userId);
+		} catch (Exception e) {
+			log.error("Failed to register report data for userId={}: {}", userId, e.getMessage());
+			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
+				"리포트 데이터 등록에 실패했습니다: " + e.getMessage());
+		}
 	}
 }

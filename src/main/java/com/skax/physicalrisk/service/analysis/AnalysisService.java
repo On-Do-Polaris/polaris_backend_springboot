@@ -100,10 +100,29 @@ public class AnalysisService {
 	}
 
 	/**
+	 * 분석 개요 조회 (v0.2)
+	 *
+	 * @param siteId 사업장 ID
+	 * @return 분석 개요 정보
+	 */
+	public Map<String, Object> getAnalysisSummary(UUID siteId) {
+		UUID userId = SecurityUtil.getCurrentUserId();
+		log.info("Fetching analysis summary for site: {}, user: {}", siteId, userId);
+
+		// 권한 확인
+		getSiteWithAuth(siteId, userId);
+
+		Map<String, Object> response = fastApiClient.getAnalysisSummary(siteId).block();
+		return response;
+	}
+
+	/**
 	 * 대시보드 요약 조회 (전체 사업장)
 	 *
+	 * @deprecated DashboardService.getDashboardSummary() 사용
 	 * @return 대시보드 요약
 	 */
+	@Deprecated
 	public DashboardSummaryResponse getDashboardSummary() {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching dashboard summary for user: {}", userId);
@@ -147,7 +166,7 @@ public class AnalysisService {
 	}
 
 	/**
-	 * 물리적 리스크 점수 조회
+	 * 물리적 리스크 점수 조회 (v0.2: /api/analysis/physical-risk)
 	 *
 	 * @param siteId     사업장 ID
 	 * @param hazardType 위험 유형 (옵션)
@@ -163,22 +182,7 @@ public class AnalysisService {
 	}
 
 	/**
-	 * 과거 재난 이력 조회
-	 *
-	 * @param siteId 사업장 ID
-	 * @return 과거 이벤트
-	 */
-	public PastEventsResponse getPastEvents(UUID siteId) {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching past events for site: {}", siteId);
-
-		getSiteWithAuth(siteId, userId);
-		Map<String, Object> response = fastApiClient.getPastEvents(siteId).block();
-		return convertToDto(response, PastEventsResponse.class);
-	}
-
-	/**
-	 * 재무 영향 분석
+	 * 재무 영향 분석 (v0.2: /api/analysis/aal)
 	 *
 	 * @param siteId 사업장 ID
 	 * @return 재무 영향
@@ -193,7 +197,7 @@ public class AnalysisService {
 	}
 
 	/**
-	 * 취약성 분석
+	 * 취약성 분석 (v0.2: /api/analysis/vulnerability)
 	 *
 	 * @param siteId 사업장 ID
 	 * @return 취약성 분석
@@ -205,22 +209,6 @@ public class AnalysisService {
 		getSiteWithAuth(siteId, userId);
 		Map<String, Object> response = fastApiClient.getVulnerability(siteId).block();
 		return convertToDto(response, VulnerabilityResponse.class);
-	}
-
-	/**
-	 * 통합 분석 결과
-	 *
-	 * @param siteId     사업장 ID
-	 * @param hazardType 위험 유형
-	 * @return 통합 분석 결과
-	 */
-	public AnalysisTotalResponse getTotalAnalysis(UUID siteId, String hazardType) {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching total analysis for site: {}, hazardType: {}", siteId, hazardType);
-
-		getSiteWithAuth(siteId, userId);
-		Map<String, Object> response = fastApiClient.getTotalAnalysis(siteId, hazardType).block();
-		return convertToDto(response, AnalysisTotalResponse.class);
 	}
 
 	/**

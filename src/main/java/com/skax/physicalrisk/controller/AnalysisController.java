@@ -154,8 +154,7 @@ public class AnalysisController {
 		@RequestParam UUID siteId
 	) {
 		log.info("GET /api/analysis/summary?siteId={}", siteId);
-		// TODO: 서비스 메서드 구현 필요
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(analysisService.getAnalysisSummary(siteId));
 	}
 
 	/**
