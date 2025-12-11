@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.report.CreateReportRequest;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.report.ReportPdfResponse;
 import com.skax.physicalrisk.dto.response.report.ReportWebViewResponse;
 import com.skax.physicalrisk.service.report.ReportService;
@@ -52,18 +53,25 @@ public class ReportController {
 		description = "통합 리포트 내용",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
 			examples = @ExampleObject(
-				value = "{\"ceosummry\": \"회사는 현재 기후 관련 위험을 면밀히 분석했습니다\", \"Governance\": \"기후 거버넌스는 당사의 지속 가능한 운영과 자산 가치를 극대화하기 위한 필수 요소입니다.\", \"strategy\": \"기후 변화에 대한 포괄적 접근 방식을 통해 우리는 지속 가능한 운영을 도모합니다.\", \"riskmanagement\": \"리스크 관리의 일환으로 당사는 여러 프로세스를 도입했습니다.\", \"goal\": \"현재 기후 리스크로 인해 예상되는 손실과 당사의 목표입니다.\"}"
+				value = "{\"result\": \"success\", \"data\": {\"ceosummry\": \"회사는 현재 기후 관련 위험을 면밀히 분석했습니다\", \"Governance\": \"기후 거버넌스는 당사의 지속 가능한 운영과 자산 가치를 극대화하기 위한 필수 요소입니다.\", \"strategy\": \"기후 변화에 대한 포괄적 접근 방식을 통해 우리는 지속 가능한 운영을 도모합니다.\", \"riskmanagement\": \"리스크 관리의 일환으로 당사는 여러 프로세스를 도입했습니다.\", \"goal\": \"현재 기후 리스크로 인해 예상되는 손실과 당사의 목표입니다.\"}}"
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping
-	public ResponseEntity<Map<String, String>> getReport() {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Map<String, String>>> getReport() {
 		log.info("GET /api/report");
 		Map<String, String> response = reportService.getReport();
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(response));
 	}
 
 	/**
@@ -96,18 +104,33 @@ public class ReportController {
 		description = "데이터 파일 등록 결과 반환",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"리포트 데이터가 등록되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/data")
-	public ResponseEntity<Map<String, Object>> registerReportData(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerReportData(
 		@Valid @RequestBody Map<String, Object> request
 	) {
 		log.info("POST /api/report/data - request: {}", request);
 		reportService.registerReportData(request);
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("리포트 데이터가 등록되었습니다."));
 	}
 }

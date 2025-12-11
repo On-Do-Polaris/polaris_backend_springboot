@@ -1,10 +1,13 @@
 package com.skax.physicalrisk.controller;
 
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.past.PastDisasterResponse;
+import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.service.past.PastDisasterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -55,8 +58,24 @@ public class PastController {
 			schema = @Schema(implementation = PastDisasterResponse.class)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "422", description = "파라미터가 유효하지 않음")
+	@ApiResponse(
+		responseCode = "401", 		
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "파라미터가 유효하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 파라미터입니다.\", \"errorCode\": \"INVALID_PARAMETER\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping
 	public ResponseEntity<PastDisasterResponse> getPastDisasters(
 		@Parameter(description = "연도", required = true, example = "2023")

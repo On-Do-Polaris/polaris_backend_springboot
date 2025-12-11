@@ -14,10 +14,12 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 /**
- * 이메일 인증 서비스
+ * 이메일 인증 서비스 (더미 구현)
  *
- * 최종 수정일: 2025-12-10
- * 파일 버전: v01
+ * 인증번호는 고정값 "123456"을 사용합니다.
+ *
+ * 최종 수정일: 2025-12-11
+ * 파일 버전: v02 (더미 구현)
  *
  * @author SKAX Team
  */
@@ -31,13 +33,12 @@ public class VerificationService {
 	private static final SecureRandom random = new SecureRandom();
 
 	/**
-	 * 6자리 랜덤 인증번호 생성
+	 * 6자리 고정 인증번호 생성 (더미 구현)
 	 *
-	 * @return 6자리 인증번호
+	 * @return 고정 인증번호 "123456"
 	 */
 	public String generateVerificationCode() {
-		int code = 100000 + random.nextInt(900000); // 100000 ~ 999999
-		return String.valueOf(code);
+		return "123456";
 	}
 
 	/**

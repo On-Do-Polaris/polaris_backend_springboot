@@ -2,6 +2,7 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.site.CreateSiteRequest;
 import com.skax.physicalrisk.dto.request.site.UpdateSiteRequest;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.site.SiteResponse;
 import com.skax.physicalrisk.service.site.SiteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,8 +62,24 @@ public class SiteController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping
 	public ResponseEntity<SiteResponse.SiteInfo> getSite(
 		@Parameter(description = "사업장명", required = true, example = "sk u 타워")
@@ -107,8 +124,24 @@ public class SiteController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "422", description = "사업장 데이터가 유효하지 않음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "사업장 데이터가 유효하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 사업장 데이터입니다.\", \"errorCode\": \"VALIDATION_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping
 	public ResponseEntity<SiteResponse.SiteInfo> createSite(@Valid @RequestBody CreateSiteRequest request) {
 		log.info("POST /api/sites - Name: {}", request.getName());
@@ -152,9 +185,33 @@ public class SiteController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
-	@ApiResponse(responseCode = "422", description = "사업장 데이터가 유효하지 않음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "사업장 데이터가 유효하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 사업장 데이터입니다.\", \"errorCode\": \"VALIDATION_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PatchMapping
 	public ResponseEntity<SiteResponse.SiteInfo> updateSite(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
@@ -183,19 +240,34 @@ public class SiteController {
 		description = "사업장 삭제 처리 결과 반환",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
-			examples = @ExampleObject(value = "{}")
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"사업장이 삭제되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
-	@ApiResponse(responseCode = "404", description = "사업장을 찾을 수 없음")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사업장을 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> deleteSite(
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> deleteSite(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		@RequestParam UUID siteId
 	) {
 		log.info("DELETE /api/sites?siteId={} - Deleting site", siteId);
 		siteService.deleteSite(siteId);
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("사업장이 삭제되었습니다."));
 	}
 }

@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.user.UpdateUserRequest;
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.user.UserResponse;
 import com.skax.physicalrisk.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +52,15 @@ public class UserController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/me")
 	public ResponseEntity<UserResponse> getCurrentUser() {
 		log.info("GET /api/users/me - Fetching current user");
@@ -91,7 +100,15 @@ public class UserController {
 			)
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PatchMapping("/me")
 	public ResponseEntity<UserResponse> updateUser(@RequestBody UpdateUserRequest request) {
 		log.info("PATCH /api/users/me - Updating user");
@@ -113,15 +130,23 @@ public class UserController {
 		description = "계정 삭제 결과 반환",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
-			examples = @ExampleObject(value = "{}")
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.common.ApiResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"계정이 삭제되었습니다.\"}")
 		)
 	)
-	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증되지 않은 사용자",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@DeleteMapping("/me")
-	public ResponseEntity<Map<String, Object>> deleteUser() {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> deleteUser() {
 		log.info("DELETE /api/users/me - Deleting user");
 		userService.deleteUser();
-		return ResponseEntity.ok(java.util.Collections.emptyMap());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("계정이 삭제되었습니다."));
 	}
 }
