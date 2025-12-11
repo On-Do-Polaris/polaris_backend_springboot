@@ -1,5 +1,7 @@
 package com.skax.physicalrisk.config;
 
+import com.skax.physicalrisk.security.CustomAccessDeniedHandler;
+import com.skax.physicalrisk.security.CustomAuthenticationEntryPoint;
 import com.skax.physicalrisk.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,10 +27,12 @@ import java.util.List;
 /**
  * Spring Security 설정
  *
- * 최종 수정일: 2025-11-24
- * 파일 버전: v02
+ * 최종 수정일: 2025-12-11
+ * 파일 버전: v03
  *
  * JWT 기반 인증 및 권한 설정
+ * - 인증 실패 시 401 Unauthorized 반환 (CustomAuthenticationEntryPoint)
+ * - 권한 부족 시 403 Forbidden 반환 (CustomAccessDeniedHandler)
  *
  * @author SKAX Team
  */
@@ -39,6 +43,8 @@ import java.util.List;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080}")
 	private String allowedOrigins;
@@ -64,6 +70,10 @@ public class SecurityConfig {
 				.requestMatchers("/h2-console/**").permitAll() // H2 콘솔은 모두 허용 (개발용)
 				.requestMatchers("/", "/index.html", "/*.css", "/*.js", "/*.png", "/*.ico").permitAll() // 정적 파일 허용
 				.anyRequest().authenticated() // 나머지는 인증 필요
+			)
+			.exceptionHandling(exception -> exception
+				.authenticationEntryPoint(customAuthenticationEntryPoint) // 401 처리
+				.accessDeniedHandler(customAccessDeniedHandler) // 403 처리
 			)
 			.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // H2 콘솔용
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
