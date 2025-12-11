@@ -708,10 +708,10 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
+                if (response.ok && data.accessToken) {
                     accessToken = data.accessToken;
                     refreshToken = data.refreshToken;
-                    currentUser = { email };
+                    currentUser = { email: data.userId || email };
 
                     updateAuthUI();
                     alert('로그인 성공!');
