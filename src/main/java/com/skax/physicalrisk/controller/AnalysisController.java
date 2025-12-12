@@ -4,6 +4,7 @@ import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
 import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.analysis.*;
 import com.skax.physicalrisk.service.analysis.AnalysisService;
+import com.skax.physicalrisk.service.user.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,7 @@ import java.math.BigDecimal;
 public class AnalysisController {
 
 	private final AnalysisService analysisService;
+	private final EmailService emailService;
 
 	/**
 	 * 분석 시작 (v0.2 - jobId 제거, 단순 성공 응답)
@@ -412,12 +414,13 @@ public class AnalysisController {
 	 *
 	 * POST /api/analysis/complete
 	 *
-	 * @param request 완료 알림 요청 (userId)
+	 * @param request 완료 알림 요청 (email)
 	 * @return 성공 응답
 	 */
 	@Operation(
 		summary = "분석 완료 콜백",
-		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다."
+		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다.",
+		hidden = true
 	)
 	@ApiResponse(
 		responseCode = "200",
@@ -430,31 +433,31 @@ public class AnalysisController {
 		)
 	)
 	@ApiResponse(
-		responseCode = "404",
-		description = "사용자를 찾을 수 없음",
+		responseCode = "500",
+		description = "서버 내부 오류",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사용자를 찾을 수 없습니다.\", \"errorCode\": \"USER_NOT_FOUND\", \"timestamp\": \"2025-12-12T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T15:30:00\"}")
 		)
 	)
 	@PostMapping("/complete")
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> notifyAnalysisCompletion(
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "사용자 ID",
+			description = "사용자 이메일",
 			required = true,
 			content = @Content(
 				mediaType = "application/json",
 				schema = @Schema(implementation = AnalysisCompleteRequest.class),
 				examples = @ExampleObject(
-					value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
+					value = "{\"email\": \"user@example.com\"}"
 				)
 			)
 		)
 		@RequestBody AnalysisCompleteRequest request
 	) {
-		log.info("POST /api/analysis/complete - userId: {}", request.getUserId());
-		analysisService.notifyAnalysisCompletion(request.getUserId());
+		log.info("POST /api/analysis/complete - email: {}", request.getEmail());
+		emailService.sendAnalysisCompletionEmail(request.getEmail());
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석 완료 알림이 발송되었습니다."));
 	}
 
@@ -466,8 +469,8 @@ public class AnalysisController {
 	@lombok.AllArgsConstructor
 	@Schema(description = "분석 완료 알림 요청")
 	public static class AnalysisCompleteRequest {
-		@Schema(description = "사용자 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-		private UUID userId;
+		@Schema(description = "사용자 이메일", required = true, example = "user@example.com")
+		private String email;
 	}
 
 	/**

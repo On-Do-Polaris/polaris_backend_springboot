@@ -16,7 +16,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 /**
@@ -63,9 +65,11 @@ public class GoogleOAuthService {
                 "OAuth 토큰이 없습니다. 관리자가 먼저 Google OAuth 인증을 완료해야 합니다"
             ));
 
-        // Access Token이 5분 이내에 만료되면 갱신
-        if (token.getExpiresAt() == null || token.getExpiresAt().isBefore(LocalDateTime.now().plusMinutes(5))) {
-            log.info("Access Token 만료 또는 만료 임박. 갱신 시작: tokenId={}", token.getId());
+        // Access Token이 5분 이내에 만료되면 갱신 (UTC 기준으로 비교)
+        LocalDateTime nowUtc = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+        if (token.getExpiresAt() == null || token.getExpiresAt().isBefore(nowUtc.plusMinutes(5))) {
+            log.info("Access Token 만료 또는 만료 임박. 갱신 시작: tokenId={}, expiresAt={}, nowUtc={}",
+                token.getId(), token.getExpiresAt(), nowUtc);
             refreshAccessToken(token);
         }
 
@@ -106,11 +110,15 @@ public class GoogleOAuthService {
                 throw new BusinessException(ErrorCode.OAUTH_TOKEN_REFRESH_FAILED, "새 Access Token이 없습니다");
             }
 
-            LocalDateTime newExpiresAt = LocalDateTime.now().plusSeconds(expiresIn != null ? expiresIn : 3600);
+            // UTC 기준으로 만료 시간 계산 (시간대 차이 문제 방지)
+            LocalDateTime newExpiresAt = LocalDateTime.ofInstant(
+                Instant.now().plusSeconds(expiresIn != null ? expiresIn : 3600),
+                ZoneOffset.UTC
+            );
             token.updateAccessToken(newAccessToken, newExpiresAt);
             tokenRepository.save(token);
 
-            log.info("Access Token 갱신 완료: 만료시간={}", newExpiresAt);
+            log.info("Access Token 갱신 완료: 만료시간(UTC)={}", newExpiresAt);
 
         } catch (WebClientResponseException e) {
             log.error("Access Token 갱신 실패: status={}, body={}",
