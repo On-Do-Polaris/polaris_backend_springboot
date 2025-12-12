@@ -59,10 +59,10 @@ public class ClimateSimulationResponse {
 		@Schema(description = "사업장 이름", example = "서울 본사")
 		private String siteName;
 
-		@Schema(description = "리스크 점수 (0-100)", example = "75")
-		private Integer riskScore;
+		@Schema(description = "사업장 위치 평균 기온 (°C)", example = "15")
+		private Integer Temperature;
 
-		@Schema(description = "사업장 위치 평균 기온 (°C)", example = "15.2")
-		private Double localAverageTemperature;
+		@Schema(description = "리스크 증가율", example = "15.2")
+		private Double riskincrease;
 	}
 }

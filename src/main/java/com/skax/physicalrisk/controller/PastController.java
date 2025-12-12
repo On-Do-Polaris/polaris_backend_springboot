@@ -55,7 +55,10 @@ public class PastController {
 		description = "과거 재해 이력 목록",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = PastDisasterResponse.class)
+			schema = @Schema(implementation = PastDisasterResponse.class),
+			examples = @ExampleObject(
+				value = "{\"data\":{\"items\":[{\"id\":1,\"date\":\"2023-07-15\",\"disaster_type\":\"호우\",\"severity\":\"경보\",\"region\":[\"서울\",\"경기\"]},{\"id\":2,\"date\":\"2023-08-10\",\"disaster_type\":\"태풍\",\"severity\":\"주의보\",\"region\":[\"부산\",\"경남\"]}]}}"
+			)
 		)
 	)
 	@ApiResponse(
