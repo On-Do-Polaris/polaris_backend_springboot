@@ -24,7 +24,7 @@ public class FinancialImpactResponse {
     @Schema(description = "사업장 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID siteId;
 
-    @Schema(description = "기간", example = "long")
+    @Schema(description = "기간", example = "long", allowableValues = {"short", "mid", "long"})
     private String term;
 
     @Schema(description = "위험 유형", example = "극심한 고온")

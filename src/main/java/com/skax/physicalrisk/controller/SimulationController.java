@@ -79,6 +79,28 @@ public class SimulationController {
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
 		)
 	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "503",
+		description = "외부 서비스 연결 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다.\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
+		)
+	)
 	@GetMapping("/location/recommendation")
 	public ResponseEntity<com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse> getLocationRecommendation(
 		@Parameter(description = "사업장 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
@@ -139,6 +161,28 @@ public class SimulationController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "503",
+		description = "외부 서비스 연결 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다.\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
 		)
 	)
 	@PostMapping("/location/compare")

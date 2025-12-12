@@ -1,8 +1,10 @@
 package com.skax.physicalrisk.controller;
 
+import com.skax.physicalrisk.dto.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,17 @@ public class HealthController {
 			mediaType = "application/json",
 			examples = @ExampleObject(
 				value = "{\"result\": \"success\", \"data\": {\"status\": \"UP\", \"timestamp\": \"2025-12-11T15:30:00\", \"service\": \"Physical Risk Management API\"}}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
 			)
 		)
 	)
