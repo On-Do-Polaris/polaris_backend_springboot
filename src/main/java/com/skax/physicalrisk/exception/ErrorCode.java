@@ -71,6 +71,12 @@ public enum ErrorCode {
 	EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 발송에 실패했습니다"),
 	EMAIL_SERVICE_UNAVAILABLE("EMAIL_SERVICE_UNAVAILABLE", "이메일 서비스를 사용할 수 없습니다"),
 
+	// Google OAuth 관련
+	OAUTH_CODE_EXCHANGE_FAILED("OAUTH_CODE_EXCHANGE_FAILED", "OAuth 인증 코드 교환에 실패했습니다"),
+	OAUTH_TOKEN_REFRESH_FAILED("OAUTH_TOKEN_REFRESH_FAILED", "OAuth 토큰 갱신에 실패했습니다"),
+	OAUTH_TOKEN_NOT_FOUND("OAUTH_TOKEN_NOT_FOUND", "저장된 OAuth 토큰을 찾을 수 없습니다"),
+	GMAIL_API_ERROR("GMAIL_API_ERROR", "Gmail API 호출에 실패했습니다"),
+
 	// 리포트 관련 에러
 	REPORT_GENERATION_FAILED("REPORT_GENERATION_FAILED", "리포트 생성에 실패했습니다"),
 	REPORT_EXPIRED("REPORT_EXPIRED", "리포트 다운로드 기간이 만료되었습니다"),

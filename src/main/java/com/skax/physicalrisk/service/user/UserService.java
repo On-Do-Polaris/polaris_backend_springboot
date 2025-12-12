@@ -1,7 +1,6 @@
 package com.skax.physicalrisk.service.user;
 
 import com.skax.physicalrisk.domain.analysis.repository.AnalysisJobRepository;
-import com.skax.physicalrisk.domain.analysis.repository.AnalysisResultRepository;
 import com.skax.physicalrisk.domain.report.repository.ReportRepository;
 import com.skax.physicalrisk.domain.site.entity.Site;
 import com.skax.physicalrisk.domain.site.repository.SiteRepository;
@@ -41,7 +40,6 @@ public class UserService {
 	private final SiteRepository siteRepository;
 	private final ReportRepository reportRepository;
 	private final AnalysisJobRepository analysisJobRepository;
-	private final AnalysisResultRepository analysisResultRepository;
 
 	/**
 	 * 현재 사용자 정보 조회
@@ -96,13 +94,12 @@ public class UserService {
 	 *
 	 * 사용자 삭제 시 연관된 데이터를 계층적으로 삭제하여 외래키 제약 조건 위반을 방지
 	 * 삭제 순서:
-	 * 1. AnalysisResult 삭제 (Site의 자식)
-	 * 2. AnalysisJob 삭제 (Site의 자식)
-	 * 3. Report 삭제 (Site의 자식)
-	 * 4. Site 삭제 (User의 자식)
-	 * 5. RefreshToken 삭제 (User의 자식)
-	 * 6. PasswordResetToken 삭제 (User의 자식)
-	 * 7. User 삭제
+	 * 1. AnalysisJob 삭제 (Site의 자식)
+	 * 2. Report 삭제 (Site의 자식)
+	 * 3. Site 삭제 (User의 자식)
+	 * 4. RefreshToken 삭제 (User의 자식)
+	 * 5. PasswordResetToken 삭제 (User의 자식)
+	 * 6. User 삭제
 	 */
 	@Transactional
 	public void deleteUser() {
@@ -119,19 +116,7 @@ public class UserService {
 			log.info("Found {} sites for user: {}", sites.size(), userId);
 
 			for (Site site : sites) {
-				// 1. 각 사업장의 AnalysisResult 삭제
-				int deletedResults = analysisResultRepository.findAll().stream()
-					.filter(result -> result.getSite().getId().equals(site.getId()))
-					.mapToInt(result -> {
-						analysisResultRepository.delete(result);
-						return 1;
-					})
-					.sum();
-				if (deletedResults > 0) {
-					log.info("Deleted {} analysis results for site: {}", deletedResults, site.getId());
-				}
-
-				// 2. 각 사업장의 AnalysisJob 삭제
+				// 1. 각 사업장의 AnalysisJob 삭제
 				int deletedJobs = analysisJobRepository.findAll().stream()
 					.filter(job -> job.getSite().getId().equals(site.getId()))
 					.mapToInt(job -> {
@@ -143,7 +128,7 @@ public class UserService {
 					log.info("Deleted {} analysis jobs for site: {}", deletedJobs, site.getId());
 				}
 
-				// 3. 각 사업장의 Report 삭제
+				// 2. 각 사업장의 Report 삭제
 				int deletedReports = reportRepository.findAll().stream()
 					.filter(report -> report.getSite().getId().equals(site.getId()))
 					.mapToInt(report -> {
@@ -156,19 +141,19 @@ public class UserService {
 				}
 			}
 
-			// 4. 모든 Site 삭제
+			// 3. 모든 Site 삭제
 			siteRepository.deleteAll(sites);
 			log.info("Deleted {} sites for user: {}", sites.size(), userId);
 		}
 
-		// 5. RefreshToken 삭제
+		// 4. RefreshToken 삭제
 		List<RefreshToken> refreshTokens = refreshTokenRepository.findByUser(user);
 		if (!refreshTokens.isEmpty()) {
 			refreshTokenRepository.deleteAll(refreshTokens);
 			log.info("Deleted {} refresh tokens for user: {}", refreshTokens.size(), userId);
 		}
 
-		// 6. PasswordResetToken 삭제
+		// 5. PasswordResetToken 삭제
 		List<PasswordResetToken> passwordResetTokens = passwordResetTokenRepository.findAll().stream()
 			.filter(token -> token.getUser().getId().equals(userId))
 			.toList();
@@ -177,7 +162,7 @@ public class UserService {
 			log.info("Deleted {} password reset tokens for user: {}", passwordResetTokens.size(), userId);
 		}
 
-		// 7. User 삭제
+		// 6. User 삭제
 		userRepository.delete(user);
 
 		log.info("User and all associated data deleted successfully: {}", userId);
