@@ -95,6 +95,10 @@ jobs:
               -e MAIL_PORT="${{ secrets.MAIL_PORT }}" \
               -e MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
               -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
+              -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+              -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \
+              -e GMAIL_SENDER_EMAIL="${{ secrets.GMAIL_SENDER_EMAIL }}" \
               ${IMAGE}
 
             # Health check - 컨테이너가 준비될 때까지 대기
