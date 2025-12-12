@@ -418,7 +418,6 @@ public class AnalysisController {
 	@Operation(
 		summary = "분석 완료 콜백",
 		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다.",
-		hidden = true
 	)
 	@ApiResponse(
 		responseCode = "200",
