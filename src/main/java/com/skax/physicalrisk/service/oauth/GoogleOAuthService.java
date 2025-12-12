@@ -101,10 +101,12 @@ public class GoogleOAuthService {
             log.info("Google OAuth 토큰 저장 완료: tokenId={}", token.getId());
 
         } catch (WebClientResponseException e) {
-            log.error("Google OAuth 토큰 교환 실패: status={}, body={}",
-                e.getStatusCode(), e.getResponseBodyAsString());
+            String errorBody = e.getResponseBodyAsString();
+            log.error("Google OAuth 토큰 교환 실패: status={}, body={}", e.getStatusCode(), errorBody);
+            log.error("요청 파라미터: clientId={}, redirectUri={}, grantType=authorization_code",
+                clientId, redirectUri);
             throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED,
-                "토큰 교환 실패: " + e.getMessage());
+                "토큰 교환 실패 [" + e.getStatusCode() + "]: " + errorBody);
         } catch (Exception e) {
             log.error("Google OAuth 토큰 교환 중 예외 발생", e);
             throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED, e.getMessage());
