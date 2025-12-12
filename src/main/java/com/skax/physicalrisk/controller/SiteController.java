@@ -240,7 +240,16 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 사업장 데이터입니다.\", \"errorCode\": \"VALIDATION_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장 데이터가 유효하지 않습니다.\", \"errorCode\": \"INVALID_SITE_DATA\", \"timestamp\": \"2025-12-12T16:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}")
 		)
 	)
 	@PatchMapping
@@ -290,6 +299,17 @@ public class SiteController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
 		)
 	)
 	@DeleteMapping
