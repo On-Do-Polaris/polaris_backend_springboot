@@ -251,7 +251,7 @@ public class AuthService {
 	}
 
 	/**
-	 * 비밀번호 재설정 이메일 인증 요청
+	 * 비밀번호 재설정 이메일 인증 요청 (1단계)
 	 *
 	 * @param email 이메일
 	 */
@@ -271,71 +271,55 @@ public class AuthService {
 	}
 
 	/**
-	 * 비밀번호 재설정 요청 (기존 토큰 방식 - 호환성 유지)
+	 * 비밀번호 재설정 인증번호 확인 (2단계)
 	 *
-	 * @param request 비밀번호 재설정 요청
+	 * @param email 이메일
+	 * @param code  인증번호
 	 */
 	@Transactional
-	public void requestPasswordReset(PasswordResetRequest request) {
-		log.info("Password reset requested for email: {}", request.getEmail());
+	public void verifyPasswordResetCode(String email, String code) {
+		log.info("Verifying password reset code for email: {}", email);
 
-		// 사용자 조회
-		User user = userRepository.findByEmail(request.getEmail())
+		// 사용자 존재 여부 확인
+		userRepository.findByEmail(email)
 			.orElseThrow(() -> {
-				log.error("User not found: {}", request.getEmail());
-				return new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND);
+				log.error("Email not found: {}", email);
+				return new ResourceNotFoundException(ErrorCode.EMAIL_NOT_FOUND);
 			});
 
-		// 재설정 토큰 생성
-		String token = UUID.randomUUID().toString();
-
-		// 토큰 저장 (30분 유효)
-		PasswordResetToken resetToken = PasswordResetToken.builder()
-			.token(token)
-			.user(user)
-			.expiresAt(LocalDateTime.now().plusMinutes(30))
-			.build();
-		passwordResetTokenRepository.save(resetToken);
-
-		// 이메일 발송
-		emailService.ifPresentOrElse(
-			service -> {
-				service.sendPasswordResetEmail(user.getEmail(), token);
-				log.info("Password reset email sent to: {}", user.getEmail());
-			},
-			() -> log.warn("EmailService not available, password reset token created but email not sent")
-		);
+		// 인증번호 검증
+		verificationService.verifyCode(email, code, VerificationCode.Purpose.PASSWORD_RESET);
 	}
 
 	/**
-	 * 비밀번호 재설정 확인
+	 * 비밀번호 재설정 완료 (3단계)
 	 *
-	 * @param request 비밀번호 재설정 확인 요청
+	 * @param email       이메일
+	 * @param newPassword 새 비밀번호
 	 */
 	@Transactional
-	public void confirmPasswordReset(PasswordResetConfirmRequest request) {
-		log.info("Confirming password reset with token");
+	public void completePasswordReset(String email, String newPassword) {
+		log.info("Completing password reset for email: {}", email);
 
-		// 토큰 조회
-		PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+		// 사용자 조회
+		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> {
-				log.error("Invalid reset token");
-				return new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+				log.error("Email not found: {}", email);
+				return new ResourceNotFoundException(ErrorCode.EMAIL_NOT_FOUND);
 			});
 
-		// 토큰 유효성 검증
-		if (!resetToken.isValid()) {
-			log.error("Reset token is expired or already used");
-			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+		// 인증 완료 여부 확인
+		if (!verificationService.isEmailVerified(email, VerificationCode.Purpose.PASSWORD_RESET)) {
+			log.error("Email not verified for password reset: {}", email);
+			throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED, "이메일 인증이 완료되지 않았습니다.");
 		}
 
 		// 비밀번호 변경
-		User user = resetToken.getUser();
-		user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+		user.updatePassword(passwordEncoder.encode(newPassword));
 		userRepository.save(user);
 
-		// 토큰 사용 처리
-		resetToken.markAsUsed();
+		// 인증 코드 삭제
+		verificationService.clearVerifiedCode(email, VerificationCode.Purpose.PASSWORD_RESET);
 
 		log.info("Password reset successful for user: {}", user.getId());
 	}
