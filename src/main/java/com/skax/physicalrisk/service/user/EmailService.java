@@ -1,8 +1,6 @@
 package com.skax.physicalrisk.service.user;
 
 import com.skax.physicalrisk.client.gmail.GmailClient;
-import com.skax.physicalrisk.exception.BusinessException;
-import com.skax.physicalrisk.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -91,12 +89,7 @@ public class EmailService {
 			"당장 어서, RIGHT NOW!!!! 로그인 해서 결과를 씹고 뜯고 맛보세여~~!";
 
 		// Gmail API를 통한 실제 이메일 발송
-		try {
-			gmailClient.sendEmail(toEmail, subject, emailContent);
-		} catch (Exception e) {
-			log.error("Failed to send analysis completion email to: {}", toEmail, e);
-			throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED, "이메일 발송에 실패했습니다.");
-		}
+		gmailClient.sendEmail(toEmail, subject, emailContent);
 
 		log.info("✅ 분석 완료 이메일 발송 완료: to={}", toEmail);
 	}
