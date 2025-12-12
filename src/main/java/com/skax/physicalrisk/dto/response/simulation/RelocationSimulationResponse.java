@@ -29,6 +29,12 @@ public class RelocationSimulationResponse {
     @Schema(description = "비교 대상 후보지 정보")
     private Candidate candidate;
 
+    @Schema(description = "현재 사업장 위치 정보")
+    private LocationData currentLocation;
+
+    @Schema(description = "새 후보지 위치 정보")
+    private LocationData newLocation;
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -70,5 +76,30 @@ public class RelocationSimulationResponse {
 
         @Schema(description = "단점", example = "초기 구축 비용 증가한다")
         private String cons;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "위치 상세 정보")
+    public static class LocationData {
+        @Schema(description = "리스크 목록")
+        private java.util.List<RiskData> risks;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "리스크 상세 정보")
+    public static class RiskData {
+        @Schema(description = "리스크 유형", example = "flood")
+        private String riskType;
+
+        @Schema(description = "물리적 리스크 점수", example = "75.5")
+        private Double physicalRiskScore;
+
+        @Schema(description = "AAL (연평균손실) 점수", example = "20.5")
+        private Double aal;
     }
 }
