@@ -33,7 +33,11 @@
       "Bash(git reset HEAD .claude/settings.local.json nul)",
       "Bash(mvn test:*)",
       "Bash(cp:*)",
-      "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\controller\\DisasterHistoryController.java\")"
+      "Bash(del \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\java\\com\\skax\\physicalrisk\\controller\\DisasterHistoryController.java\")",
+      "Bash(grep:*)",
+      "Bash(ls -la \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\resources\"\" | grep -E \"yml)",
+      "Bash(yaml:*)",
+      "Bash(properties \")"
     ],
     "deny": [],
     "ask": []
