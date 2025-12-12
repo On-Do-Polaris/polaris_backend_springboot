@@ -37,7 +37,8 @@
       "Bash(grep:*)",
       "Bash(ls -la \"c:\\Users\\Administrator\\Desktop\\backend_team_java\\src\\main\\resources\"\" | grep -E \"yml)",
       "Bash(yaml:*)",
-      "Bash(properties \")"
+      "Bash(properties \")",
+      "Bash(mvn compile:*)"
     ],
     "deny": [],
     "ask": []

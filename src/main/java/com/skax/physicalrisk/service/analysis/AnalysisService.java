@@ -44,6 +44,7 @@ public class AnalysisService {
 	private final SiteRepository siteRepository;
 	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
+	private final com.skax.physicalrisk.service.user.EmailService emailService;
 
 	/**
 	 * 분석 시작
@@ -296,6 +297,25 @@ public class AnalysisService {
 
 		return siteRepository.findByIdAndUser(siteId, user)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND));
+	}
+
+	/**
+	 * 분석 완료 알림 (FastAPI 콜백용)
+	 *
+	 * @param userId 사용자 ID
+	 */
+	@Transactional
+	public void notifyAnalysisCompletion(UUID userId) {
+		log.info("Notifying analysis completion for user: {}", userId);
+
+		// 사용자 조회
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		// 완료 이메일 발송
+		emailService.sendAnalysisCompletionEmail(user.getEmail());
+
+		log.info("Analysis completion notification sent to: {}", user.getEmail());
 	}
 
 	/**
