@@ -37,11 +37,8 @@ public class DashboardSummaryResponse {
 		@Schema(description = "사업장 ID")
 		private UUID siteId;
 
-		@Schema(description = "사업장 이름", example = "서울 본사")
+		@Schema(description = "사업장 이름", example = "sk u 타워")
 		private String siteName;
-
-		@Schema(description = "사업장 유형", example = "공장")
-		private String siteType;
 
 		@Schema(description = "위도", example = "37.36633726")
 		private BigDecimal latitude;
@@ -49,8 +46,14 @@ public class DashboardSummaryResponse {
 		@Schema(description = "경도", example = "127.10661717")
 		private BigDecimal longitude;
 
-		@Schema(description = "위치", example = "서울특별시 강남구")
-		private String location;
+		@Schema(description = "지번 주소", example = "경기도 성남시 분당구 정자동 25-1")
+		private String jibunAddress;
+
+		@Schema(description = "도로명 주소", example = "경기도 성남시 분당구 성남대로343번길 9")
+		private String roadAddress;
+
+		@Schema(description = "사업장 유형", example = "data_center")
+		private String siteType;
 
 		@Schema(description = "통합 리스크 점수 (0-100)", example = "75")
 		private Integer totalRiskScore;
