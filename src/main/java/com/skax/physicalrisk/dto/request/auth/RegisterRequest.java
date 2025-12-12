@@ -37,7 +37,4 @@ public class RegisterRequest {
 	// @NotBlank(message = "조직명은 필수입니다")
 	// private String organization;
 	// 조직명 삭제
-
-	@Schema(description = "이메일 인증 코드", example = "123456")
-	private String verificationCode;
 }

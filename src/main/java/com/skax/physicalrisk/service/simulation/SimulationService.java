@@ -81,15 +81,17 @@ public class SimulationService {
 	 */
 	public RelocationSimulationResponse compareLocation(RelocationSimulationRequest request) {
 		log.info("Comparing location: currentSiteId={}, newLocation=({}, {})",
-			request.getCurrentSiteId(), request.getLatitude(), request.getLongitude());
+			request.getSiteId(),
+			request.getCandidate().getLatitude(),
+			request.getCandidate().getLongitude());
 
 		// DTO를 Map으로 변환
 		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("currentSiteId", request.getCurrentSiteId());
-		requestMap.put("latitude", request.getLatitude());
-		requestMap.put("longitude", request.getLongitude());
-		requestMap.put("roadAddress", request.getRoadAddress());
-		requestMap.put("jibunAddress", request.getJibunAddress());
+		requestMap.put("currentSiteId", request.getSiteId());
+		requestMap.put("latitude", request.getCandidate().getLatitude());
+		requestMap.put("longitude", request.getCandidate().getLongitude());
+		requestMap.put("roadAddress", request.getCandidate().getRoadAddress());
+		requestMap.put("jibunAddress", request.getCandidate().getJibunAddress());
 
 		Map<String, Object> response = fastApiClient.compareRelocation(requestMap).block();
 
@@ -209,7 +211,7 @@ public class SimulationService {
 
 				// Physical Risk Score 추출
 				Object scoreObj = riskData.get("physical_risk_score_100");
-				Integer riskScore = scoreObj != null ? ((Number) scoreObj).intValue() : 0;
+				Double riskScore = scoreObj != null ? ((Number) scoreObj).doubleValue() : 0.0;
 
 				// AAL v11: aal_analysis에서 final_aal_percentage 추출
 				Double aal = 0.0;
@@ -218,15 +220,15 @@ public class SimulationService {
 					Object finalAalObj = aalData.get("final_aal_percentage");
 					if (finalAalObj != null) {
 						Double finalAalPercentage = ((Number) finalAalObj).doubleValue();
-						// % → 0-1 스케일 변환
-						aal = finalAalPercentage / 100.0;
-						log.debug("Risk type: {}, AAL: {}% -> {}", riskType, finalAalPercentage, aal);
+						// % → 0-100 스케일 유지
+						aal = finalAalPercentage;
+						log.debug("Risk type: {}, AAL: {}%", riskType, aal);
 					}
 				}
 
 				RelocationSimulationResponse.RiskData risk = RelocationSimulationResponse.RiskData.builder()
 					.riskType(convertRiskTypeName(riskType))
-					.riskScore(riskScore)
+					.physicalRiskScore(riskScore)
 					.aal(aal)
 					.build();
 

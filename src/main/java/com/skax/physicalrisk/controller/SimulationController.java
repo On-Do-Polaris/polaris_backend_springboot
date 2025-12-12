@@ -55,7 +55,10 @@ public class SimulationController {
 		description = "추천 후보지 3개와 각 후보지의 리스크 정보",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse.class)
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.simulation.LocationRecommendationResponse.class),
+			examples = @ExampleObject(
+				value = "{\"site\":{\"siteId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"candidate1\":{\"candidateId\":\"a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6\",\"candidateName\":\"세종 데이터 센터 부지\",\"latitude\":36.5040736,\"longitude\":127.2494855,\"jibunAddress\":\"세종특별자치시 보람동 660\",\"roadAddress\":\"세종특별자치시 한누리대로 2130 (보람동)\",\"riskscore\":70,\"aalscore\":20,\"physical-risk-scores\":{\"extreme_heat\":10,\"extreme_cold\":20,\"river_flood\":30},\"aal-scores\":{\"extreme_heat\":9,\"extreme_cold\":10,\"river_flood\":11},\"pros\":\"홍수 위험 62% 감소한다\",\"cons\":\"초기 구축 비용 증가한다\"},\"candidate2\":{\"candidateId\":\"b2c3d4e5-f6a7-b8c9-d0e1-f2a3b4c5d6e7\",\"candidateName\":\"부산 데이터 센터 부지\",\"latitude\":35.1795543,\"longitude\":129.0756416,\"jibunAddress\":\"부산광역시 연제구 연산동 1000\",\"roadAddress\":\"부산광역시 연제구 중앙대로 1001\",\"riskscore\":65,\"aalscore\":18,\"physical-risk-scores\":{\"extreme_heat\":15,\"extreme_cold\":10,\"river_flood\":25},\"aal-scores\":{\"extreme_heat\":8,\"extreme_cold\":9,\"river_flood\":12},\"pros\":\"해수면 상승 영향 적음\",\"cons\":\"태풍 위험도 높음\"},\"candidate3\":{\"candidateId\":\"c3d4e5f6-a7b8-c9d0-e1f2-a3b4c5d6e7f8\",\"candidateName\":\"춘천 데이터 센터 부지\",\"latitude\":37.8813,\"longitude\":127.7298,\"jibunAddress\":\"강원도 춘천시 동면 123\",\"roadAddress\":\"강원도 춘천시 동면 순환대로 1234\",\"riskscore\":50,\"aalscore\":10,\"physical-risk-scores\":{\"extreme_heat\":5,\"extreme_cold\":30,\"river_flood\":10},\"aal-scores\":{\"extreme_heat\":4,\"extreme_cold\":15,\"river_flood\":5},\"pros\":\"대부분의 기후 리스크 낮음\",\"cons\":\"겨울철 한파 리스크 높음\"}}}"
+			)
 		)
 	)
 	@ApiResponse(

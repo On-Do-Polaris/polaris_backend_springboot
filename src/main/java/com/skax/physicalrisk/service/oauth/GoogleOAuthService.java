@@ -23,11 +23,10 @@ import java.util.Map;
  * Google OAuth 2.0 서비스
  *
  * Gmail API 사용을 위한 OAuth 2.0 토큰 관리
- * - Authorization Code를 Access Token + Refresh Token으로 교환
  * - Refresh Token을 사용한 Access Token 갱신
- * - DB에 Refresh Token 영구 저장
+ * - DB에 저장된 Refresh Token 사용
  *
- * 파일 버전: v01
+ * 파일 버전: v02 (토큰 교환 기능 제거 - 수동 설정)
  * 최종 수정일: 2025-12-12
  *
  * @author SKAX Team
@@ -46,80 +45,8 @@ public class GoogleOAuthService {
     @Value("${google.oauth.client-secret}")
     private String clientSecret;
 
-    @Value("${google.oauth.redirect-uri}")
-    private String redirectUri;
-
     @Value("${google.oauth.token-uri}")
     private String tokenUri;
-
-    /**
-     * Authorization Code를 Access Token + Refresh Token으로 교환
-     *
-     * Google OAuth 인증 후 받은 code를 사용하여 토큰을 발급받고 DB에 저장
-     *
-     * @param code Authorization Code
-     */
-    @Transactional
-    public void exchangeCodeForTokens(String code) {
-        log.info("Google OAuth 토큰 교환 시작: code={}", code.substring(0, Math.min(20, code.length())) + "...");
-
-        try {
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("code", code);
-            requestBody.add("client_id", clientId);
-            requestBody.add("client_secret", clientSecret);
-            requestBody.add("redirect_uri", redirectUri);
-            requestBody.add("grant_type", "authorization_code");
-
-            // 요청 파라미터 로깅 (디버깅용)
-            log.info("토큰 교환 요청 파라미터:");
-            log.info("  - tokenUri: {}", tokenUri);
-            log.info("  - client_id: {}", clientId);
-            log.info("  - redirect_uri: {}", redirectUri);
-            log.info("  - grant_type: authorization_code");
-            log.info("  - code: {}...", code.substring(0, Math.min(20, code.length())));
-
-            Map<String, Object> response = webClient.post()
-                .uri(tokenUri)
-                .body(BodyInserters.fromFormData(requestBody))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
-
-            if (response == null) {
-                throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED, "토큰 교환 응답이 null입니다");
-            }
-
-            String accessToken = (String) response.get("access_token");
-            String refreshToken = (String) response.get("refresh_token");
-            Integer expiresIn = (Integer) response.get("expires_in");
-
-            if (accessToken == null || refreshToken == null) {
-                log.error("토큰 교환 응답에 필수 필드 누락: {}", response);
-                throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED, "Access Token 또는 Refresh Token이 없습니다");
-            }
-
-            GoogleOAuthToken token = GoogleOAuthToken.builder()
-                .refreshToken(refreshToken)
-                .accessToken(accessToken)
-                .expiresAt(LocalDateTime.now().plusSeconds(expiresIn != null ? expiresIn : 3600))
-                .build();
-
-            tokenRepository.save(token);
-            log.info("Google OAuth 토큰 저장 완료: tokenId={}", token.getId());
-
-        } catch (WebClientResponseException e) {
-            String errorBody = e.getResponseBodyAsString();
-            log.error("Google OAuth 토큰 교환 실패: status={}, body={}", e.getStatusCode(), errorBody);
-            log.error("요청 파라미터: clientId={}, redirectUri={}, grantType=authorization_code",
-                clientId, redirectUri);
-            throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED,
-                "토큰 교환 실패 [" + e.getStatusCode() + "]: " + errorBody);
-        } catch (Exception e) {
-            log.error("Google OAuth 토큰 교환 중 예외 발생", e);
-            throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED, e.getMessage());
-        }
-    }
 
     /**
      * 유효한 Access Token 반환
@@ -196,20 +123,4 @@ public class GoogleOAuthService {
         }
     }
 
-    /**
-     * OAuth 인증 URL 생성 (관리자용)
-     *
-     * @return OAuth 인증 URL
-     */
-    public String generateAuthUrl() {
-        // authUri와 scope는 클래스 필드에 이미 선언되어 있지만,
-        // GoogleOAuthController에서 직접 사용하므로 이 메서드는 사용되지 않음
-        String authUriLocal = "https://accounts.google.com/o/oauth2/auth";
-        String scopeLocal = "https://www.googleapis.com/auth/gmail.send";
-
-        return String.format(
-            "%s?client_id=%s&redirect_uri=%s&response_type=code&scope=%s&access_type=offline&prompt=consent",
-            authUriLocal, clientId, redirectUri, scopeLocal
-        );
-    }
 }

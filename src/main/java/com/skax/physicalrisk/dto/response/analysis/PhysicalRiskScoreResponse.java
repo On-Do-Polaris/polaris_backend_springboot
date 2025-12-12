@@ -1,19 +1,17 @@
 package com.skax.physicalrisk.dto.response.analysis;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
- * 시나리오별 물리적 리스크 점수 응답 DTO
- * SSP 시나리오별 기간(단기/중기/장기)에 따른 리스크 점수 제공
- * - 단기: 1~4분기
- * - 중기: 2026~2030년
- * - 장기: 2020s, 2030s, 2040s, 2050s
+ * 물리적 리스크 시나리오별 값 응답 DTO
  *
  * @author SKAX Team
  */
@@ -21,91 +19,31 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "시나리오별 물리적 리스크 점수")
+@Schema(description = "물리적 리스크 시나리오별 값")
 public class PhysicalRiskScoreResponse {
 
-	@Schema(description = "SSP 시나리오별 리스크 점수 목록 (4개 시나리오)")
-	private List<SSPScenarioScore> scenarios;
+    @Schema(description = "사업장 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    private UUID siteId;
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "SSP 시나리오별 리스크 점수")
-	public static class SSPScenarioScore {
-		@Schema(description = "SSP 시나리오", example = "SSP1-2.6", allowableValues = {"SSP1-2.6", "SSP2-4.5", "SSP3-7.0", "SSP5-8.5"})
-		private String scenario;
+    @Schema(description = "기간", example = "long")
+    private String term;
 
-		@Schema(description = "리스크 종류", example = "극심한 고온")
-		private String riskType;
+    @Schema(description = "위험 유형", example = "극심한 고온")
+    private String hazardType;
 
-		@Schema(description = "단기 리스크 점수 (분기별: Q1, Q2, Q3, Q4)")
-		private ShortTermScore shortTerm;
+    @Schema(description = "시나리오 1 점수")
+    private Map<String, Integer> scenarios1;
 
-		@Schema(description = "중기 리스크 점수 (연도별: 2026~2030)")
-		private MidTermScore midTerm;
+    @Schema(description = "시나리오 2 점수")
+    private Map<String, Integer> scenarios2;
 
-		@Schema(description = "장기 리스크 점수 (연대별: 2020s, 2030s, 2040s, 2050s)")
-		private LongTermScore longTerm;
-	}
+    @Schema(description = "시나리오 3 점수")
+    private Map<String, Integer> scenarios3;
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "단기 리스크 점수 (분기별)")
-	public static class ShortTermScore {
-		@Schema(description = "1분기 점수 (0-100)", example = "65")
-		private Integer q1;
+    @Schema(description = "시나리오 4 점수")
+    private Map<String, Integer> scenarios4;
 
-		@Schema(description = "2분기 점수 (0-100)", example = "72")
-		private Integer q2;
-
-		@Schema(description = "3분기 점수 (0-100)", example = "78")
-		private Integer q3;
-
-		@Schema(description = "4분기 점수 (0-100)", example = "70")
-		private Integer q4;
-	}
-
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "중기 리스크 점수 (연도별)")
-	public static class MidTermScore {
-		@Schema(description = "2026년 점수 (0-100)", example = "68")
-		private Integer year2026;
-
-		@Schema(description = "2027년 점수 (0-100)", example = "70")
-		private Integer year2027;
-
-		@Schema(description = "2028년 점수 (0-100)", example = "73")
-		private Integer year2028;
-
-		@Schema(description = "2029년 점수 (0-100)", example = "75")
-		private Integer year2029;
-
-		@Schema(description = "2030년 점수 (0-100)", example = "77")
-		private Integer year2030;
-	}
-
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "장기 리스크 점수 (연대별)")
-	public static class LongTermScore {
-		@Schema(description = "2020년대 점수 (0-100)", example = "72")
-		private Integer year2020s;
-
-		@Schema(description = "2030년대 점수 (0-100)", example = "78")
-		private Integer year2030s;
-
-		@Schema(description = "2040년대 점수 (0-100)", example = "84")
-		private Integer year2040s;
-
-		@Schema(description = "2050년대 점수 (0-100)", example = "89")
-		private Integer year2050s;
-	}
+    @JsonProperty("Strategy")
+    @Schema(description = "대응 방안", example = "냉각 시스템 강화 및 단열재 보강")
+    private String Strategy;
 }
