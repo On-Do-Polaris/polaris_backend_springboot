@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -61,18 +64,16 @@ public class GoogleOAuthService {
         log.info("Google OAuth 토큰 교환 시작: code={}", code.substring(0, Math.min(20, code.length())) + "...");
 
         try {
-            Map<String, String> requestBody = Map.of(
-                "code", code,
-                "client_id", clientId,
-                "client_secret", clientSecret,
-                "redirect_uri", redirectUri,
-                "grant_type", "authorization_code"
-            );
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("code", code);
+            requestBody.add("client_id", clientId);
+            requestBody.add("client_secret", clientSecret);
+            requestBody.add("redirect_uri", redirectUri);
+            requestBody.add("grant_type", "authorization_code");
 
             Map<String, Object> response = webClient.post()
                 .uri(tokenUri)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue(requestBody)
+                .body(BodyInserters.fromFormData(requestBody))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
@@ -143,17 +144,15 @@ public class GoogleOAuthService {
         log.info("Refresh Token으로 Access Token 갱신 시작");
 
         try {
-            Map<String, String> requestBody = Map.of(
-                "refresh_token", token.getRefreshToken(),
-                "client_id", clientId,
-                "client_secret", clientSecret,
-                "grant_type", "refresh_token"
-            );
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("refresh_token", token.getRefreshToken());
+            requestBody.add("client_id", clientId);
+            requestBody.add("client_secret", clientSecret);
+            requestBody.add("grant_type", "refresh_token");
 
             Map<String, Object> response = webClient.post()
                 .uri(tokenUri)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue(requestBody)
+                .body(BodyInserters.fromFormData(requestBody))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
