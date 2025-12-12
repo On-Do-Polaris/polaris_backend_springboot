@@ -379,6 +379,69 @@ public class AnalysisController {
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getVulnerability(siteId)));
 	}
 
+	/**
+	 * 분석 완료 콜백 (FastAPI → Java)
+	 *
+	 * POST /api/analysis/complete
+	 *
+	 * @param request 완료 알림 요청 (userId)
+	 * @return 성공 응답
+	 */
+	@Operation(
+		summary = "분석 완료 콜백",
+		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다.",
+		hidden = true
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "알림 발송 성공",
+		content = @Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(
+				value = "{\"result\": \"success\", \"message\": \"분석 완료 알림이 발송되었습니다.\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "사용자를 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사용자를 찾을 수 없습니다.\", \"errorCode\": \"USER_NOT_FOUND\", \"timestamp\": \"2025-12-12T15:30:00\"}")
+		)
+	)
+	@PostMapping("/complete")
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> notifyAnalysisCompletion(
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "사용자 ID",
+			required = true,
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = AnalysisCompleteRequest.class),
+				examples = @ExampleObject(
+					value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
+				)
+			)
+		)
+		@RequestBody AnalysisCompleteRequest request
+	) {
+		log.info("POST /api/analysis/complete - userId: {}", request.getUserId());
+		analysisService.notifyAnalysisCompletion(request.getUserId());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석 완료 알림이 발송되었습니다."));
+	}
+
+	/**
+	 * 분석 완료 요청 DTO
+	 */
+	@lombok.Data
+	@lombok.NoArgsConstructor
+	@lombok.AllArgsConstructor
+	@Schema(description = "분석 완료 알림 요청")
+	public static class AnalysisCompleteRequest {
+		@Schema(description = "사용자 ID", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+		private UUID userId;
+	}
 
 	/**
 	 * 분석 시작 요청 DTO (v0.2)

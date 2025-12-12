@@ -14,12 +14,13 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 /**
- * 이메일 인증 서비스 (더미 구현)
+ * 이메일 인증 서비스
  *
- * 인증번호는 고정값 "123456"을 사용합니다.
+ * 랜덤 6자리 숫자 인증번호를 생성하여 DB에 저장하고 이메일로 발송합니다.
+ * 인증번호는 5분간 유효하며, 만료된 코드는 매일 자정에 자동 정리됩니다.
  *
- * 최종 수정일: 2025-12-11
- * 파일 버전: v02 (더미 구현)
+ * 최종 수정일: 2025-12-12
+ * 파일 버전: v03 (랜덤 인증번호 생성)
  *
  * @author SKAX Team
  */
@@ -33,12 +34,13 @@ public class VerificationService {
 	private static final SecureRandom random = new SecureRandom();
 
 	/**
-	 * 6자리 고정 인증번호 생성 (더미 구현)
+	 * 6자리 랜덤 인증번호 생성
 	 *
-	 * @return 고정 인증번호 "123456"
+	 * @return 6자리 숫자 인증번호 (000000 ~ 999999)
 	 */
 	public String generateVerificationCode() {
-		return "123456";
+		int code = random.nextInt(1000000); // 0 ~ 999999
+		return String.format("%06d", code); // 6자리로 포맷 (앞에 0 채우기)
 	}
 
 	/**
