@@ -71,6 +71,14 @@ public class GoogleOAuthService {
             requestBody.add("redirect_uri", redirectUri);
             requestBody.add("grant_type", "authorization_code");
 
+            // 요청 파라미터 로깅 (디버깅용)
+            log.info("토큰 교환 요청 파라미터:");
+            log.info("  - tokenUri: {}", tokenUri);
+            log.info("  - client_id: {}", clientId);
+            log.info("  - redirect_uri: {}", redirectUri);
+            log.info("  - grant_type: authorization_code");
+            log.info("  - code: {}...", code.substring(0, Math.min(20, code.length())));
+
             Map<String, Object> response = webClient.post()
                 .uri(tokenUri)
                 .body(BodyInserters.fromFormData(requestBody))

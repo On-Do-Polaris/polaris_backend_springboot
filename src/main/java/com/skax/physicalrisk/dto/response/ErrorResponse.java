@@ -1,5 +1,6 @@
 package com.skax.physicalrisk.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,7 @@ public class ErrorResponse {
 	private String code;  // 하위 호환성을 위해 유지
 
 	@Schema(description = "발생 시간", example = "2025-12-11T15:30:00")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS")
 	@Builder.Default
 	private LocalDateTime timestamp = LocalDateTime.now();
 
