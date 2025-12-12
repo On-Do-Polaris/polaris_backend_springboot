@@ -9,7 +9,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,7 +35,6 @@ import java.util.Properties;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class GmailClient {
 
     private final GoogleOAuthService oauthService;
@@ -46,7 +44,7 @@ public class GmailClient {
     private String senderEmail;
 
     /**
-     * WebClient 빈 생성
+     * 생성자
      */
     public GmailClient(GoogleOAuthService oauthService) {
         this.oauthService = oauthService;
