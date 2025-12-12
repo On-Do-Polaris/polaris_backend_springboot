@@ -444,20 +444,20 @@ public class AnalysisController {
 	@PostMapping("/complete")
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> notifyAnalysisCompletion(
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "사용자 이메일",
+			description = "사용자 ID (이메일)",
 			required = true,
 			content = @Content(
 				mediaType = "application/json",
 				schema = @Schema(implementation = AnalysisCompleteRequest.class),
 				examples = @ExampleObject(
-					value = "{\"email\": \"user@example.com\"}"
+					value = "{\"userId\": \"user@example.com\"}"
 				)
 			)
 		)
 		@RequestBody AnalysisCompleteRequest request
 	) {
-		log.info("POST /api/analysis/complete - email: {}", request.getEmail());
-		emailService.sendAnalysisCompletionEmail(request.getEmail());
+		log.info("POST /api/analysis/complete - userId: {}", request.getUserId());
+		emailService.sendAnalysisCompletionEmail(request.getUserId());
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석 완료 알림이 발송되었습니다."));
 	}
 
@@ -469,8 +469,8 @@ public class AnalysisController {
 	@lombok.AllArgsConstructor
 	@Schema(description = "분석 완료 알림 요청")
 	public static class AnalysisCompleteRequest {
-		@Schema(description = "사용자 이메일", required = true, example = "user@example.com")
-		private String email;
+		@Schema(description = "사용자 ID (이메일 형식)", required = true, example = "user@example.com")
+		private String userId;
 	}
 
 	/**
