@@ -104,26 +104,35 @@ public class AnalysisController {
 	}
 
 	/**
-	 * 분석 작업 상태 조회
+	 * 분석 작업 상태 조회 (v0.2: jobId 제거, status만 반환)
 	 *
-	 * GET /api/analysis/status?siteId={siteId}&jobId={jobId}
+	 * GET /api/analysis/status
 	 *
-	 * @param siteId 사업장 ID
-	 * @param jobId  작업 ID
-	 * @return 작업 상태
+	 * @param jobid 작업 ID (사용하지 않음, 호환성을 위해 유지)
+	 * @return 작업 상태 (ing: 분석 중, done: 분석 완료)
 	 */
 	@Operation(
 		summary = "분석 상태 확인",
-		description = "회원가입 후 첫 로그인 시 사업장 등록 후 수행된 분석의 진행 상태를 확인하는 API.\n모든 사업장의 분석 결과가 다 나올 때까지 로딩을 띄울 건데 분석 결과가 나왔는지 확인하는 api.\n입력은 없거나 jobid."
+		description = "사용자의 분석 진행 상태를 확인하는 API. status 값이 'ing'면 분석 중, 'done'이면 분석 완료."
 	)
 	@ApiResponse(
 		responseCode = "200",
-		description = "현재 분석 상태 반환. 현재 상태를 알려주는 값이 있어야 함.",
+		description = "분석 중 (status: ing)",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = "{\"result\": \"success\", \"data\": {\"status\": \"ing\"}}"
-			)
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.common.ApiResponse.class),
+			examples = {
+				@ExampleObject(
+					name = "분석 중",
+					description = "분석이 진행 중인 경우",
+					value = "{\"result\": \"success\", \"data\": {\"status\": \"ing\"}}"
+				),
+				@ExampleObject(
+					name = "분석 완료",
+					description = "분석이 완료된 경우",
+					value = "{\"result\": \"success\", \"data\": {\"status\": \"done\"}}"
+				)
+			}
 		)
 	)
 	@ApiResponse(
@@ -135,12 +144,30 @@ public class AnalysisController {
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
 		)
 	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "503",
+		description = "FastAPI 서버 연결 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다.\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@GetMapping("/status")
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<AnalysisJobStatusResponse>> getAnalysisStatus(
-		@Parameter(description = "통합 또는 개별 분석 jobId (선택)", required = false)
+		@Parameter(description = "작업 ID (사용하지 않음, 호환성을 위해 유지)", required = false)
 		@RequestParam(required = false) UUID jobid
 	) {
-		log.info("GET /api/analysis/status?jobid={}", jobid);
+		log.info("GET /api/analysis/status");
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getAnalysisStatus(jobid)));
 	}
 

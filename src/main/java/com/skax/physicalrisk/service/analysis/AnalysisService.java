@@ -83,14 +83,14 @@ public class AnalysisService {
 	}
 
 	/**
-	 * 분석 작업 상태 조회
+	 * 분석 작업 상태 조회 (v0.2: jobId 제거, status만 반환)
 	 *
-	 * @param jobid  작업 ID (선택)
-	 * @return 작업 상태
+	 * @param jobid  작업 ID (선택, 사용하지 않음)
+	 * @return 작업 상태 (ing 또는 done)
 	 */
 	public AnalysisJobStatusResponse getAnalysisStatus(UUID jobid) {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Fetching analysis status for userId: {}, jobid: {}", userId, jobid);
+		log.info("Fetching analysis status for userId: {}", userId);
 
 		// 사용자 인증 확인
 		userRepository.findById(userId)
@@ -98,7 +98,35 @@ public class AnalysisService {
 
 		// userId를 FastAPI로 전달
 		Map<String, Object> response = fastApiClient.getAnalysisStatus(userId, jobid).block();
-		return convertToDto(response, AnalysisJobStatusResponse.class);
+
+		// FastAPI 응답에서 status 추출 및 변환
+		String fastApiStatus = (String) response.getOrDefault("status", "unknown");
+		String simplifiedStatus = convertToSimplifiedStatus(fastApiStatus);
+
+		log.info("Analysis status for userId {}: FastAPI={}, Simplified={}", userId, fastApiStatus, simplifiedStatus);
+
+		return AnalysisJobStatusResponse.builder()
+			.status(simplifiedStatus)
+			.build();
+	}
+
+	/**
+	 * FastAPI 상태를 간소화된 상태로 변환
+	 *
+	 * @param fastApiStatus FastAPI에서 받은 상태
+	 * @return "ing" 또는 "done"
+	 */
+	private String convertToSimplifiedStatus(String fastApiStatus) {
+		if (fastApiStatus == null) {
+			return "ing";
+		}
+
+		// FastAPI 상태값: queued, running, processing, completed, failed, done 등
+		return switch (fastApiStatus.toLowerCase()) {
+			case "completed", "done", "finished", "success" -> "done";
+			case "queued", "running", "processing", "pending", "in_progress" -> "ing";
+			default -> "ing"; // 기본값은 진행 중으로 처리
+		};
 	}
 
 	/**

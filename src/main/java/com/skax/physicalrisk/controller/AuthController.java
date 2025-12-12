@@ -79,6 +79,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "503",
 		description = "이메일 발송 실패",
 		content = @Content(
@@ -131,6 +140,15 @@ public class AuthController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증번호가 일치하지 않거나 만료되었습니다.\", \"errorCode\": \"INVALID_VERIFICATION_CODE\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
 		)
 	)
 	@PostMapping("/register-verificationCode")
@@ -189,6 +207,15 @@ public class AuthController {
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 인증이 완료되지 않았습니다.\", \"errorCode\": \"EMAIL_NOT_VERIFIED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
 		)
 	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
 	@PostMapping("/register")
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
 		log.info("POST /api/auth/register - Email: {}", request.getEmail());
@@ -234,6 +261,15 @@ public class AuthController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 또는 비밀번호가 일치하지 않습니다.\", \"errorCode\": \"INVALID_CREDENTIALS\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
 		)
 	)
 	@PostMapping("/login")
@@ -366,6 +402,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "503",
 		description = "이메일 발송 실패",
 		content = @Content(
@@ -379,5 +424,139 @@ public class AuthController {
 		log.info("POST /api/auth/password/reset-email - Email: {}", request.getEmail());
 		authService.sendPasswordResetEmail(request.getEmail());
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("비밀번호 재설정 인증번호가 이메일로 발송되었습니다."));
+	}
+
+	/**
+	 * 비밀번호 재설정 인증번호 확인 (2단계)
+	 *
+	 * POST /api/auth/password/reset-verify
+	 *
+	 * @param request 인증번호 확인 요청 (email, code)
+	 * @return 성공 메시지
+	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
+	 * @throws BusinessException 인증번호가 일치하지 않거나 만료된 경우 (422)
+	 */
+	@Operation(
+		summary = "비밀번호 재설정 인증번호 확인",
+		description = "비밀번호 재설정을 위한 인증번호를 확인합니다."
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "이메일과 인증번호",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.request.auth.PasswordResetVerifyCodeRequest.class),
+			examples = @ExampleObject(
+				value = "{\"email\": \"user@example.com\", \"code\": \"123456\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "인증번호 확인 성공",
+		content = @Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"인증번호가 확인되었습니다.\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "이메일이 존재하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"존재하지 않는 이메일입니다.\", \"errorCode\": \"EMAIL_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "인증번호 불일치 또는 만료",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증번호가 일치하지 않습니다.\", \"errorCode\": \"VERIFICATION_CODE_MISMATCH\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@PostMapping("/password/reset-verify")
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> verifyPasswordResetCode(@Valid @RequestBody com.skax.physicalrisk.dto.request.auth.PasswordResetVerifyCodeRequest request) {
+		log.info("POST /api/auth/password/reset-verify - Email: {}", request.getEmail());
+		authService.verifyPasswordResetCode(request.getEmail(), request.getCode());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("인증번호가 확인되었습니다."));
+	}
+
+	/**
+	 * 비밀번호 재설정 완료 (3단계)
+	 *
+	 * POST /api/auth/password/reset-complete
+	 *
+	 * @param request 비밀번호 재설정 요청 (email, newPassword)
+	 * @return 성공 메시지
+	 * @throws ResourceNotFoundException 이메일이 존재하지 않는 경우 (404)
+	 * @throws BusinessException 이메일 인증이 완료되지 않은 경우 (422)
+	 */
+	@Operation(
+		summary = "비밀번호 재설정 완료",
+		description = "새로운 비밀번호로 변경합니다."
+	)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		description = "이메일과 새 비밀번호",
+		required = true,
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.request.auth.PasswordResetCompleteRequest.class),
+			examples = @ExampleObject(
+				value = "{\"email\": \"user@example.com\", \"newPassword\": \"newPassword123!\"}"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "비밀번호 재설정 성공",
+		content = @Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(value = "{\"result\": \"success\", \"message\": \"비밀번호가 성공적으로 재설정되었습니다.\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "이메일이 존재하지 않음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"존재하지 않는 이메일입니다.\", \"errorCode\": \"EMAIL_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "422",
+		description = "이메일 인증 미완료",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 인증이 완료되지 않았습니다.\", \"errorCode\": \"EMAIL_NOT_VERIFIED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@PostMapping("/password/reset-complete")
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> completePasswordReset(@Valid @RequestBody com.skax.physicalrisk.dto.request.auth.PasswordResetCompleteRequest request) {
+		log.info("POST /api/auth/password/reset-complete - Email: {}", request.getEmail());
+		authService.completePasswordReset(request.getEmail(), request.getNewPassword());
+		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("비밀번호가 성공적으로 재설정되었습니다."));
 	}
 }
