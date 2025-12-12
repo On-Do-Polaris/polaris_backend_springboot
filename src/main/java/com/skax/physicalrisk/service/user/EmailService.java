@@ -1,6 +1,8 @@
 package com.skax.physicalrisk.service.user;
 
 import com.skax.physicalrisk.client.gmail.GmailClient;
+import com.skax.physicalrisk.exception.BusinessException;
+import com.skax.physicalrisk.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -82,15 +84,19 @@ public class EmailService {
 	public void sendAnalysisCompletionEmail(String toEmail) {
 		log.info("분석 완료 이메일 발송: to={}", toEmail);
 
-		String subject = "[SKAX On-Do] 사업장 분석 완료";
-		String emailContent = "안녕하세요,\n\n" +
-			"요청하신 사업장 물리적 리스크 분석이 완료되었습니다.\n\n" +
-			"SKAX On-Do에 로그인하여 분석 결과를 확인하실 수 있습니다.\n\n" +
-			"감사합니다.\n\n" +
-			"SKAX On-Do 팀";
+		String subject = "[SKAX On-Do] 사업장 분석 완료!";
+		String emailContent =
+			"축하드립니다.\n\n" +
+			"SKAX의 SKALA 2기 On-Do가 당신이 기대하고 고대하고 고수하고 기다리던 사업장 분석 작업을 완료했습니다.\n\n" +
+			"당장 어서, RIGHT NOW!!!! 로그인 해서 결과를 씹고 뜯고 맛보세여~~!";
 
 		// Gmail API를 통한 실제 이메일 발송
-		gmailClient.sendEmail(toEmail, subject, emailContent);
+		try {
+			gmailClient.sendEmail(toEmail, subject, emailContent);
+		} catch (Exception e) {
+			log.error("Failed to send analysis completion email to: {}", toEmail, e);
+			throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED, "이메일 발송에 실패했습니다.");
+		}
 
 		log.info("✅ 분석 완료 이메일 발송 완료: to={}", toEmail);
 	}
