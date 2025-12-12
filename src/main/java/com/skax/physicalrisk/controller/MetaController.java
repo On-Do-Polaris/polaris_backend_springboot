@@ -53,6 +53,17 @@ public class MetaController {
 			)
 		)
 	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
+		)
+	)
 	@GetMapping("/hazards")
 	public ResponseEntity<List<HazardType>> getHazardTypes() {
 		log.info("GET /api/meta/hazards - Fetching hazard types");
@@ -80,6 +91,17 @@ public class MetaController {
 			)
 		)
 	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+			)
+		)
+	)
 	@GetMapping("/industries")
 	public ResponseEntity<List<Industry>> getIndustries() {
 		log.info("GET /api/meta/industries - Fetching industries");
@@ -104,6 +126,17 @@ public class MetaController {
 			schema = @Schema(implementation = List.class),
 			examples = @ExampleObject(
 				value = "[\"SSP1-2.6\", \"SSP2-4.5\", \"SSP3-7.0\", \"SSP5-8.5\"]"
+			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(
+				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
 			)
 		)
 	)

@@ -71,12 +71,21 @@ public class PastController {
 		)
 	)
 	@ApiResponse(
-		responseCode = "422",
-		description = "파라미터가 유효하지 않음",
+		responseCode = "400",
+		description = "잘못된 요청",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 파라미터입니다.\", \"errorCode\": \"INVALID_PARAMETER\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다.\", \"errorCode\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-12T16:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "500",
+		description = "서버 내부 오류",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}")
 		)
 	)
 	@GetMapping

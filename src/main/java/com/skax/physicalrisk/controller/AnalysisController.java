@@ -239,9 +239,23 @@ public class AnalysisController {
 		description = "물리적 리스크 시나리오별 값",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}}"
-			)
+			examples = {
+				@ExampleObject(
+					name = "장기",
+					description = "장기 리스크 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}}"
+				),
+				@ExampleObject(
+					name = "중기",
+					description = "중기 리스크 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 65, \"point2\": 70, \"point3\": 75, \"point4\": 80, \"point5\": 85}, \"scenarios2\": {\"point1\": 66, \"point2\": 71, \"point3\": 76, \"point4\": 81, \"point5\": 86}, \"scenarios3\": {\"point1\": 67, \"point2\": 72, \"point3\": 77, \"point4\": 82, \"point5\": 87}, \"scenarios4\": {\"point1\": 68, \"point2\": 73, \"point3\": 78, \"point4\": 83, \"point5\": 88}, \"Strategy\": \"재생 에너지 사용 확대 및 에너지 효율 개선\"}}"
+				),
+				@ExampleObject(
+					name = "단기",
+					description = "단기 리스크 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 50}, \"scenarios2\": {\"point1\": 52}, \"scenarios3\": {\"point1\": 54}, \"scenarios4\": {\"point1\": 56}, \"Strategy\": \"기후 변화 교육 및 인식 제고 프로그램 실시\"}}"
+				)
+			}
 		)
 	)
 	@ApiResponse(
@@ -294,9 +308,23 @@ public class AnalysisController {
 		description = "AAL 시나리오별 값",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
-			)
+			examples = {
+				@ExampleObject(
+					name = "장기",
+					description = "장기 AAL 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+				),
+				@ExampleObject(
+					name = "중기",
+					description = "중기 AAL 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 65, \"point2\": 70, \"point3\": 75, \"point4\": 80, \"point5\": 85}, \"scenarios2\": {\"point1\": 66, \"point2\": 71, \"point3\": 76, \"point4\": 81, \"point5\": 86}, \"scenarios3\": {\"point1\": 67, \"point2\": 72, \"point3\": 77, \"point4\": 82, \"point5\": 87}, \"scenarios4\": {\"point1\": 68, \"point2\": 73, \"point3\": 78, \"point4\": 83, \"point5\": 88}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+				),
+				@ExampleObject(
+					name = "단기",
+					description = "단기 AAL 값",
+					value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 50}, \"scenarios2\": {\"point1\": 52}, \"scenarios3\": {\"point1\": 54}, \"scenarios4\": {\"point1\": 56}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+				)
+			}
 		)
 	)
 	@ApiResponse(
@@ -389,8 +417,7 @@ public class AnalysisController {
 	 */
 	@Operation(
 		summary = "분석 완료 콜백",
-		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다.",
-		hidden = true
+		description = "FastAPI에서 분석 완료 시 호출하는 콜백 엔드포인트. 사용자에게 완료 이메일을 발송합니다."
 	)
 	@ApiResponse(
 		responseCode = "200",
