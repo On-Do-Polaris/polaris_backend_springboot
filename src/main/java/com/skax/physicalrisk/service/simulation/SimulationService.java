@@ -165,16 +165,23 @@ public class SimulationService {
 		try {
 			RelocationSimulationResponse result = new RelocationSimulationResponse();
 
+			// siteId 설정
+			Object siteIdObj = response.get("siteId");
+			if (siteIdObj != null) {
+				result.setSiteId(UUID.fromString(siteIdObj.toString()));
+			}
+
+			// candidate 객체 처리 (newLocation 데이터 기반)
+			Map<String, Object> newLoc = (Map<String, Object>) response.get("newLocation");
+			if (newLoc != null) {
+				result.setCandidate(convertToCandidate(newLoc));
+				result.setNewLocation(convertLocationData(newLoc));
+			}
+
 			// currentLocation 처리
 			Map<String, Object> currentLoc = (Map<String, Object>) response.get("currentLocation");
 			if (currentLoc != null) {
 				result.setCurrentLocation(convertLocationData(currentLoc));
-			}
-
-			// newLocation 처리
-			Map<String, Object> newLoc = (Map<String, Object>) response.get("newLocation");
-			if (newLoc != null) {
-				result.setNewLocation(convertLocationData(newLoc));
 			}
 
 			return result;
@@ -182,6 +189,84 @@ public class SimulationService {
 			log.error("Failed to convert relocation response: {}", e.getMessage());
 			throw new RuntimeException("이전 시뮬레이션 응답 변환 실패: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * FastAPI newLocation 데이터를 Candidate 객체로 변환
+	 * 9개 기후 리스크 타입의 physical-risk-scores와 aal-scores를 모두 포함
+	 */
+	@SuppressWarnings("unchecked")
+	private RelocationSimulationResponse.Candidate convertToCandidate(Map<String, Object> newLoc) {
+		RelocationSimulationResponse.Candidate candidate = new RelocationSimulationResponse.Candidate();
+
+		// 기본 정보
+		Object candidateIdObj = newLoc.get("candidateId");
+		if (candidateIdObj != null) {
+			candidate.setCandidateId(UUID.fromString(candidateIdObj.toString()));
+		}
+
+		Object latObj = newLoc.get("latitude");
+		if (latObj != null) {
+			candidate.setLatitude(new java.math.BigDecimal(latObj.toString()));
+		}
+
+		Object lonObj = newLoc.get("longitude");
+		if (lonObj != null) {
+			candidate.setLongitude(new java.math.BigDecimal(lonObj.toString()));
+		}
+
+		candidate.setJibunAddress((String) newLoc.get("jibunAddress"));
+		candidate.setRoadAddress((String) newLoc.get("roadAddress"));
+		candidate.setPros((String) newLoc.get("pros"));
+		candidate.setCons((String) newLoc.get("cons"));
+
+		// riskscore, aalscore
+		Object riskscoreObj = newLoc.get("riskscore");
+		if (riskscoreObj != null) {
+			candidate.setRiskscore(((Number) riskscoreObj).intValue());
+		}
+
+		Object aalscoreObj = newLoc.get("aalscore");
+		if (aalscoreObj != null) {
+			candidate.setAalscore(((Number) aalscoreObj).intValue());
+		}
+
+		// physical_risk_scores와 aal_analysis를 9개 기후 리스크로 변환
+		Map<String, Object> physicalRiskScores = (Map<String, Object>) newLoc.get("physical_risk_scores");
+		Map<String, Object> aalAnalysis = (Map<String, Object>) newLoc.get("aal_analysis");
+
+		if (physicalRiskScores != null) {
+			Map<String, Integer> physicalScoresMap = new java.util.HashMap<>();
+			Map<String, Integer> aalScoresMap = new java.util.HashMap<>();
+
+			// 9개 기후 리스크 타입 처리
+			for (Map.Entry<String, Object> entry : physicalRiskScores.entrySet()) {
+				String riskType = entry.getKey();
+				Map<String, Object> riskData = (Map<String, Object>) entry.getValue();
+
+				// Physical Risk Score 추출
+				Object scoreObj = riskData.get("physical_risk_score_100");
+				if (scoreObj != null) {
+					physicalScoresMap.put(riskType, ((Number) scoreObj).intValue());
+				}
+
+				// AAL 추출
+				if (aalAnalysis != null) {
+					Map<String, Object> aalData = (Map<String, Object>) aalAnalysis.get(riskType);
+					if (aalData != null) {
+						Object finalAalObj = aalData.get("final_aal_percentage");
+						if (finalAalObj != null) {
+							aalScoresMap.put(riskType, ((Number) finalAalObj).intValue());
+						}
+					}
+				}
+			}
+
+			candidate.setPhysicalRiskScores(physicalScoresMap);
+			candidate.setAalScores(aalScoresMap);
+		}
+
+		return candidate;
 	}
 
 	/**
