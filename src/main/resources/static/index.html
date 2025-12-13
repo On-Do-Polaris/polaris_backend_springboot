@@ -1,680 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKAX Physical Risk Management API - 테스트 페이지</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .content {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 0;
-        }
-
-        .sidebar {
-            background: #f8f9fa;
-            padding: 30px;
-            border-right: 1px solid #e0e0e0;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-        }
-
-        .main {
-            padding: 30px;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-        }
-
-        .auth-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .auth-section h3 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-badge.logged-out {
-            background: #fee;
-            color: #c00;
-        }
-
-        .status-badge.logged-in {
-            background: #efe;
-            color: #0a0;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-            font-family: 'Courier New', monospace;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .button-secondary {
-            background: #6c757d;
-        }
-
-        .button-danger {
-            background: #dc3545;
-        }
-
-        .api-section {
-            margin-bottom: 30px;
-        }
-
-        .api-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-            font-size: 18px;
-        }
-
-        .api-endpoint {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .api-endpoint h4 {
-            color: #555;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
-        .method {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-right: 8px;
-        }
-
-        .method.get { background: #61affe; color: white; }
-        .method.post { background: #49cc90; color: white; }
-        .method.put { background: #fca130; color: white; }
-        .method.delete { background: #f93e3e; color: white; }
-
-        .response {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 400px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .response pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .token-display {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            word-break: break-all;
-        }
-
-        .user-info {
-            background: #d1ecf1;
-            border: 1px solid #0c5460;
-            color: #0c5460;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-            flex-wrap: wrap;
-        }
-
-        .tab-button {
-            background: none;
-            color: #666;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-weight: 600;
-            border-bottom: 3px solid transparent;
-            width: auto;
-            font-size: 13px;
-        }
-
-        .tab-button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🌍 SKAX Physical Risk Management API</h1>
-            <p>FastAPI 호출 API 전체 테스트 도구 (13개 엔드포인트)</p>
-        </div>
-
-        <div class="content">
-            <!-- 사이드바 -->
-            <div class="sidebar">
-                <div class="auth-section">
-                    <h3>
-                        인증 상태
-                        <span id="authStatus" class="status-badge logged-out">로그아웃</span>
-                    </h3>
-
-                    <div id="loginForm">
-                        <label>이메일</label>
-                        <input type="email" id="loginEmail" value="test@example.com" placeholder="이메일 입력">
-
-                        <label>비밀번호</label>
-                        <input type="password" id="loginPassword" value="password123" placeholder="비밀번호 입력">
-
-                        <button onclick="login()">로그인</button>
-
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
-                            <button onclick="showRegisterForm()" class="button-secondary">회원가입</button>
-                        </div>
-                    </div>
-
-                    <div id="loggedInInfo" style="display: none;">
-                        <div class="user-info" id="userInfo"></div>
-                        <div class="token-display" id="tokenDisplay"></div>
-                        <button onclick="logout()" class="button-danger" style="margin-top: 15px;">로그아웃</button>
-                    </div>
-                </div>
-
-                <div class="auth-section">
-                    <h3>API 설정</h3>
-                    <label>Base URL</label>
-                    <input type="text" id="baseUrl" value="" placeholder="http://localhost:8080">
-                </div>
-
-                <div class="auth-section">
-                    <h3>현재 사업장 ID</h3>
-                    <input type="text" id="globalSiteId" placeholder="사업장 생성 후 자동 입력" readonly style="background: #f0f0f0;">
-                    <button onclick="fillAllSiteIds()" class="button-secondary" style="font-size: 12px; padding: 8px;">모든 폼에 적용</button>
-                </div>
-            </div>
-
-            <!-- 메인 콘텐츠 -->
-            <div class="main">
-                <div class="tab-buttons">
-                    <button class="tab-button active" onclick="switchTab('auth')">인증</button>
-                    <button class="tab-button" onclick="switchTab('sites')">사업장</button>
-                    <button class="tab-button" onclick="switchTab('analysis')">분석</button>
-                    <button class="tab-button" onclick="switchTab('dashboard')">대시보드</button>
-                    <button class="tab-button" onclick="switchTab('simulation')">시뮬레이션</button>
-                    <button class="tab-button" onclick="switchTab('report')">리포트</button>
-                    <button class="tab-button" onclick="switchTab('past')">과거재해</button>
-                </div>
-
-                <!-- 인증 API 탭 -->
-                <div id="authTab" class="tab-content active">
-                    <div class="api-section">
-                        <h3>회원가입</h3>
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/auth/register</h4>
-
-                            <label>이름</label>
-                            <input type="text" id="regName" placeholder="홍길동">
-
-                            <label>이메일</label>
-                            <input type="email" id="regEmail" placeholder="user@example.com">
-
-                            <label>비밀번호</label>
-                            <input type="password" id="regPassword" placeholder="비밀번호 (8자 이상)">
-
-                            <button onclick="register()">회원가입</button>
-                            <div id="registerResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 사업장 API 탭 -->
-                <div id="sitesTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>사업장 관리</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/sites</h4>
-                            <button onclick="getSites()">사업장 목록 조회</button>
-                            <div id="getSitesResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/sites</h4>
-
-                            <label>사업장 이름</label>
-                            <input type="text" id="siteName" placeholder="서울 본사">
-
-                            <label>도로명 주소</label>
-                            <input type="text" id="siteRoadAddr" placeholder="서울특별시 강남구 테헤란로 123">
-
-                            <label>지번 주소</label>
-                            <input type="text" id="siteJibunAddr" placeholder="서울특별시 강남구 역삼동 123-45">
-
-                            <div class="grid-2">
-                                <div>
-                                    <label>위도</label>
-                                    <input type="text" id="siteLatitude" value="37.5665" placeholder="37.5665">
-                                </div>
-                                <div>
-                                    <label>경도</label>
-                                    <input type="text" id="siteLongitude" value="126.9780" placeholder="126.9780">
-                                </div>
-                            </div>
-
-                            <label>산업 유형</label>
-                            <select id="siteType">
-                                <option value="data_center">데이터센터</option>
-                                <option value="manufacturing">제조업</option>
-                                <option value="logistics">물류</option>
-                                <option value="retail">유통</option>
-                                <option value="technology">기술</option>
-                                <option value="finance">금융</option>
-                            </select>
-
-                            <button onclick="createSite()">사업장 생성</button>
-                            <div id="createSiteResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 분석 API 탭 -->
-                <div id="analysisTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>리스크 분석</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/analysis/start</h4>
-
-                            <label>사업장 ID (UUID)</label>
-                            <input type="text" class="site-id-field" id="analysisSiteId" placeholder="사업장 ID">
-
-                            <button onclick="startAnalysis()">분석 시작</button>
-                            <div id="startAnalysisResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/status?jobid={jobid}</h4>
-
-                            <label>작업 ID (jobid)</label>
-                            <input type="text" id="statusJobId" placeholder="작업 ID">
-
-                            <button onclick="getAnalysisStatus()">분석 상태 조회</button>
-                            <div id="analysisStatusResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/summary?siteId={siteId}</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="summarySiteId" placeholder="UUID">
-
-                            <button onclick="getAnalysisSummary()">분석 개요 조회</button>
-                            <div id="summaryResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/physical-risk</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="physicalRiskSiteId" placeholder="UUID">
-
-                            <label>기간 (term)</label>
-                            <select id="physicalRiskTerm">
-                                <option value="long">장기 (long)</option>
-                                <option value="mid">중기 (mid)</option>
-                                <option value="short">단기 (short)</option>
-                            </select>
-
-                            <label>재해 유형 (hazardType)</label>
-                            <select id="physicalRiskHazardType">
-                                <option value="극심한 고온">극심한 고온</option>
-                                <option value="극심한 한파">극심한 한파</option>
-                                <option value="하천 홍수">하천 홍수</option>
-                                <option value="도시 홍수">도시 홍수</option>
-                                <option value="가뭄">가뭄</option>
-                                <option value="물 부족">물 부족</option>
-                                <option value="해수면 상승">해수면 상승</option>
-                                <option value="태풍">태풍</option>
-                                <option value="산불">산불</option>
-                            </select>
-
-                            <button onclick="getPhysicalRisk()">물리적 리스크 조회</button>
-                            <div id="physicalRiskResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/aal</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="aalSiteId" placeholder="UUID">
-
-                            <label>기간 (term)</label>
-                            <select id="aalTerm">
-                                <option value="long">장기 (long)</option>
-                                <option value="mid">중기 (mid)</option>
-                                <option value="short">단기 (short)</option>
-                            </select>
-
-                            <label>재해 유형 (hazardType)</label>
-                            <select id="aalHazardType">
-                                <option value="극심한 고온">극심한 고온</option>
-                                <option value="극심한 한파">극심한 한파</option>
-                                <option value="하천 홍수">하천 홍수</option>
-                                <option value="도시 홍수">도시 홍수</option>
-                                <option value="가뭄">가뭄</option>
-                                <option value="물 부족">물 부족</option>
-                                <option value="해수면 상승">해수면 상승</option>
-                                <option value="태풍">태풍</option>
-                                <option value="산불">산불</option>
-                            </select>
-
-                            <button onclick="getAal()">재무 영향 조회</button>
-                            <div id="aalResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/analysis/vulnerability?siteId={siteId}</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="vulnerabilitySiteId" placeholder="UUID">
-
-                            <button onclick="getVulnerability()">취약성 분석 조회</button>
-                            <div id="vulnerabilityResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 대시보드 API 탭 -->
-                <div id="dashboardTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>대시보드</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/dashboard</h4>
-                            <button onclick="getDashboard()">대시보드 조회</button>
-                            <div id="dashboardResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 시뮬레이션 API 탭 -->
-                <div id="simulationTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>시뮬레이션</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/simulation/location/recommendation</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="recSiteId" placeholder="UUID">
-
-                            <button onclick="getLocationRecommendation()">위치 추천 조회</button>
-                            <div id="recommendationResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/simulation/location/compare</h4>
-
-                            <label>현재 사업장 ID</label>
-                            <input type="text" class="site-id-field" id="compareCurrentSiteId" placeholder="UUID">
-
-                            <div class="grid-2">
-                                <div>
-                                    <label>후보지 위도</label>
-                                    <input type="text" id="compareLatitude" value="36.5040736" placeholder="36.5040736">
-                                </div>
-                                <div>
-                                    <label>후보지 경도</label>
-                                    <input type="text" id="compareLongitude" value="127.2494855" placeholder="127.2494855">
-                                </div>
-                            </div>
-
-                            <label>후보지 도로명 주소 (선택)</label>
-                            <input type="text" id="compareRoadAddr" value="세종특별자치시 한누리대로 2130" placeholder="세종특별자치시 한누리대로 2130">
-
-                            <label>후보지 지번 주소 (선택)</label>
-                            <input type="text" id="compareJibunAddr" value="세종특별자치시 보람동 660" placeholder="세종특별자치시 보람동 660">
-
-                            <button onclick="compareLocation()">위치 비교</button>
-                            <div id="compareResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/simulation/climate</h4>
-
-                            <label>시나리오</label>
-                            <select id="climateScenario">
-                                <option value="SSP2-4.5">SSP2-4.5</option>
-                                <option value="SSP5-8.5">SSP5-8.5</option>
-                                <option value="SSP1-2.6">SSP1-2.6</option>
-                            </select>
-
-                            <label>재해 유형</label>
-                            <select id="climateHazardType">
-                                <option value="극심한 고온">극심한 고온</option>
-                                <option value="극심한 한파">극심한 한파</option>
-                                <option value="하천 홍수">하천 홍수</option>
-                                <option value="도시 홍수">도시 홍수</option>
-                                <option value="가뭄">가뭄</option>
-                                <option value="물 부족">물 부족</option>
-                                <option value="해수면 상승">해수면 상승</option>
-                                <option value="태풍">태풍</option>
-                                <option value="산불">산불</option>
-                            </select>
-
-                            <button onclick="runClimateSimulation()">기후 시뮬레이션 실행</button>
-                            <div id="climateResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 리포트 API 탭 -->
-                <div id="reportTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>리포트</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/report</h4>
-                            <button onclick="getReport()">통합 리포트 조회</button>
-                            <div id="reportResponse" class="response"><pre></pre></div>
-                        </div>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method post">POST</span>/api/report/data</h4>
-
-                            <label>사업장 ID</label>
-                            <input type="text" class="site-id-field" id="reportDataSiteId" placeholder="UUID">
-
-                            <label>데이터 (JSON)</label>
-                            <textarea id="reportDataContent" placeholder='{"key": "value", "example": "data"}'></textarea>
-
-                            <button onclick="registerReportData()">리포트 데이터 등록</button>
-                            <div id="reportDataResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 과거재해 API 탭 -->
-                <div id="pastTab" class="tab-content">
-                    <div class="api-section">
-                        <h3>과거 재해 이력</h3>
-
-                        <div class="api-endpoint">
-                            <h4><span class="method get">GET</span>/api/past</h4>
-
-                            <label>연도 (year)</label>
-                            <input type="number" id="pastYear" value="2023" placeholder="2023">
-
-                            <label>재해 유형 (disaster_type)</label>
-                            <select id="pastDisasterType">
-                                <option value="호우">호우</option>
-                                <option value="태풍">태풍</option>
-                                <option value="대설">대설</option>
-                                <option value="폭염">폭염</option>
-                                <option value="한파">한파</option>
-                                <option value="지진">지진</option>
-                                <option value="산불">산불</option>
-                            </select>
-
-                            <label>심각도 (severity)</label>
-                            <select id="pastSeverity">
-                                <option value="경보">경보</option>
-                                <option value="주의보">주의보</option>
-                                <option value="특보">특보</option>
-                            </select>
-
-                            <button onclick="getPastDisasters()">과거 재해 조회</button>
-                            <div id="pastResponse" class="response"><pre></pre></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
+<script>
         let accessToken = null;
         let refreshToken = null;
         let currentUser = null;
@@ -695,33 +19,47 @@
             showResponse(elementId, { error: message }, true);
         }
 
+        async function makeApiCall(method, path, body, responseElementId, authRequired = true) {
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (authRequired) {
+                    if (!accessToken) throw new Error('로그인이 필요합니다.');
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                }
+
+                const options = {
+                    method: method,
+                    headers: headers
+                };
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${getBaseUrl()}${path}`, options);
+                const data = await response.json();
+                showResponse(responseElementId, data, !response.ok);
+                return { ok: response.ok, data: data };
+            } catch (error) {
+                showError(responseElementId, error.message);
+                return { ok: false, error: error.message };
+            }
+        }
+
         async function login() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+            const result = await makeApiCall('POST', '/api/auth/login', { email, password }, 'loginResponse', false);
 
-                const responseData = await response.json();
-
-                // v0.2: ApiResponse<LoginResponse> 형식 처리
-                if (response.ok && responseData.result === 'success' && responseData.data) {
-                    const loginData = responseData.data;
-                    accessToken = loginData.accessToken;
-                    refreshToken = loginData.refreshToken;
-                    currentUser = { email: loginData.userId || email };
-
-                    updateAuthUI();
-                    alert('로그인 성공!');
-                } else {
-                    alert('로그인 실패: ' + (responseData.message || '알 수 없는 오류'));
-                }
-            } catch (error) {
-                alert('로그인 오류: ' + error.message);
+            if (result.ok && result.data.result === 'success' && result.data.data) {
+                const loginData = result.data.data;
+                accessToken = loginData.accessToken;
+                refreshToken = loginData.refreshToken;
+                currentUser = { email: loginData.userId || email }; // userId는 UUID일 수도, 이메일일 수도 있으므로 보수적으로 처리
+                updateAuthUI();
+                alert('로그인 성공!');
+            } else if (result.ok) { // API 호출 성공했으나 result가 success가 아닌 경우 (예: 에러 응답)
+                alert('로그인 실패: ' + (result.data.message || '알 수 없는 오류'));
             }
         }
 
@@ -735,28 +73,50 @@
                 return;
             }
 
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
+            const result = await makeApiCall('POST', '/api/auth/register', { name, email, password }, 'registerResponse', false);
 
-                const data = await response.json();
-                showResponse('registerResponse', data, !response.ok);
-
-                if (response.ok) {
-                    alert('회원가입 성공! 로그인해주세요.');
-                    document.getElementById('loginEmail').value = email;
-                    document.getElementById('loginPassword').value = password;
-                    switchTab('auth');
-                }
-            } catch (error) {
-                showError('registerResponse', error.message);
+            if (result.ok) {
+                alert('회원가입 성공! 로그인해주세요.');
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('loginPassword').value = password;
+                switchTab('auth'); // 탭 스위칭 로직 수정 필요
             }
         }
 
-        function logout() {
+        async function sendRegisterEmail() {
+            const email = document.getElementById('regEmailSend').value;
+            if (!email) {
+                alert('이메일을 입력해주세요.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/register-email', { email }, 'registerEmailResponse', false);
+            if (result.ok) {
+                alert('인증번호가 이메일로 발송되었습니다.');
+            }
+        }
+
+        async function verifyRegisterCode() {
+            const email = document.getElementById('regEmailVerify').value;
+            const verificationCode = document.getElementById('regCodeVerify').value;
+            if (!email || !verificationCode) {
+                alert('이메일과 인증번호를 입력해주세요.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/register-verificationCode', { email, verificationCode }, 'verifyRegisterCodeResponse', false);
+            if (result.ok) {
+                alert('인증번호 확인 성공!');
+            }
+        }
+
+        async function logoutApi() {
+            const result = await makeApiCall('POST', '/api/auth/logout', null, 'logoutResponse');
+            if (result.ok) {
+                alert('로그아웃 성공!');
+                logoutClient(); // 클라이언트 측 토큰 삭제
+            }
+        }
+
+        function logoutClient() {
             accessToken = null;
             refreshToken = null;
             currentUser = null;
@@ -764,25 +124,87 @@
             updateAuthUI();
         }
 
+        async function refreshTokenApi() {
+            const currentRefreshToken = document.getElementById('refreshTokenInput').value || refreshToken;
+            if (!currentRefreshToken) {
+                alert('리프레시 토큰이 필요합니다.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/refresh', { refreshToken: currentRefreshToken }, 'refreshTokenResponse', false);
+            if (result.ok && result.data.result === 'success' && result.data.data) {
+                const newTokens = result.data.data;
+                accessToken = newTokens.accessToken;
+                refreshToken = newTokens.refreshToken;
+                currentUser = { email: newTokens.userId }; // Refresh 응답에도 userId가 있습니다.
+                updateAuthUI();
+                alert('토큰이 갱신되었습니다!');
+            } else if (result.ok) { // API 호출 성공했으나 result가 success가 아닌 경우 (예: 에러 응답)
+                alert('토큰 갱신 실패: ' + (result.data.message || '알 수 없는 오류'));
+            }
+        }
+
+        async function sendPasswordResetEmail() {
+            const email = document.getElementById('passwordResetEmailSend').value;
+            if (!email) {
+                alert('이메일을 입력해주세요.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/password/reset-email', { email }, 'passwordResetEmailResponse', false);
+            if (result.ok) {
+                alert('비밀번호 재설정 이메일이 발송되었습니다.');
+            }
+        }
+
+        async function verifyPasswordResetCode() {
+            const email = document.getElementById('passwordResetEmailVerify').value;
+            const code = document.getElementById('passwordResetCodeVerify').value;
+            if (!email || !code) {
+                alert('이메일과 인증번호를 입력해주세요.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/password/reset-verify', { email, code }, 'passwordResetVerifyResponse', false);
+            if (result.ok) {
+                alert('인증번호 확인 성공! 이제 새 비밀번호를 설정하세요.');
+            }
+        }
+
+        async function completePasswordReset() {
+            const email = document.getElementById('passwordResetEmailComplete').value;
+            const newPassword = document.getElementById('newPasswordComplete').value;
+            if (!email || !newPassword) {
+                alert('이메일과 새 비밀번호를 입력해주세요.');
+                return;
+            }
+            const result = await makeApiCall('POST', '/api/auth/password/reset-complete', { email, newPassword }, 'passwordResetCompleteResponse', false);
+            if (result.ok) {
+                alert('비밀번호가 성공적으로 재설정되었습니다!');
+            }
+        }
+        
         function updateAuthUI() {
             const authStatus = document.getElementById('authStatus');
-            const loginForm = document.getElementById('loginForm');
+            const loginFormContainer = document.getElementById('loginForm');
             const loggedInInfo = document.getElementById('loggedInInfo');
             const userInfo = document.getElementById('userInfo');
             const tokenDisplay = document.getElementById('tokenDisplay');
+            const refreshTokenInput = document.getElementById('refreshTokenInput');
 
             if (accessToken) {
                 authStatus.textContent = '로그인됨';
                 authStatus.className = 'status-badge logged-in';
-                loginForm.style.display = 'none';
+                loginFormContainer.style.display = 'none';
                 loggedInInfo.style.display = 'block';
-                userInfo.textContent = `로그인: ${currentUser.email}`;
-                tokenDisplay.textContent = `Token: ${accessToken.substring(0, 50)}...`;
+                userInfo.textContent = `로그인: ${currentUser ? currentUser.email : '알 수 없음'}`;
+                tokenDisplay.innerHTML = `<strong>Access Token:</strong> ${accessToken.substring(0, 50)}...<br><strong>Refresh Token:</strong> ${refreshToken ? refreshToken.substring(0, 50) + '...' : '없음'}`;
+                if (refreshTokenInput) refreshTokenInput.value = refreshToken || ''; // 리프레시 토큰 입력 필드 업데이트 (페이지 로드 시 없을 수 있음)
             } else {
                 authStatus.textContent = '로그아웃';
                 authStatus.className = 'status-badge logged-out';
-                loginForm.style.display = 'block';
+                loginFormContainer.style.display = 'block';
                 loggedInInfo.style.display = 'none';
+                userInfo.textContent = '';
+                tokenDisplay.textContent = '';
+                if (refreshTokenInput) refreshTokenInput.value = '';
             }
         }
 
@@ -813,335 +235,253 @@
         }
 
         async function getSites() {
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/sites`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('getSitesResponse', data, !response.ok);
-
-                // 첫 번째 사업장 ID 자동 입력
-                if (response.ok && data.sites && data.sites.length > 0) {
-                    updateGlobalSiteId(data.sites[0].id);
-                    fillAllSiteIds();
-                }
-            } catch (error) {
-                showError('getSitesResponse', error.message);
+            const result = await makeApiCall('GET', '/api/sites', null, 'getSitesResponse');
+            if (result.ok && result.data.sites && result.data.sites.length > 0) {
+                updateGlobalSiteId(result.data.sites[0].siteId); // SiteResponse.SiteInfo의 id 대신 siteId 사용
+                fillAllSiteIds();
             }
         }
 
         async function createSite() {
-            try {
-                const requestBody = {
-                    name: document.getElementById('siteName').value,
-                    roadAddress: document.getElementById('siteRoadAddr').value,
-                    jibunAddress: document.getElementById('siteJibunAddr').value,
-                    latitude: document.getElementById('siteLatitude').value,
-                    longitude: document.getElementById('siteLongitude').value,
-                    type: document.getElementById('siteType').value
-                };
+            const requestBody = {
+                name: document.getElementById('siteName').value,
+                roadAddress: document.getElementById('siteRoadAddr').value,
+                jibunAddress: document.getElementById('siteJibunAddr').value,
+                latitude: parseFloat(document.getElementById('siteLatitude').value),
+                longitude: parseFloat(document.getElementById('siteLongitude').value),
+                type: document.getElementById('siteType').value
+            };
 
-                const response = await fetch(`${getBaseUrl()}/api/sites`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
+            const result = await makeApiCall('POST', '/api/site', requestBody, 'createSiteResponse'); // Changed to /api/site
+            if (result.ok && result.data.siteId) { // Changed to siteId
+                alert('사업장 생성 성공!');
+                updateGlobalSiteId(result.data.siteId);
+                fillAllSiteIds();
+            }
+        }
 
-                const data = await response.json();
-                showResponse('createSiteResponse', data, !response.ok);
+        async function getSiteByName() {
+            const siteName = document.getElementById('getSiteByNameInput').value;
+            if (!siteName) {
+                alert('사업장 이름을 입력하세요.');
+                return;
+            }
+            const path = `/api/site?siteName=${encodeURIComponent(siteName)}`;
+            const result = await makeApiCall('GET', path, null, 'getSiteByNameResponse');
+        }
 
-                if (response.ok && data.id) {
-                    alert('사업장 생성 성공!');
-                    updateGlobalSiteId(data.id);
-                    fillAllSiteIds();
+        async function updateSite() {
+            const siteId = document.getElementById('updateSiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
+            }
+
+            const requestBody = {};
+            const name = document.getElementById('updateSiteName').value;
+            const latitudeStr = document.getElementById('updateSiteLatitude').value;
+            const longitudeStr = document.getElementById('updateSiteLongitude').value;
+            const type = document.getElementById('updateSiteType').value;
+
+            if (name) requestBody.name = name;
+            if (latitudeStr) requestBody.latitude = parseFloat(latitudeStr);
+            if (longitudeStr) requestBody.longitude = parseFloat(longitudeStr);
+            if (type) requestBody.type = type;
+
+            if (Object.keys(requestBody).length === 0) {
+                alert('수정할 내용을 하나 이상 입력하세요.');
+                return;
+            }
+            
+            const path = `/api/site?siteId=${siteId}`;
+            const result = await makeApiCall('PATCH', path, requestBody, 'updateSiteResponse');
+            if (result.ok) {
+                alert('사업장 수정 성공!');
+            }
+        }
+
+        async function deleteSite() {
+            const siteId = document.getElementById('deleteSiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
+            }
+            const path = `/api/site?siteId=${siteId}`;
+            const result = await makeApiCall('DELETE', path, null, 'deleteSiteResponse');
+            if (result.ok) {
+                alert('사업장 삭제 성공!');
+                if (currentSiteId === siteId) {
+                    currentSiteId = null;
+                    document.getElementById('globalSiteId').value = '';
                 }
-            } catch (error) {
-                showError('createSiteResponse', error.message);
+                fillAllSiteIds();
             }
         }
 
         async function startAnalysis() {
-            try {
-                const siteId = document.getElementById('analysisSiteId').value;
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
+            const siteId = document.getElementById('analysisSiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
+            }
 
-                const requestBody = {
-                    sites: [{ siteId: siteId }]
-                };
+            const requestBody = {
+                sites: [{ siteId: siteId }]
+            };
 
-                const response = await fetch(`${getBaseUrl()}/api/analysis/start`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
-
-                const data = await response.json();
-                showResponse('startAnalysisResponse', data, !response.ok);
-
-                if (response.ok && data.jobId) {
-                    document.getElementById('statusJobId').value = data.jobId;
-                    alert('분석 시작! Job ID: ' + data.jobId);
-                }
-            } catch (error) {
-                showError('startAnalysisResponse', error.message);
+            const result = await makeApiCall('POST', '/api/analysis/start', requestBody, 'startAnalysisResponse');
+            if (result.ok && result.data.jobId) { // FastAPI Job ID는 FastAPI 응답에 있음 (Spring Boot는 Void 반환)
+                 // FastAPI 응답 형식에 따라 수정 필요 (현재 Spring Boot는 Void를 반환하므로 jobId를 받지 못함)
+                 // 여기서는 Mock으로 처리하거나, 실제 Spring Boot 응답 DTO에 jobId가 추가되어야 함
+                document.getElementById('statusJobId').value = "mock-job-id-" + siteId; // 임시 Mock ID
+                alert('분석 시작! Job ID (Mock): ' + document.getElementById('statusJobId').value);
+            } else if (result.ok) { // Spring Boot에서 성공 응답만 오는 경우
+                alert('분석 시작 요청 성공. Job ID는 Spring Boot 응답에 포함되지 않습니다.');
             }
         }
 
         async function getAnalysisStatus() {
-            try {
-                const jobid = document.getElementById('statusJobId').value;
-                const url = jobid
-                    ? `${getBaseUrl()}/api/analysis/status?jobid=${jobid}`
-                    : `${getBaseUrl()}/api/analysis/status`;
-
-                const response = await fetch(url, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('analysisStatusResponse', data, !response.ok);
-            } catch (error) {
-                showError('analysisStatusResponse', error.message);
-            }
+            const jobid = document.getElementById('statusJobId').value;
+            const userId = currentUser ? currentUser.email : ''; // FastAPI 클라이언트에서 userId를 요구함.
+            const path = jobid
+                ? `/api/analysis/status?jobid=${jobid}`
+                : `/api/analysis/status`;
+            const result = await makeApiCall('GET', path, null, 'analysisStatusResponse');
         }
 
         async function getAnalysisSummary() {
-            try {
-                const siteId = document.getElementById('summarySiteId').value;
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
-
-                const response = await fetch(`${getBaseUrl()}/api/analysis/summary?siteId=${siteId}`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('summaryResponse', data, !response.ok);
-            } catch (error) {
-                showError('summaryResponse', error.message);
+            const siteId = document.getElementById('summarySiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
             }
+            const path = `/api/analysis/summary?siteId=${siteId}`;
+            const result = await makeApiCall('GET', path, null, 'summaryResponse');
         }
 
         async function getPhysicalRisk() {
-            try {
-                const siteId = document.getElementById('physicalRiskSiteId').value;
-                const term = document.getElementById('physicalRiskTerm').value;
-                const hazardType = document.getElementById('physicalRiskHazardType').value;
+            const siteId = document.getElementById('physicalRiskSiteId').value;
+            const term = document.getElementById('physicalRiskTerm').value;
+            const hazardType = document.getElementById('physicalRiskHazardType').value;
 
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
-
-                const url = `${getBaseUrl()}/api/analysis/physical-risk?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
-                const response = await fetch(url, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('physicalRiskResponse', data, !response.ok);
-            } catch (error) {
-                showError('physicalRiskResponse', error.message);
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
             }
+
+            const path = `/api/analysis/physical-risk?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
+            const result = await makeApiCall('GET', path, null, 'physicalRiskResponse');
         }
 
         async function getAal() {
-            try {
-                const siteId = document.getElementById('aalSiteId').value;
-                const term = document.getElementById('aalTerm').value;
-                const hazardType = document.getElementById('aalHazardType').value;
+            const siteId = document.getElementById('aalSiteId').value;
+            const term = document.getElementById('aalTerm').value;
+            const hazardType = document.getElementById('aalHazardType').value;
 
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
-
-                const url = `${getBaseUrl()}/api/analysis/aal?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
-                const response = await fetch(url, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('aalResponse', data, !response.ok);
-            } catch (error) {
-                showError('aalResponse', error.message);
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
             }
+
+            const path = `${getBaseUrl()}/api/analysis/aal?siteId=${siteId}&term=${term}&hazardType=${encodeURIComponent(hazardType)}`;
+            const result = await makeApiCall('GET', path, null, 'aalResponse');
         }
 
         async function getVulnerability() {
-            try {
-                const siteId = document.getElementById('vulnerabilitySiteId').value;
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
-
-                const response = await fetch(`${getBaseUrl()}/api/analysis/vulnerability?siteId=${siteId}`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('vulnerabilityResponse', data, !response.ok);
-            } catch (error) {
-                showError('vulnerabilityResponse', error.message);
+            const siteId = document.getElementById('vulnerabilitySiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
             }
+            const path = `/api/analysis/vulnerability?siteId=${siteId}`;
+            const result = await makeApiCall('GET', path, null, 'vulnerabilityResponse');
         }
 
         async function getDashboard() {
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/dashboard`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('dashboardResponse', data, !response.ok);
-            } catch (error) {
-                showError('dashboardResponse', error.message);
-            }
+            const result = await makeApiCall('GET', '/api/dashboard', null, 'dashboardResponse');
         }
 
         async function getLocationRecommendation() {
-            try {
-                const siteId = document.getElementById('recSiteId').value;
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
-
-                const response = await fetch(`${getBaseUrl()}/api/simulation/location/recommendation?siteId=${siteId}`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('recommendationResponse', data, !response.ok);
-            } catch (error) {
-                showError('recommendationResponse', error.message);
+            const siteId = document.getElementById('recSiteId').value;
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
             }
+            const path = `/api/simulation/location/recommendation?siteId=${siteId}`;
+            const result = await makeApiCall('GET', path, null, 'recommendationResponse');
         }
 
         async function compareLocation() {
-            try {
-                const requestBody = {
-                    currentSiteId: document.getElementById('compareCurrentSiteId').value,
-                    latitude: document.getElementById('compareLatitude').value,
-                    longitude: document.getElementById('compareLongitude').value,
-                    roadAddress: document.getElementById('compareRoadAddr').value,
-                    jibunAddress: document.getElementById('compareJibunAddr').value
-                };
+            const siteId = document.getElementById('compareCurrentSiteId').value; // siteId로 변경
+            const latitude = parseFloat(document.getElementById('compareLatitude').value);
+            const longitude = parseFloat(document.getElementById('compareLongitude').value);
+            const roadAddress = document.getElementById('compareRoadAddr').value;
+            const jibunAddress = document.getElementById('compareJibunAddr').value;
 
-                if (!requestBody.currentSiteId || !requestBody.latitude || !requestBody.longitude) {
-                    alert('필수 필드를 입력하세요.');
-                    return;
-                }
-
-                const response = await fetch(`${getBaseUrl()}/api/simulation/location/compare`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
-
-                const data = await response.json();
-                showResponse('compareResponse', data, !response.ok);
-            } catch (error) {
-                showError('compareResponse', error.message);
+            if (!siteId || isNaN(latitude) || isNaN(longitude)) {
+                alert('사업장 ID, 위도, 경도는 필수입니다.');
+                return;
             }
+
+            const requestBody = {
+                siteId: siteId, // currentSiteId를 siteId로 변경
+                candidate: {
+                    latitude: latitude,
+                    longitude: longitude,
+                    roadAddress: roadAddress,
+                    jibunAddress: jibunAddress
+                }
+            };
+            const result = await makeApiCall('POST', '/api/simulation/location/compare', requestBody, 'compareResponse');
         }
 
         async function runClimateSimulation() {
-            try {
-                const requestBody = {
-                    scenario: document.getElementById('climateScenario').value,
-                    hazardType: document.getElementById('climateHazardType').value
-                };
-
-                const response = await fetch(`${getBaseUrl()}/api/simulation/climate`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
-
-                const data = await response.json();
-                showResponse('climateResponse', data, !response.ok);
-            } catch (error) {
-                showError('climateResponse', error.message);
-            }
+            const requestBody = {
+                scenario: document.getElementById('climateScenario').value,
+                hazardType: document.getElementById('climateHazardType').value
+            };
+            const result = await makeApiCall('POST', '/api/simulation/climate', requestBody, 'climateResponse');
         }
 
         async function getReport() {
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/report`, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('reportResponse', data, !response.ok);
-            } catch (error) {
-                showError('reportResponse', error.message);
-            }
+            const result = await makeApiCall('GET', '/api/report', null, 'reportResponse');
         }
 
         async function registerReportData() {
+            const siteId = document.getElementById('reportDataSiteId').value;
+            const dataContent = document.getElementById('reportDataContent').value;
+
+            if (!siteId) {
+                alert('사업장 ID를 입력하세요.');
+                return;
+            }
+
+            let parsedData;
             try {
-                const siteId = document.getElementById('reportDataSiteId').value;
-                const dataContent = document.getElementById('reportDataContent').value;
+                parsedData = dataContent ? JSON.parse(dataContent) : {};
+            } catch (e) {
+                alert('잘못된 JSON 형식입니다.');
+                return;
+            }
 
-                if (!siteId) {
-                    alert('사업장 ID를 입력하세요.');
-                    return;
-                }
+            const requestBody = {
+                siteId: siteId,
+                data: parsedData // JSON 객체 자체를 'data' 필드에 넣음
+            };
 
-                let parsedData;
-                try {
-                    parsedData = dataContent ? JSON.parse(dataContent) : {};
-                } catch (e) {
-                    alert('잘못된 JSON 형식입니다.');
-                    return;
-                }
-
-                const requestBody = {
-                    siteId: siteId,
-                    ...parsedData
-                };
-
-                const response = await fetch(`${getBaseUrl()}/api/report/data`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(requestBody)
-                });
-
-                const data = await response.json();
-                showResponse('reportDataResponse', data, !response.ok);
-
-                if (response.ok) {
-                    alert('리포트 데이터 등록 성공!');
-                }
-            } catch (error) {
-                showError('reportDataResponse', error.message);
+            const result = await makeApiCall('POST', '/api/report/data', requestBody, 'reportDataResponse');
+            if (result.ok) {
+                alert('리포트 데이터 등록 성공!');
             }
         }
 
         async function getPastDisasters() {
-            try {
-                const year = document.getElementById('pastYear').value;
-                const disasterType = document.getElementById('pastDisasterType').value;
-                const severity = document.getElementById('pastSeverity').value;
+            const year = document.getElementById('pastYear').value;
+            const disasterType = document.getElementById('pastDisasterType').value;
+            const severity = document.getElementById('pastSeverity').value;
 
-                const url = `${getBaseUrl()}/api/past?year=${year}&disaster_type=${encodeURIComponent(disasterType)}&severity=${encodeURIComponent(severity)}`;
-                const response = await fetch(url, {
-                    headers: getAuthHeaders()
-                });
-
-                const data = await response.json();
-                showResponse('pastResponse', data, !response.ok);
-            } catch (error) {
-                showError('pastResponse', error.message);
-            }
+            const path = `/api/past?year=${year}&disaster_type=${encodeURIComponent(disasterType)}&severity=${encodeURIComponent(severity)}`;
+            const result = await makeApiCall('GET', path, null, 'pastResponse');
         }
 
         function switchTab(tabName) {
@@ -1150,12 +490,19 @@
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
             // 선택된 탭 활성화
-            event.target.classList.add('active');
+            const clickedButton = event.target.closest('.tab-button');
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            } else {
+                // event.target이 탭 버튼이 아닐 경우 (예: showRegisterForm에서 호출)
+                document.querySelector(`.tab-buttons button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            }
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
-
+        
         function showRegisterForm() {
             switchTab('auth');
+            // 회원가입 폼으로 스크롤 이동 또는 특정 회원가입 섹션 활성화 로직 추가 가능
         }
 
         // 초기화
@@ -1164,7 +511,9 @@
             const currentOrigin = window.location.origin;
             document.getElementById('baseUrl').value = currentOrigin;
             updateAuthUI();
+            
+            // 초기 로딩 시 'auth' 탭을 활성화
+            document.querySelector('.tab-buttons .tab-button').classList.add('active');
+            document.getElementById('authTab').classList.add('active');
         });
     </script>
-</body>
-</html>
