@@ -168,45 +168,45 @@ public class FastApiClient {
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
-	/**
-	 * 과거 재난 이력 조회
-	 *
-	 * GET /api/analysis/past-events?siteId={siteId}
-	 *
-	 * @param siteId 사업장 ID
-	 * @return 과거 이벤트
-	 */
-	public Mono<Map<String, Object>> getPastEvents(UUID siteId) {
-		return webClient.get()
-			.uri(uriBuilder -> uriBuilder
-				.path("/api/analysis/past-events")
-				.queryParam("siteId", siteId)
-				.build())
-			.header("X-API-Key", apiKey)
-			.retrieve()
-			.bodyToMono(MAP_TYPE_REF);
-	}
+	// /**
+	//  * 과거 재난 이력 조회
+	//  *
+	//  * GET /api/analysis/past-events?siteId={siteId}
+	//  *
+	//  * @param siteId 사업장 ID
+	//  * @return 과거 이벤트
+	//  */
+	// public Mono<Map<String, Object>> getPastEvents(UUID siteId) {
+	// 	return webClient.get()
+	// 		.uri(uriBuilder -> uriBuilder
+	// 			.path("/api/analysis/past-events")
+	// 			.queryParam("siteId", siteId)
+	// 			.build())
+	// 		.header("X-API-Key", apiKey)
+	// 		.retrieve()
+	// 		.bodyToMono(MAP_TYPE_REF);
+	// }
 
-	/**
-	 * SSP 시나리오별 리스크 전망
-	 *
-	 * GET /api/analysis/ssp?siteId={siteId}&hazardType={hazardType}
-	 *
-	 * @param siteId 사업장 ID
-	 * @param hazardType 위험 유형 (옵션)
-	 * @return SSP 전망
-	 */
-	public Mono<Map<String, Object>> getSSPProjection(UUID siteId, String hazardType) {
-		return webClient.get()
-			.uri(uriBuilder -> uriBuilder
-				.path("/api/analysis/ssp")
-				.queryParam("siteId", siteId)
-				.queryParamIfPresent("hazardType", java.util.Optional.ofNullable(hazardType))
-				.build())
-			.header("X-API-Key", apiKey)
-			.retrieve()
-			.bodyToMono(MAP_TYPE_REF);
-	}
+	// /**
+	//  * SSP 시나리오별 리스크 전망
+	//  *
+	//  * GET /api/analysis/ssp?siteId={siteId}&hazardType={hazardType}
+	//  *
+	//  * @param siteId 사업장 ID
+	//  * @param hazardType 위험 유형 (옵션)
+	//  * @return SSP 전망
+	//  */
+	// public Mono<Map<String, Object>> getSSPProjection(UUID siteId, String hazardType) {
+	// 	return webClient.get()
+	// 		.uri(uriBuilder -> uriBuilder
+	// 			.path("/api/analysis/ssp")
+	// 			.queryParam("siteId", siteId)
+	// 			.queryParamIfPresent("hazardType", java.util.Optional.ofNullable(hazardType))
+	// 			.build())
+	// 		.header("X-API-Key", apiKey)
+	// 		.retrieve()
+	// 		.bodyToMono(MAP_TYPE_REF);
+	// }
 
 	/**
 	 * 재무 영향 분석
@@ -246,26 +246,26 @@ public class FastApiClient {
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
-	/**
-	 * 통합 분석 결과
-	 *
-	 * GET /api/analysis/total?siteId={siteId}&hazardType={hazardType}
-	 *
-	 * @param siteId 사업장 ID
-	 * @param hazardType 위험 유형
-	 * @return 통합 분석 결과
-	 */
-	public Mono<Map<String, Object>> getTotalAnalysis(UUID siteId, String hazardType) {
-		return webClient.get()
-			.uri(uriBuilder -> uriBuilder
-				.path("/api/analysis/total")
-				.queryParam("siteId", siteId)
-				.queryParam("hazardType", hazardType)
-				.build())
-			.header("X-API-Key", apiKey)
-			.retrieve()
-			.bodyToMono(MAP_TYPE_REF);
-	}
+	// /**
+	//  * 통합 분석 결과
+	//  *
+	//  * GET /api/analysis/total?siteId={siteId}&hazardType={hazardType}
+	//  *
+	//  * @param siteId 사업장 ID
+	//  * @param hazardType 위험 유형
+	//  * @return 통합 분석 결과
+	//  */
+	// public Mono<Map<String, Object>> getTotalAnalysis(UUID siteId, String hazardType) {
+	// 	return webClient.get()
+	// 		.uri(uriBuilder -> uriBuilder
+	// 			.path("/api/analysis/total")
+	// 			.queryParam("siteId", siteId)
+	// 			.queryParam("hazardType", hazardType)
+	// 			.build())
+	// 		.header("X-API-Key", apiKey)
+	// 		.retrieve()
+	// 		.bodyToMono(MAP_TYPE_REF);
+	// }
 
 	/**
 	 * 사업장 이전 시뮬레이션
@@ -427,17 +427,21 @@ public class FastApiClient {
 	/**
 	 * 분석 개요 조회
 	 *
-	 * GET /api/analysis/summary?siteId={siteId}
+	 * GET /api/analysis/summary?siteId={siteId}&latitude={latitude}&longitude={longitude}
 	 *
 	 * @param siteId 사업장 ID
+	 * @param latitude 위도
+	 * @param longitude 경도
 	 * @return 분석 개요 정보
 	 */
-	public Mono<Map<String, Object>> getAnalysisSummary(UUID siteId) {
-		log.info("FastAPI 분석 개요 조회: siteId={}", siteId);
+	public Mono<Map<String, Object>> getAnalysisSummary(UUID siteId, Double latitude, Double longitude) {
+		log.info("FastAPI 분석 개요 조회: siteId={}, latitude={}, longitude={}", siteId, latitude, longitude);
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/api/analysis/summary")
 				.queryParam("siteId", siteId)
+				.queryParam("latitude", latitude)
+				.queryParam("longitude", longitude)
 				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()

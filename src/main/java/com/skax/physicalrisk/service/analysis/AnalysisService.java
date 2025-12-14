@@ -140,10 +140,16 @@ public class AnalysisService {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching analysis summary for site: {}, user: {}", siteId, userId);
 
-		// 권한 확인
-		getSiteWithAuth(siteId, userId);
+		// 권한 확인 및 Site 정보 조회
+		Site site = getSiteWithAuth(siteId, userId);
 
-		Map<String, Object> response = fastApiClient.getAnalysisSummary(siteId).block();
+		// Site에서 위경도 추출
+		Double latitude = site.getLatitude() != null ? site.getLatitude().doubleValue() : null;
+		Double longitude = site.getLongitude() != null ? site.getLongitude().doubleValue() : null;
+
+		log.info("Calling FastAPI with siteId={}, latitude={}, longitude={}", siteId, latitude, longitude);
+
+		Map<String, Object> response = fastApiClient.getAnalysisSummary(siteId, latitude, longitude).block();
 		return response;
 	}
 
