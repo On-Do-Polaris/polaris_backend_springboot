@@ -39,16 +39,16 @@ public class PastController {
 	 *
 	 * GET /api/past?year={year}&disaster_type={disaster_type}&severity={severity}
 	 *
-	 * @param year         연도 (required)
-	 * @param disasterType 재해 유형 (required)
-	 * @param severity     심각도 (required)
+	 * @param year         연도 (optional)
+	 * @param disasterType 재해 유형 (optional)
+	 * @param severity     심각도 (optional)
 	 * @return 과거 재해 이력 목록
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 * @throws ValidationException   파라미터가 유효하지 않은 경우 (422)
 	 */
 	@Operation(
 		summary = "과거 재해 이력 조회",
-		description = "연도, 재해 유형, 심각도에 따른 과거 재해 이력을 조회한다."
+		description = "연도, 재해 유형, 심각도에 따른 과거 재해 이력을 조회한다. 모든 파라미터는 선택적이며, 빈 값으로 호출 시 전체 이력을 조회한다."
 	)
 	@ApiResponse(
 		responseCode = "200",
@@ -90,12 +90,12 @@ public class PastController {
 	)
 	@GetMapping
 	public ResponseEntity<PastDisasterResponse> getPastDisasters(
-		@Parameter(description = "연도", required = true, example = "2023")
-		@RequestParam int year,
-		@Parameter(description = "재해 유형", required = true, example = "호우")
-		@RequestParam("disaster_type") String disasterType,
-		@Parameter(description = "심각도", required = true, example = "경보")
-		@RequestParam String severity
+		@Parameter(description = "연도", required = false, example = "2023")
+		@RequestParam(required = false) Integer year,
+		@Parameter(description = "재해 유형", required = false, example = "호우")
+		@RequestParam(value = "disaster_type", required = false) String disasterType,
+		@Parameter(description = "심각도", required = false, example = "경보")
+		@RequestParam(required = false) String severity
 	) {
 		log.info("GET /api/past?year={}&disaster_type={}&severity={}", year, disasterType, severity);
 		PastDisasterResponse response = pastDisasterService.getPastDisasters(year, disasterType, severity);

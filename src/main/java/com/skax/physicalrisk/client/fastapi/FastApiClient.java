@@ -337,22 +337,22 @@ public class FastApiClient {
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
-	/**
-	 * 리포트 웹 뷰 조회 (사용자 ID 기반) - DEPRECATED
-	 *
-	 * ⚠️ WARNING: FastAPI는 userId가 아닌 reportId를 요구합니다.
-	 * 이 메서드는 기존 호환성을 위해 남겨두었지만 작동하지 않을 수 있습니다.
-	 *
-	 * @param userId 사용자 ID
-	 * @return 웹 뷰 리포트
-	 * @deprecated FastAPI OpenAPI 스펙과 불일치. getReportWebViewByReportId 사용 권장
-	 */
-	@Deprecated
-	public Mono<Map<String, Object>> getReportWebViewByUserId(UUID userId) {
-		log.warn("⚠️ getReportWebViewByUserId는 deprecated됨. FastAPI는 reportId를 요구하지만 userId={}가 전달됨", userId);
-		// 임시로 userId를 reportId로 변환 (실제로는 DB에서 매핑 필요)
-		return getReportWebViewByReportId(userId.toString());
-	}
+	// /**
+	//  * 리포트 웹 뷰 조회 (사용자 ID 기반) - DEPRECATED
+	//  *
+	//  * ⚠️ WARNING: FastAPI는 userId가 아닌 reportId를 요구합니다.
+	//  * 이 메서드는 기존 호환성을 위해 남겨두었지만 작동하지 않을 수 있습니다.
+	//  *
+	//  * @param userId 사용자 ID
+	//  * @return 웹 뷰 리포트
+	//  * @deprecated FastAPI OpenAPI 스펙과 불일치. getReportWebViewByReportId 사용 권장
+	//  */
+	// @Deprecated
+	// public Mono<Map<String, Object>> getReportWebViewByUserId(UUID userId) {
+	// 	log.warn("⚠️ getReportWebViewByUserId는 deprecated됨. FastAPI는 reportId를 요구하지만 userId={}가 전달됨", userId);
+	// 	// 임시로 userId를 reportId로 변환 (실제로는 DB에서 매핑 필요)
+	// 	return getReportWebViewByReportId(userId.toString());
+	// }
 
 	/**
 	 * 리포트 PDF 다운로드 정보 조회 (리포트 ID 기반)
@@ -373,21 +373,21 @@ public class FastApiClient {
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
-	/**
-	 * 리포트 PDF 다운로드 정보 조회 (사용자 ID 기반) - DEPRECATED
-	 *
-	 * ⚠️ WARNING: FastAPI는 userId가 아닌 reportId를 요구합니다.
-	 *
-	 * @param userId 사용자 ID
-	 * @return PDF 다운로드 정보
-	 * @deprecated FastAPI OpenAPI 스펙과 불일치. getReportPdfByReportId 사용 권장
-	 */
-	@Deprecated
-	public Mono<Map<String, Object>> getReportPdfByUserId(UUID userId) {
-		log.warn("⚠️ getReportPdfByUserId는 deprecated됨. FastAPI는 reportId를 요구하지만 userId={}가 전달됨", userId);
-		// 임시로 userId를 reportId로 변환 (실제로는 DB에서 매핑 필요)
-		return getReportPdfByReportId(userId.toString());
-	}
+	// /**
+	//  * 리포트 PDF 다운로드 정보 조회 (사용자 ID 기반) - DEPRECATED
+	//  *
+	//  * ⚠️ WARNING: FastAPI는 userId가 아닌 reportId를 요구합니다.
+	//  *
+	//  * @param userId 사용자 ID
+	//  * @return PDF 다운로드 정보
+	//  * @deprecated FastAPI OpenAPI 스펙과 불일치. getReportPdfByReportId 사용 권장
+	//  */
+	// @Deprecated
+	// public Mono<Map<String, Object>> getReportPdfByUserId(UUID userId) {
+	// 	log.warn("⚠️ getReportPdfByUserId는 deprecated됨. FastAPI는 reportId를 요구하지만 userId={}가 전달됨", userId);
+	// 	// 임시로 userId를 reportId로 변환 (실제로는 DB에서 매핑 필요)
+	// 	return getReportPdfByReportId(userId.toString());
+	// }
 
 	/**
 	 * 리포트 삭제
@@ -409,20 +409,20 @@ public class FastApiClient {
 			.bodyToMono(MAP_TYPE_REF);
 	}
 
-	/**
-	 * 리포트 삭제 (사용자 ID 기반) - DEPRECATED
-	 *
-	 * ⚠️ WARNING: 이 메서드는 deprecated되었습니다. deleteReport(userId) 사용 권장
-	 *
-	 * @param userId 사용자 ID
-	 * @return 삭제 결과
-	 * @deprecated deleteReport(UUID userId) 사용 권장
-	 */
-	@Deprecated
-	public Mono<Map<String, Object>> deleteReportByUserId(UUID userId) {
-		log.warn("⚠️ deleteReportByUserId는 deprecated됨. deleteReport(userId) 사용 권장");
-		return deleteReport(userId);
-	}
+	// /**
+	//  * 리포트 삭제 (사용자 ID 기반) - DEPRECATED
+	//  *
+	//  * ⚠️ WARNING: 이 메서드는 deprecated되었습니다. deleteReport(userId) 사용 권장
+	//  *
+	//  * @param userId 사용자 ID
+	//  * @return 삭제 결과
+	//  * @deprecated deleteReport(UUID userId) 사용 권장
+	//  */
+	// @Deprecated
+	// public Mono<Map<String, Object>> deleteReportByUserId(UUID userId) {
+	// 	log.warn("⚠️ deleteReportByUserId는 deprecated됨. deleteReport(userId) 사용 권장");
+	// 	return deleteReport(userId);
+	// }
 
 	/**
 	 * 분석 개요 조회
@@ -509,21 +509,28 @@ public class FastApiClient {
 	 *
 	 * GET /api/past?year={year}&disaster_type={disaster_type}&severity={severity}
 	 *
-	 * @param year 연도
-	 * @param disasterType 재해 유형
-	 * @param severity 심각도
+	 * @param year 연도 (optional)
+	 * @param disasterType 재해 유형 (optional)
+	 * @param severity 심각도 (optional)
 	 * @return 과거 재해 이력
 	 */
-	public Mono<Map<String, Object>> getPastDisasters(int year, String disasterType, String severity) {
+	public Mono<Map<String, Object>> getPastDisasters(Integer year, String disasterType, String severity) {
 		log.info("FastAPI 과거 재해 조회: year={}, disaster_type={}, severity={}",
 			year, disasterType, severity);
 		return webClient.get()
-			.uri(uriBuilder -> uriBuilder
-				.path("/api/past")
-				.queryParam("year", year)
-				.queryParam("disaster_type", disasterType)
-				.queryParam("severity", severity)
-				.build())
+			.uri(uriBuilder -> {
+				var builder = uriBuilder.path("/api/past");
+				if (year != null) {
+					builder.queryParam("year", year);
+				}
+				if (disasterType != null && !disasterType.isEmpty()) {
+					builder.queryParam("disaster_type", disasterType);
+				}
+				if (severity != null && !severity.isEmpty()) {
+					builder.queryParam("severity", severity);
+				}
+				return builder.build();
+			})
 			.header("X-API-Key", apiKey)
 			.retrieve()
 			.bodyToMono(MAP_TYPE_REF);
