@@ -109,14 +109,20 @@ public class UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// 사용자의 모든 사업장 조회
+		// 1. 사용자의 Report 삭제 (User와 직접 연결)
+		reportRepository.findByUser(user).ifPresent(report -> {
+			reportRepository.delete(report);
+			log.info("Deleted report for user: {}", userId);
+		});
+
+		// 2. 사용자의 모든 사업장 조회
 		List<Site> sites = siteRepository.findByUser(user);
 
 		if (!sites.isEmpty()) {
 			log.info("Found {} sites for user: {}", sites.size(), userId);
 
 			for (Site site : sites) {
-				// 1. 각 사업장의 AnalysisJob 삭제
+				// 각 사업장의 AnalysisJob 삭제
 				int deletedJobs = analysisJobRepository.findAll().stream()
 					.filter(job -> job.getSite().getId().equals(site.getId()))
 					.mapToInt(job -> {
@@ -126,18 +132,6 @@ public class UserService {
 					.sum();
 				if (deletedJobs > 0) {
 					log.info("Deleted {} analysis jobs for site: {}", deletedJobs, site.getId());
-				}
-
-				// 2. 각 사업장의 Report 삭제
-				int deletedReports = reportRepository.findAll().stream()
-					.filter(report -> report.getSite().getId().equals(site.getId()))
-					.mapToInt(report -> {
-						reportRepository.delete(report);
-						return 1;
-					})
-					.sum();
-				if (deletedReports > 0) {
-					log.info("Deleted {} reports for site: {}", deletedReports, site.getId());
 				}
 			}
 
