@@ -427,17 +427,21 @@ public class FastApiClient {
 	/**
 	 * 분석 개요 조회
 	 *
-	 * GET /api/analysis/summary?siteId={siteId}
+	 * GET /api/analysis/summary?siteId={siteId}&latitude={latitude}&longitude={longitude}
 	 *
 	 * @param siteId 사업장 ID
+	 * @param latitude 위도
+	 * @param longitude 경도
 	 * @return 분석 개요 정보
 	 */
-	public Mono<Map<String, Object>> getAnalysisSummary(UUID siteId) {
-		log.info("FastAPI 분석 개요 조회: siteId={}", siteId);
+	public Mono<Map<String, Object>> getAnalysisSummary(UUID siteId, Double latitude, Double longitude) {
+		log.info("FastAPI 분석 개요 조회: siteId={}, latitude={}, longitude={}", siteId, latitude, longitude);
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/api/analysis/summary")
 				.queryParam("siteId", siteId)
+				.queryParam("latitude", latitude)
+				.queryParam("longitude", longitude)
 				.build())
 			.header("X-API-Key", apiKey)
 			.retrieve()
