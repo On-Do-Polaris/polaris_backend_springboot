@@ -36,18 +36,18 @@ public class PastDisasterService {
 	/**
 	 * 과거 재해 이력 조회
 	 *
-	 * @param year         연도
-	 * @param disasterType 재해 유형
-	 * @param severity     심각도
+	 * @param year         연도 (optional)
+	 * @param disasterType 재해 유형 (optional)
+	 * @param severity     심각도 (optional)
 	 * @return 과거 재해 이력
 	 */
-	public PastDisasterResponse getPastDisasters(int year, String disasterType, String severity) {
+	public PastDisasterResponse getPastDisasters(Integer year, String disasterType, String severity) {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching past disasters for year={}, disasterType={}, severity={}, userId={}",
 			year, disasterType, severity, userId);
 
-		// 파라미터 검증
-		if (year < 1900 || year > 2100) {
+		// 파라미터 검증 (year가 제공된 경우에만)
+		if (year != null && (year < 1900 || year > 2100)) {
 			throw new BusinessException(ErrorCode.INVALID_REQUEST, "유효하지 않은 연도입니다");
 		}
 
