@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -146,20 +145,24 @@ public class ReportController {
 	@PostMapping(value = "/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerReportData(
 		@Parameter(
-			description = "사업장 ID 정보 (JSON)",
+			description = "사업장 ID",
 			required = true,
-			schema = @Schema(implementation = ReportDataRequest.class),
-			content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+			example = "550e8400-e29b-41d4-a716-446655440000"
 		)
-		@RequestPart(value = "data", required = true) @Valid ReportDataRequest request,
+		@RequestParam(value = "siteId", required = true) UUID siteId,
 		@Parameter(
 			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
-			required = true,
-			content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+			required = true
 		)
 		@RequestPart(value = "file", required = true) MultipartFile file
 	) {
-		log.info("POST /api/report/data - request: {}, fileName: {}", request, file.getOriginalFilename());
+		log.info("POST /api/report/data - siteId: {}, fileName: {}", siteId, file.getOriginalFilename());
+
+		// DTO 객체 생성
+		ReportDataRequest request = ReportDataRequest.builder()
+			.siteId(siteId)
+			.build();
+
 		reportService.registerReportData(request, file);
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("리포트 데이터가 등록되었습니다."));
 	}
