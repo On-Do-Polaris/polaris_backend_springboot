@@ -521,8 +521,7 @@ public class FastApiClient {
             return webClient.post()
                 .uri("/api/reports/data")
                 .header("X-API-Key", apiKey)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
+				.body(BodyInserters.fromMultipartData(builder.build())) // 얘가 알아서 헤더(boundary 포함)를 만들어 줌
                 .retrieve()
                 .bodyToMono(MAP_TYPE_REF)
                 .doOnSuccess(response -> log.info("리포트 데이터 등록 성공: {}", response))
