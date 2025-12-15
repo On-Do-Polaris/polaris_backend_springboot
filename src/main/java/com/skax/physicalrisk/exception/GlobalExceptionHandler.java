@@ -144,6 +144,37 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * HttpMediaTypeNotSupportedException 처리
+	 *
+	 * @param ex HttpMediaTypeNotSupportedException
+	 * @return ErrorResponse
+	 */
+	@ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+	public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+		org.springframework.web.HttpMediaTypeNotSupportedException ex) {
+		log.error("Unsupported media type: {} - Supported types: {}",
+			ex.getContentType(), ex.getSupportedMediaTypes());
+
+		String message = String.format(
+			"잘못된 Content-Type입니다. multipart/form-data 요청 시 'data' 파트는 Content-Type을 'application/json'으로 설정해야 합니다. " +
+			"현재 전송된 Content-Type: %s",
+			ex.getContentType()
+		);
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.result("error")
+			.message(message)
+			.errorCode(ErrorCode.INVALID_REQUEST.getCode())
+			.code(ErrorCode.INVALID_REQUEST.getCode())
+			.timestamp(LocalDateTime.now())
+			.build();
+
+		return ResponseEntity
+			.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+			.body(errorResponse);
+	}
+
+	/**
 	 * 기타 모든 예외 처리
 	 *
 	 * @param ex Exception
