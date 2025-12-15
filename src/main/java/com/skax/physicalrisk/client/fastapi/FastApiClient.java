@@ -47,11 +47,11 @@ public class FastApiClient {
 	}
 
 	/**
-	 * 분석 시작 요청
+	 * 분석 시작 요청 (단일/다중 사업장 모두 지원)
 	 *
 	 * POST /api/analysis/start
 	 *
-	 * @param request 분석 요청 DTO
+	 * @param request 분석 요청 DTO (sites 리스트 포함)
 	 * @return 작업 상태 응답
 	 */
 	public Mono<Map<String, Object>> startAnalysis(StartAnalysisRequestDto request) {
@@ -67,14 +67,14 @@ public class FastApiClient {
 
 		// 4. 변환된 요청 생성
 		StartAnalysisRequestDto convertedRequest = StartAnalysisRequestDto.builder()
-			.site(request.getSite())
+			.sites(request.getSites())
 			.hazardTypes(convertedHazardTypes)
 			.priority(normalizedPriority)
 			.options(request.getOptions())
 			.build();
 
-		log.info("FastAPI 분석 시작 요청: siteId={}, hazardTypes={}, priority={}",
-			convertedRequest.getSite().getId(),
+		log.info("FastAPI 분석 시작 요청: siteCount={}, hazardTypes={}, priority={}",
+			convertedRequest.getSites() != null ? convertedRequest.getSites().size() : 0,
 			convertedRequest.getHazardTypes(),
 			convertedRequest.getPriority());
 		log.debug("전체 요청 본문: {}", convertedRequest);
