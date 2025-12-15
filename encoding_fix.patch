@@ -1,0 +1,94 @@
+diff --git a/src/main/java/com/skax/physicalrisk/client/fastapi/FastApiClient.java b/src/main/java/com/skax/physicalrisk/client/fastapi/FastApiClient.java
+index 242579b..61ce849 100644
+--- a/src/main/java/com/skax/physicalrisk/client/fastapi/FastApiClient.java
++++ b/src/main/java/com/skax/physicalrisk/client/fastapi/FastApiClient.java
+@@ -162,12 +162,13 @@
+ 	 * @param hazardType 위험 유형 (옵션)
+ 	 * @return 물리적 리스크 점수
+ 	 */
+-	public Mono<Map<String, Object>> getPhysicalRiskScores(UUID siteId, String hazardType) {
++	public Mono<Map<String, Object>> getPhysicalRiskScores(UUID siteId, String hazardType, String term) {
+ 		return webClient.get()
+ 			.uri(uriBuilder -> uriBuilder
+ 				.path("/api/analysis/physical-risk-scores")
+ 				.queryParam("siteId", siteId)
+ 				.queryParamIfPresent("hazardType", java.util.Optional.ofNullable(hazardType))
++				.queryParamIfPresent("term", java.util.Optional.ofNullable(term))
+ 				.build())
+ 			.header("X-API-Key", apiKey)
+ 			.retrieve()
+@@ -222,11 +223,13 @@
+ 	 * @param siteId 사업장 ID
+ 	 * @return 재무 영향
+ 	 */
+-	public Mono<Map<String, Object>> getFinancialImpact(UUID siteId) {
++	public Mono<Map<String, Object>> getFinancialImpact(UUID siteId, String hazardType, String term) {
+ 		return webClient.get()
+ 			.uri(uriBuilder -> uriBuilder
+ 				.path("/api/analysis/financial-impacts")
+ 				.queryParam("siteId", siteId)
++				.queryParamIfPresent("hazardType", java.util.Optional.ofNullable(hazardType))
++				.queryParamIfPresent("term", java.util.Optional.ofNullable(term))
+ 				.build())
+ 			.header("X-API-Key", apiKey)
+ 			.retrieve()
+diff --git a/src/main/java/com/skax/physicalrisk/controller/AnalysisController.java b/src/main/java/com/skax/physicalrisk/controller/AnalysisController.java
+index 2998202..1073231 100644
+--- a/src/main/java/com/skax/physicalrisk/controller/AnalysisController.java
++++ b/src/main/java/com/skax/physicalrisk/controller/AnalysisController.java
+@@ -288,7 +288,7 @@
+ 		@RequestParam String hazardType
+ 	) {
+ 		log.info("GET /api/analysis/physical-risk?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
+-		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getPhysicalRiskScores(siteId, hazardType)));
++		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getPhysicalRiskScores(siteId, hazardType, term)));
+ 	}
+ 
+ 	/**
+@@ -357,7 +357,7 @@
+ 		@RequestParam String hazardType
+ 	) {
+ 		log.info("GET /api/analysis/aal?siteId={}&term={}&hazardType={}", siteId, term, hazardType);
+-		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getFinancialImpact(siteId)));
++		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(analysisService.getFinancialImpact(siteId, hazardType, term)));
+ 	}
+ 
+ 	/**
+diff --git a/src/main/java/com/skax/physicalrisk/service/analysis/AnalysisService.java b/src/main/java/com/skax/physicalrisk/service/analysis/AnalysisService.java
+index 9a387fc..dc787ed 100644
+--- a/src/main/java/com/skax/physicalrisk/service/analysis/AnalysisService.java
++++ b/src/main/java/com/skax/physicalrisk/service/analysis/AnalysisService.java
+@@ -209,24 +209,24 @@
+ 	 * @param hazardType 위험 유형 (옵션)
+ 	 * @return 물리적 리스크 점수
+ 	 */
+-	public PhysicalRiskScoreResponse getPhysicalRiskScores(UUID siteId, String hazardType) {
++	public PhysicalRiskScoreResponse getPhysicalRiskScores(UUID siteId, String hazardType, String term) {
+ 		UUID userId = SecurityUtil.getCurrentUserId();
+-		log.info("Fetching physical risk scores for site: {}, hazardType: {}", siteId, hazardType);
++		log.info("Fetching physical risk scores for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
+ 
+ 		getSiteWithAuth(siteId, userId);
+-		Map<String, Object> response = fastApiClient.getPhysicalRiskScores(siteId, hazardType).block();
++		Map<String, Object> response = fastApiClient.getPhysicalRiskScores(siteId, hazardType, term).block();
+ 		return convertToDto(response, PhysicalRiskScoreResponse.class);
+ 	}
+ 
+ 	/**
+ 	 * 재무 영향 분석 (v0.2: /api/analysis/aal)
+ 	 *
+ 	 * @param siteId 사업장 ID
+ 	 * @return 재무 영향
+ 	 */
+-	public FinancialImpactResponse getFinancialImpact(UUID siteId) {
++	public FinancialImpactResponse getFinancialImpact(UUID siteId, String hazardType, String term) {
+ 		UUID userId = SecurityUtil.getCurrentUserId();
+-		log.info("Fetching financial impact for site: {}", siteId);
++		log.info("Fetching financial impact for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
+ 
+ 		getSiteWithAuth(siteId, userId);
+-		Map<String, Object> response = fastApiClient.getFinancialImpact(siteId).block();
++		Map<String, Object> response = fastApiClient.getFinancialImpact(siteId, hazardType, term).block();
+ 		return convertToDto(response, FinancialImpactResponse.class);
+ 	}
+ 
