@@ -148,14 +148,16 @@ public class ReportController {
 		@Parameter(
 			description = "사업장 ID 정보 (JSON)",
 			required = true,
-			schema = @Schema(implementation = ReportDataRequest.class)
+			schema = @Schema(implementation = ReportDataRequest.class),
+			content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
 		)
-		@RequestPart("data") @Valid ReportDataRequest request,
+		@RequestPart(value = "data", required = true) @Valid ReportDataRequest request,
 		@Parameter(
 			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
-			required = true
+			required = true,
+			content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 		)
-		@RequestPart("file") MultipartFile file
+		@RequestPart(value = "file", required = true) MultipartFile file
 	) {
 		log.info("POST /api/report/data - request: {}, fileName: {}", request, file.getOriginalFilename());
 		reportService.registerReportData(request, file);
