@@ -6,11 +6,17 @@ import com.skax.physicalrisk.util.HazardTypeMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -489,23 +495,45 @@ public class FastApiClient {
 	}
 
 	/**
-	 * 리포트 추가 데이터 등록
+	 * 리포트 추가 데이터 등록 (파일 포함)
 	 *
 	 * POST /api/reports/data
 	 *
-	 * @param request 리포트 데이터 요청 (userId 포함)
+	 * @param userId 사용자 ID
+	 * @param siteId 사업장 ID
+	 * @param file   업로드할 파일
 	 * @return 등록 결과
 	 */
-	public Mono<Map<String, Object>> registerReportData(Map<String, Object> request) {
-		log.info("FastAPI 리포트 데이터 등록: userId={}", request.get("userId"));
-		return webClient.post()
-			.uri("/api/reports/data")
-			.header("X-API-Key", apiKey)
-			.bodyValue(request)
-			.retrieve()
-			.bodyToMono(MAP_TYPE_REF)
-			.doOnSuccess(response -> log.info("리포트 데이터 등록 성공: {}", response))
-			.doOnError(error -> log.error("리포트 데이터 등록 실패", error));
+	public Mono<Map<String, Object>> registerReportData(UUID userId, UUID siteId, MultipartFile file) {
+		log.info("FastAPI 리포트 데이터 등록: userId={}, siteId={}, fileName={}", userId, siteId, file.getOriginalFilename());
+
+		try {
+			MultipartBodyBuilder builder = new MultipartBodyBuilder();
+			builder.part("userId", userId.toString());
+			builder.part("siteId", siteId.toString());
+			builder.part("file", file.getResource())
+				.filename(file.getOriginalFilename())
+				.contentType(MediaType.parseMediaType(file.getContentType() != null ? file.getContentType() : "application/octet-stream"));
+
+			return webClient.post()
+				.uri("/api/reports/data")
+				.header("X-API-Key", apiKey)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(BodyInserters.fromMultipartData(builder.build()))
+				.retrieve()
+				.bodyToMono(MAP_TYPE_REF)
+				.doOnSuccess(response -> log.info("리포트 데이터 등록 성공: {}", response))
+				.doOnError(error -> {
+					log.error("리포트 데이터 등록 실패", error);
+					if (error instanceof WebClientResponseException) {
+						WebClientResponseException ex = (WebClientResponseException) error;
+						log.error("응답 코드: {}, 응답 본문: {}", ex.getStatusCode(), ex.getResponseBodyAsString());
+					}
+				});
+		} catch (Exception e) {
+			log.error("리포트 데이터 등록 중 예외 발생", e);
+			return Mono.error(e);
+		}
 	}
 
 	/**
