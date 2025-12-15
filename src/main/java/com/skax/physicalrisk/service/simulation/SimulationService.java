@@ -1,5 +1,6 @@
 package com.skax.physicalrisk.service.simulation;
-
+// 반드시 이 패키지여야 합니다.
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.client.fastapi.dto.AalAnalysisData;
@@ -99,47 +100,98 @@ public class SimulationService {
 		return convertToRelocationResponse(response);
 	}
 
-	/**
-	 * 기후 시뮬레이션
-	 *
-	 * 현재 사용자의 모든 사업장에 대해 2020-2100년 기간의 시뮬레이션을 자동 실행
-	 *
-	 * @param request 기후 시뮬레이션 요청 (scenario, hazardType만 포함)
-	 * @return 시뮬레이션 결과
-	 */
-	public ClimateSimulationResponse runClimateSimulation(ClimateSimulationRequest request) {
-		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Running climate simulation for user: {}, scenario={}, hazardType={}",
-			userId, request.getScenario(), request.getHazardType());
+/**
+     * 기후 시뮬레이션 실행
+     *
+     * 1. DB에서 사용자 사업장 정보 조회 (이름, 지역코드 등)
+     * 2. FastAPI에 연산 요청 (Site ID만 전달)
+     * 3. 결과 병합 (DB 정보 + FastAPI 연산 결과)
+     */
+    public ClimateSimulationResponse runClimateSimulation(ClimateSimulationRequest request) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+        log.info("Running climate simulation for user: {}, scenario={}, hazardType={}",
+            userId, request.getScenario(), request.getHazardType());
 
-		// 사용자 조회 및 검증
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+        // 1. 사용자 및 사업장 조회
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		// 사용자의 모든 사업장 조회
-		List<Site> sites = siteRepository.findByUser(user);
-		if (sites.isEmpty()) {
-			throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND, "사용자의 사업장이 없습니다");
-		}
+        List<Site> sites = siteRepository.findByUser(user);
+        if (sites.isEmpty()) {
+            throw new ResourceNotFoundException(ErrorCode.SITE_NOT_FOUND, "사용자의 사업장이 없습니다");
+        }
 
-		// 사업장 ID 목록 추출
-		List<UUID> siteIds = sites.stream()
-			.map(Site::getId)
-			.collect(Collectors.toList());
+        // 2. FastAPI 요청 데이터 생성
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+        
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("scenario", request.getScenario());
+        requestMap.put("hazardType", request.getHazardType());
+        requestMap.put("siteIds", siteIds);
+        requestMap.put("startYear", 2025); // 요구사항에 맞춰 2025년으로 변경 (기존 2020)
+        requestMap.put("endYear", 2100);
 
-		log.info("Fetched {} sites for climate simulation", siteIds.size());
+        // 3. FastAPI 호출 (비동기 결과를 동기로 대기)
+        // 예상 FastAPI 응답 구조:
+        // {
+        //   "regionScores": { "11010": { "2025": 45.2, ... } },
+        //   "siteAALs": { "uuid-string": { "2025": 12.5, ... } }
+        // }
+        Map<String, Object> apiResponse = fastApiClient.runClimateSimulation(requestMap).block();
 
-		// FastAPI 요청 데이터 생성 (모든 사업장 + 전체 연도 범위)
-		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("scenario", request.getScenario());
-		requestMap.put("hazardType", request.getHazardType());
-		requestMap.put("siteIds", siteIds);
-		requestMap.put("startYear", 2020);  // 전체 기간: 2020-2100
+        if (apiResponse == null) {
+            throw new RuntimeException("FastAPI로부터 응답을 받지 못했습니다.");
+        }
 
-		// FastAPI 호출
-		Map<String, Object> response = fastApiClient.runClimateSimulation(requestMap).block();
-		return convertToDto(response, ClimateSimulationResponse.class);
-	}
+        // 4. 응답 데이터 조립 (DB 데이터 + API 결과 병합)
+        return buildSimulationResponse(request, sites, apiResponse);
+    }
+
+    /**
+     * DB의 사업장 정보와 FastAPI의 계산 결과를 병합하여 최종 DTO 생성
+     */
+    private ClimateSimulationResponse buildSimulationResponse(
+            ClimateSimulationRequest request, 
+            List<Site> sites, 
+            Map<String, Object> apiResponse
+    ) {
+        ObjectMapper mapper = new ObjectMapper(); // 또는 Bean으로 주입받은 mapper 사용
+
+        // 4-1. 행정구역 점수 파싱 (regionScores)
+        Map<String, Map<String, Double>> regionScores = mapper.convertValue(
+                apiResponse.get("regionScores"), 
+                new TypeReference<Map<String, Map<String, Double>>>() {}
+        );
+
+        // 4-2. 사업장별 AAL 결과 파싱 (Key: SiteId String, Value: Map<Year, Score>)
+        Map<String, Map<String, Double>> siteAalResults = mapper.convertValue(
+                apiResponse.get("siteAALs"), // FastAPI가 이 키로 사업장 결과를 준다고 가정
+                new TypeReference<Map<String, Map<String, Double>>>() {}
+        );
+
+        // 4-3. Sites 리스트 조립 (DB의 이름/지역코드 + API의 AAL 값)
+        List<ClimateSimulationResponse.SiteSimulationData> siteDataList = sites.stream()
+        	.map(site -> {
+            	Map<String, Double> aalData = siteAalResults.getOrDefault(site.getId().toString(), new HashMap<>());
+                
+                return ClimateSimulationResponse.SiteSimulationData.builder()
+                        .siteId(site.getId())
+                        .siteName(site.getName())        // DB에서 가져온 이름
+                        .regionCode(site.getRegionCode()) // DB에서 가져온 지역코드
+                        .aalByYear(aalData)              // API에서 가져온 연산 결과
+                        .build();
+			})
+            .collect(Collectors.toList());
+
+        // 4-4. 최종 DTO 반환
+        return ClimateSimulationResponse.builder()
+                .scenario(request.getScenario())
+                .hazardType(request.getHazardType())
+                .regionScores(regionScores)
+                .sites(siteDataList)
+                .build();
+    }
+
 
 	/**
 	 * Map을 DTO로 변환

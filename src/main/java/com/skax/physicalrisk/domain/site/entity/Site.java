@@ -42,6 +42,9 @@ public class Site {
 	@Column(name = "name", nullable = false, length = 255)
 	private String name; // 사업장 이름
 
+	@Column(name = "region_code", length = 5) // 행정구역 코드 (예: 11010)
+    private String regionCode;
+
 	@Column(name = "road_address", length = 500)
 	private String roadAddress; // 도로명 주소
 

@@ -223,7 +223,6 @@ public class SimulationController {
         content = @Content(
             mediaType = "application/json",
             schema = @Schema(implementation = ClimateSimulationResponse.class),
-            // ▼▼▼ [중요] 변경된 DTO 구조에 맞춰 예시 JSON 수정됨 ▼▼▼
             examples = @ExampleObject(
                 value = """
                     {
