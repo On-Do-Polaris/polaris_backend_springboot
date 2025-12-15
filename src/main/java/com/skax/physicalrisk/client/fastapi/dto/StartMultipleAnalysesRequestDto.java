@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * FastAPI 분석 시작 요청 DTO
+ * FastAPI 다중 사업장 분석 시작 요청 DTO
  *
- * FastAPI POST /api/analysis/start 엔드포인트용
- * 단일/다중 사업장 분석 모두 지원
+ * FastAPI POST /api/analysis/start-multiple 엔드포인트용
  *
  * 최종 수정일: 2025-12-15
- * 파일 버전: v02
+ * 파일 버전: v01
  *
  * @author SKAX Team
  */
@@ -22,9 +21,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StartAnalysisRequestDto {
+public class StartMultipleAnalysesRequestDto {
 
-	private List<SiteInfoDto> sites;  // 사업장 리스트 (단일/다중 모두 지원)
+	private List<SiteInfoDto> sites;
 	private List<String> hazardTypes;
 	private String priority;  // low, normal, high
 	private AnalysisOptions options;

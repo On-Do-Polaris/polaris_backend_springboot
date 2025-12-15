@@ -2,8 +2,12 @@ package com.skax.physicalrisk.controller;
 
 import com.skax.physicalrisk.dto.request.report.CreateReportRequest;
 import com.skax.physicalrisk.dto.response.ErrorResponse;
+import com.skax.physicalrisk.dto.request.report.ReportDataRequest;
+import io.swagger.v3.oas.annotations.Parameter;
 import com.skax.physicalrisk.dto.response.report.ReportPdfResponse;
 import com.skax.physicalrisk.dto.response.report.ReportWebViewResponse;
+import com.skax.physicalrisk.exception.ResourceNotFoundException;
+import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +18,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -91,24 +97,14 @@ public class ReportController {
 	 * POST /api/report/data
 	 *
 	 * @param request 리포트 추가 데이터 요청 (siteId, data 객체)
+	 * @param file    데이터 파일
 	 * @return 빈 응답 (성공)
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 * @throws ResourceNotFoundException 사업장을 찾을 수 없는 경우 (404)
 	 */
 	@Operation(
 		summary = "보고서 추가 데이터 등록",
-		description = "보고서 작성을 위해 추가 데이터를 등록하는 엔드포인트.\n사업장별로 데이터 파일을 업로드할 수 있다."
-	)
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(
-		description = "사업장 ID와 데이터",
-		required = true,
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = Map.class),
-			examples = @ExampleObject(
-				value = "{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"data\": \"여기가 데이터 파일\"}"
-			)
-		)
+		description = "보고서 작성을 위해 추가 데이터를 등록하는 엔드포인트.\n사업장 ID와 데이터 파일을 multipart/form-data로 전송한다."
 	)
 	@ApiResponse(
 		responseCode = "200",
@@ -147,12 +143,22 @@ public class ReportController {
 			)
 		)
 	)
-	@PostMapping("/data")
+	@PostMapping(value = "/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerReportData(
-		@Valid @RequestBody Map<String, Object> request
+		@Parameter(
+			description = "사업장 ID 정보 (JSON)",
+			required = true,
+			schema = @Schema(implementation = ReportDataRequest.class)
+		)
+		@RequestPart("data") @Valid ReportDataRequest request,
+		@Parameter(
+			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
+			required = true
+		)
+		@RequestPart("file") MultipartFile file
 	) {
-		log.info("POST /api/report/data - request: {}", request);
-		reportService.registerReportData(request);
+		log.info("POST /api/report/data - request: {}, fileName: {}", request, file.getOriginalFilename());
+		reportService.registerReportData(request, file);
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("리포트 데이터가 등록되었습니다."));
 	}
 }

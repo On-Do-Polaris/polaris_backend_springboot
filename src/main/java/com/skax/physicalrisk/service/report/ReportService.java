@@ -1,6 +1,7 @@
 package com.skax.physicalrisk.service.report;
 
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
+import com.skax.physicalrisk.dto.request.report.ReportDataRequest;
 import com.skax.physicalrisk.domain.report.entity.Report;
 import com.skax.physicalrisk.domain.report.repository.ReportRepository;
 import com.skax.physicalrisk.domain.user.entity.User;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -88,28 +91,27 @@ public class ReportService {
 	/**
 	 * 리포트 추가 데이터 등록 (v0.2 신규)
 	 *
-	 * @param request 리포트 추가 데이터 요청 (siteId, data)
+	 * @param request 리포트 추가 데이터 요청 (siteId)
+	 * @param file    데이터 파일
 	 */
 	@Transactional
-	public void registerReportData(Map<String, Object> request) {
+	public void registerReportData(ReportDataRequest request, MultipartFile file) {
 		UUID userId = SecurityUtil.getCurrentUserId();
-		log.info("Registering report data for user: {}, request: {}", userId, request);
+		log.info("Registering report data for user: {}, siteId: {}, fileName: {}",
+			userId, request.getSiteId(), file.getOriginalFilename());
 
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
-
-		// FastAPI로 리포트 데이터 등록 요청
-		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("userId", userId);
-		requestMap.putAll(request);
+				.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		try {
-			fastApiClient.registerReportData(requestMap).block();
-			log.info("Report data registered successfully for userId={}", userId);
+			// FastAPI로 파일 전송
+			fastApiClient.registerReportData(userId, request.getSiteId(), file).block();
+			log.info("Report data registered successfully for userId={}, siteId={}", userId, request.getSiteId());
+
 		} catch (Exception e) {
 			log.error("Failed to register report data for userId={}: {}", userId, e.getMessage());
 			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
-				"리포트 데이터 등록에 실패했습니다: " + e.getMessage());
+					"리포트 데이터 등록에 실패했습니다: " + e.getMessage());
 		}
 	}
 }

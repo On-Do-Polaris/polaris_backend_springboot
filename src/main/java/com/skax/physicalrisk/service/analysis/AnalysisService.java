@@ -47,7 +47,7 @@ public class AnalysisService {
 	private final com.skax.physicalrisk.service.user.EmailService emailService;
 
 	/**
-	 * 분석 시작
+	 * 분석 시작 (단일 사업장)
 	 *
 	 * @param siteId       사업장 ID
 	 * @param latitude     위도
@@ -71,11 +71,11 @@ public class AnalysisService {
 		// FastAPI 요청 DTO 생성 - SiteInfoDto.from()을 사용하여 모든 필드와 매핑 로직 적용
 		SiteInfoDto siteInfo = SiteInfoDto.from(site);
 
-		// hazardTypes는 빈 리스트로 초기화 (FastAPI 필수 필드)
+		// 단일 사업장도 리스트로 전송 (sites 필드 사용)
 		StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
-			.site(siteInfo)
-			.hazardTypes(List.of())  // 빈 리스트로 초기화
-			.priority("normal")      // 기본 우선순위
+			.sites(List.of(siteInfo))  // 단일 사업장을 리스트로 감싸서 전송
+			.hazardTypes(List.of())    // 빈 리스트로 초기화
+			.priority("normal")        // 기본 우선순위
 			.build();
 
 		// WebClient 호출 후 block()으로 동기 변환
@@ -249,7 +249,7 @@ public class AnalysisService {
 	}
 
 	/**
-	 * 다중 사업장 분석 시작 (v0.2)
+	 * 다중 사업장 분석 시작 (v0.2 - 단일 FastAPI 호출)
 	 *
 	 * @param sites 사업장 ID 목록
 	 */
@@ -257,37 +257,41 @@ public class AnalysisService {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Starting analysis for {} sites by user: {}", sites.size(), userId);
 
-		// 각 사업장별로 분석 시작
-		for (com.skax.physicalrisk.controller.AnalysisController.StartAnalysisRequest.SiteIdWrapper siteWrapper : sites) {
-			UUID siteId = siteWrapper.getSiteId();
-			log.info("Processing analysis for site: {}", siteId);
+		// 모든 사업장 정보를 SiteInfoDto 리스트로 변환
+		List<SiteInfoDto> siteInfoList = sites.stream()
+			.map(siteWrapper -> {
+				UUID siteId = siteWrapper.getSiteId();
+				try {
+					// 사업장 조회 및 권한 확인
+					Site site = getSiteWithAuth(siteId, userId);
+					return SiteInfoDto.from(site);
+				} catch (Exception e) {
+					log.error("Error loading site {}: {}", siteId, e.getMessage());
+					return null;
+				}
+			})
+			.filter(siteInfo -> siteInfo != null)  // 실패한 사업장 제외
+			.collect(Collectors.toList());
 
-			try {
-				// 사업장 조회 및 권한 확인
-				Site site = getSiteWithAuth(siteId, userId);
-
-				// FastAPI 요청 DTO 생성
-				SiteInfoDto siteInfo = SiteInfoDto.from(site);
-
-				StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
-					.site(siteInfo)
-					.hazardTypes(List.of())
-					.priority("normal")
-					.build();
-
-				// FastAPI 호출 (비동기)
-				fastApiClient.startAnalysis(request)
-					.doOnSuccess(response -> log.info("Analysis started for site: {}", siteId))
-					.doOnError(error -> log.error("Failed to start analysis for site: {}", siteId, error))
-					.subscribe();
-
-			} catch (Exception e) {
-				log.error("Error processing site {}: {}", siteId, e.getMessage());
-				// 하나의 사업장 실패해도 계속 진행
-			}
+		if (siteInfoList.isEmpty()) {
+			log.warn("No valid sites to analyze");
+			return;
 		}
 
-		log.info("Analysis start requests sent for all sites");
+		// 단일 FastAPI 요청으로 모든 사업장 분석 시작
+		StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
+			.sites(siteInfoList)
+			.hazardTypes(List.of())  // 빈 리스트로 초기화
+			.priority("normal")      // 기본 우선순위
+			.build();
+
+		// FastAPI 호출 (비동기)
+		fastApiClient.startAnalysis(request)
+			.doOnSuccess(response -> log.info("Analysis started for {} sites", siteInfoList.size()))
+			.doOnError(error -> log.error("Failed to start analysis for sites", error))
+			.subscribe();
+
+		log.info("Analysis start request sent for all sites");
 	}
 
 	/**
