@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * 과거 재해 이력 응답 DTO
  *
- * 최종 수정일: 2025-12-10
- * 파일 버전: v01
+ * 최종 수정일: 2025-12-15
+ * 파일 버전: v02 - FastAPI 응답 구조에 맞게 수정 (data를 직접 배열로 변경)
  *
  * @author SKAX Team
  */
@@ -22,23 +22,9 @@ import java.util.List;
 public class PastDisasterResponse {
 
 	/**
-	 * 데이터 래퍼
+	 * 재해 이력 목록 (FastAPI는 data를 배열로 직접 반환)
 	 */
-	private DataWrapper data;
-
-	/**
-	 * 데이터 래퍼 클래스
-	 */
-	@Getter
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Builder
-	public static class DataWrapper {
-		/**
-		 * 재해 이력 목록
-		 */
-		private List<DisasterItem> items;
-	}
+	private List<DisasterItem> data;
 
 	/**
 	 * 재해 이력 항목
