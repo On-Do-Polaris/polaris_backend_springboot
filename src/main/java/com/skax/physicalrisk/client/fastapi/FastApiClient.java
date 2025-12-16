@@ -141,12 +141,12 @@ public class FastApiClient {
      * @param userId 사용자 ID
      * @return 대시보드 요약
      */
-    public Mono<Map<String, Object>> getDashboardSummary(UUID userId) {
-        log.info("FastAPI 대시보드 요약 조회: userId={}", userId);
+    public Mono<Map<String, Object>> getDashboardSummary(List<UUID> siteIds) {
+        log.info("FastAPI 대시보드 요약 조회: siteCount={}", siteIds.size());
         return webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/api/dashboard/summary")
-                .queryParam("userId", userId)
+                .queryParam("siteIds", siteIds)
                 .build())
             .header("X-API-Key", apiKey)
             .retrieve()
