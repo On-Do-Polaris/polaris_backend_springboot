@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/health")
 public class HealthController {
+
+	@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080,https://on-do.site}")
+	private String allowedOrigins;
 
 	/**
 	 * 헬스 체크
@@ -69,5 +73,20 @@ public class HealthController {
 		data.put("service", "Physical Risk Management API");
 
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(data));
+	}
+
+	/**
+	 * CORS 설정 확인 (진단용)
+	 * @return 현재 적용된 CORS 설정
+	 */
+	@Operation(
+		summary = "CORS 설정 확인",
+		description = "현재 애플리케이션에 적용된 CORS 허용 도메인 목록을 확인합니다."
+	)
+	@GetMapping("/cors-check")
+	public ResponseEntity<Map<String, String>> checkCors() {
+		Map<String, String> corsInfo = new HashMap<>();
+		corsInfo.put("allowed-origins", allowedOrigins);
+		return ResponseEntity.ok(corsInfo);
 	}
 }
