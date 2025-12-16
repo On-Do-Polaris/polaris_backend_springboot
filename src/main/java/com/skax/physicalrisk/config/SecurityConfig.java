@@ -46,7 +46,7 @@ public class SecurityConfig {
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-	@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080}")
+	@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080,https://on-do.site}")
 	private String allowedOrigins;
 
 	/**
