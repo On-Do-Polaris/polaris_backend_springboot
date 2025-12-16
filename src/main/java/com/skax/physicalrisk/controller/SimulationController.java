@@ -195,76 +195,114 @@ public class SimulationController {
 	}
 
 	/**
-	 * 기후 시뮬레이션
-	 *
-	 * POST /api/simulation/climate
-	 *
-	 * @param request 기후 시뮬레이션 요청
-	 * @return 시뮬레이션 결과
-	 */
-	@Operation(
-		summary = "기후 시뮬레이션",
-		description = "SSP 시나리오와 기후 변수에 따라 연도별 모든 사업장 값을 반환한다.\n대응 방안은 현재 API에 존재하지 않으며, 추후 필요 시 필드 추가가 필요하다."
-	)
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(
-		description = "시뮬레이션 시나리오와 위험 유형",
-		required = true,
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ClimateSimulationRequest.class),
-			examples = @ExampleObject(
-				value = "{\"scenario\": \"SSP2-4.5\", \"hazardType\": \"극심한 고온\"}"
-			)
-		)
-	)
-	@ApiResponse(
-		responseCode = "200",
-		description = "시나리오별, 연도별 사업장 기후 데이터",
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ClimateSimulationResponse.class),
-			examples = @ExampleObject(
-				value = "{\"scenario\": \"SSP2-4.5\", \"riskType\": \"극심한 고온\", \"yearlyData\": [{\"year\": 2030, \"nationalAverageTemperature\": 14.5, \"sites\": [{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"siteName\": \"sk u 타워\", \"Temperature\": 15, \"riskincrease\": 15.2}, {\"siteId\": \"3fa96f64-5789-6859-b3fc-2c963f23dhi6\", \"siteName\": \"판교 데이터 센터\", \"Temperature\": 14.8, \"riskincrease\": 18}]}, {\"year\": 2040, \"nationalAverageTemperature\": 16.5, \"sites\": [{\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"siteName\": \"sk u 타워\", \"Temperature\": 17, \"riskincrease\": 17.2}, {\"siteId\": \"3fa96f64-5789-6859-b3fc-2c963f23dhi6\", \"siteName\": \"판교 데이터 센터\", \"Temperature\": 15.8, \"riskincrease\": 19}]}]}"
-			)
-		)
-	)
-	@ApiResponse(
-		responseCode = "401",
-		description = "인증되지 않은 사용자",
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
-		)
-	)
-	@ApiResponse(
-		responseCode = "500",
-		description = "서버 내부 오류",
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(
-				value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
-			)
-		)
-	)
-	@ApiResponse(
-		responseCode = "503",
-		description = "외부 서비스 연결 실패",
-		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(
-				value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다.\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
-			)
-		)
-	)
-	@PostMapping("/climate")
-	public ResponseEntity<ClimateSimulationResponse> runClimateSimulation(
-		@Valid @RequestBody ClimateSimulationRequest request
-	) {
-		log.info("POST /api/simulation/climate");
-		ClimateSimulationResponse response = simulationService.runClimateSimulation(request);
-		return ResponseEntity.ok(response);
-	}
+     * 기후 시뮬레이션
+     *
+     * POST /api/simulation/climate
+     *
+     * @param request 기후 시뮬레이션 요청
+     * @return 시뮬레이션 결과
+     */
+    @Operation(
+        summary = "기후 시뮬레이션",
+        description = "SSP 시나리오와 기후 변수에 따라 행정구역별 점수 및 사업장별 AAL 값을 반환한다."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "시뮬레이션 시나리오와 위험 유형",
+        required = true,
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ClimateSimulationRequest.class),
+            examples = @ExampleObject(
+                value = "{\"scenario\": \"SSP2-4.5\", \"hazardType\": \"극심한 고온\"}"
+            )
+        )
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "시나리오별 행정구역 기후 점수 및 사업장 AAL 데이터",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ClimateSimulationResponse.class),
+            examples = @ExampleObject(
+                value = """
+                    {
+                      "scenario": "SSP2-4.5",
+                      "hazardType": "극심한 고온",
+                      "regionScores": {
+                        "11010": {
+                          "2025": 45.2,
+                          "2026": 45.8,
+                          "2100": 89.3
+                        },
+                        "11020": {
+                          "2025": 43.1,
+                          "2100": 87.5
+                        }
+                      },
+                      "sites": [
+                        {
+                          "siteId": "4b5be9aa-c228-4a13-b0c5-0d98deb51424",
+                          "siteName": "SK ATS",
+                          "regionCode": "11010",
+                          "aalByYear": {
+                            "2025": 12.5,
+                            "2026": 13.1,
+                            "2100": 46.3
+                          }
+                        },
+                        {
+                          "siteId": "7f3d82b1-9a45-4c27-88e1-3b2f1d8c0a9e",
+                          "siteName": "SK U 타워",
+                          "regionCode": "41281",
+                          "aalByYear": {
+                            "2025": 16.5,
+                            "2026": 17.1,
+                            "2100": 47.9
+                          }
+                        }
+                      ]
+                    }
+                    """
+            )
+        )
+    )
+    @ApiResponse(
+        responseCode = "401",
+        description = "인증되지 않은 사용자",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+        )
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "서버 내부 오류",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(
+                value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+            )
+        )
+    )
+    @ApiResponse(
+        responseCode = "503",
+        description = "외부 서비스 연결 실패",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(
+                value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다.\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-12T16:30:00\"}"
+            )
+        )
+    )
+    @PostMapping("/climate")
+    public ResponseEntity<ClimateSimulationResponse> runClimateSimulation(
+        @Valid @RequestBody ClimateSimulationRequest request
+    ) {
+        log.info("POST /api/simulation/climate");
+        ClimateSimulationResponse response = simulationService.runClimateSimulation(request);
+        return ResponseEntity.ok(response);
+    }
 }

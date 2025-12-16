@@ -27,7 +27,7 @@ public class ClimateSimulationRequest {
 	@Pattern(regexp = "SSP1-2\\.6|SSP2-4\\.5|SSP3-7\\.0|SSP5-8\\.5", message = "유효한 SSP 시나리오를 입력하세요")
 	private String scenario;
 
-	@Schema(description = "위험 유형", example = "극심한 고온")
+	@Schema(description = "위험 유형", example = "극심한 고온", allowableValues = {"극심한 고온", "극심한 한파", "하천 홍수", "도시 홍수", "가뭄", "물 부족", "해수면 상승", "태풍", "산불"})
 	@NotBlank(message = "위험 유형은 필수입니다")
 	private String hazardType;
 }
