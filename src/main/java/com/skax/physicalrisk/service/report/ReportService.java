@@ -1,7 +1,9 @@
 package com.skax.physicalrisk.service.report;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skax.physicalrisk.client.fastapi.FastApiClient;
 import com.skax.physicalrisk.dto.request.report.ReportDataRequest;
+import com.skax.physicalrisk.dto.response.report.new_structure.ReportResponse;
 import com.skax.physicalrisk.domain.report.entity.Report;
 import com.skax.physicalrisk.domain.report.repository.ReportRepository;
 import com.skax.physicalrisk.domain.user.entity.User;
@@ -26,8 +28,8 @@ import java.util.UUID;
  *
  * FastAPI 서버를 통한 리포트 생성 및 조회
  *
- * 최종 수정일: 2025-12-14
- * 파일 버전: v02 - Report 테이블 저장 로직 추가
+ * 최종 수정일: 2025-12-16
+ * 파일 버전: v03 - 새로운 응답 스키마 적용 (TCFD Report Structure)
  *
  * @author SKAX Team
  */
@@ -40,16 +42,17 @@ public class ReportService {
 	private final FastApiClient fastApiClient;
 	private final UserRepository userRepository;
 	private final ReportRepository reportRepository;
+	private final ObjectMapper objectMapper;
 
 	/**
 	 * 통합 리포트 조회 및 저장
 	 *
 	 * FastAPI로부터 리포트를 조회하고 Report 테이블에 저장
 	 *
-	 * @return 통합 리포트 내용 (ceosummry, Governance, strategy, riskmanagement, goal)
+	 * @return TCFD 구조의 리포트 응답
 	 */
 	@Transactional
-	public Map<String, String> getReport() {
+	public ReportResponse getReport() {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching report for userId={}", userId);
 
@@ -73,14 +76,10 @@ public class ReportService {
 			reportRepository.save(report);
 			log.info("Report saved successfully for userId={}, reportId={}", userId, report.getId());
 
-			// 응답 반환 (기존과 동일한 5개 필드)
-			return Map.of(
-				"ceosummry", (String) response.get("ceosummry"),
-				"Governance", (String) response.get("Governance"),
-				"strategy", (String) response.get("strategy"),
-				"riskmanagement", (String) response.get("riskmanagement"),
-				"goal", (String) response.get("goal")
-			);
+			// Map을 ReportResponse DTO로 변환
+			ReportResponse reportResponse = objectMapper.convertValue(response, ReportResponse.class);
+
+			return reportResponse;
 		} catch (Exception e) {
 			log.error("Failed to fetch report: {}", e.getMessage());
 			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,

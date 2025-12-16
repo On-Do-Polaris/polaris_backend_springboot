@@ -1,11 +1,9 @@
 package com.skax.physicalrisk.controller;
 
-import com.skax.physicalrisk.dto.request.report.CreateReportRequest;
 import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.request.report.ReportDataRequest;
+import com.skax.physicalrisk.dto.response.report.new_structure.ReportResponse;
 import io.swagger.v3.oas.annotations.Parameter;
-import com.skax.physicalrisk.dto.response.report.ReportPdfResponse;
-import com.skax.physicalrisk.dto.response.report.ReportWebViewResponse;
 import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.service.report.ReportService;
@@ -16,20 +14,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
  * 리포트 컨트롤러 (v0.2)
  *
- * 최종 수정일: 2025-12-10
- * 파일 버전: v02
+ * 최종 수정일: 2025-12-16
+ * 파일 버전: v03
  *
  * @author SKAX Team
  */
@@ -46,21 +42,19 @@ public class ReportController {
 	 *
 	 * GET /api/report
 	 *
-	 * @return 통합 리포트 내용 (ceosummry, Governance, strategy, riskmanagement, goal)
+	 * @return 통합 리포트 내용 (TCFD Report Structure)
 	 * @throws UnauthorizedException 인증되지 않은 사용자인 경우 (401)
 	 */
 	@Operation(
 		summary = "통합 리포트 조회",
-		description = "보고서 내용을 받아오는 엔드포인트.\nCEO 요약, 거버넌스, 전략, 리스크 관리, 목표 정보를 포함한다."
+		description = "보고서 내용을 받아오는 엔드포인트.\nTCFD 기반의 구조화된 리포트 데이터를 반환한다."
 	)
 	@ApiResponse(
 		responseCode = "200",
 		description = "통합 리포트 내용",
 		content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = "{\"result\": \"success\", \"data\": {\"ceosummry\": \"회사는 현재 기후 관련 위험을 면밀히 분석했습니다\", \"Governance\": \"기후 거버넌스는 당사의 지속 가능한 운영과 자산 가치를 극대화하기 위한 필수 요소입니다.\", \"strategy\": \"기후 변화에 대한 포괄적 접근 방식을 통해 우리는 지속 가능한 운영을 도모합니다.\", \"riskmanagement\": \"리스크 관리의 일환으로 당사는 여러 프로세스를 도입했습니다.\", \"goal\": \"현재 기후 리스크로 인해 예상되는 손실과 당사의 목표입니다.\"}}"
-			)
+			schema = @Schema(implementation = ReportResponse.class)
 		)
 	)
 	@ApiResponse(
@@ -84,9 +78,9 @@ public class ReportController {
 		)
 	)
 	@GetMapping
-	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Map<String, String>>> getReport() {
+	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<ReportResponse>> getReport() {
 		log.info("GET /api/report");
-		Map<String, String> response = reportService.getReport();
+		ReportResponse response = reportService.getReport();
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success(response));
 	}
 
