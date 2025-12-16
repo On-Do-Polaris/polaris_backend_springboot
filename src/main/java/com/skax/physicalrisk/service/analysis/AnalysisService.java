@@ -167,7 +167,19 @@ public class AnalysisService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-        Map<String, Object> response = fastApiClient.getDashboardSummary(userId).block();
+        // Find all sites for the user
+        List<Site> userSites = siteRepository.findByUser(user);
+        List<UUID> siteIds = userSites.stream().map(Site::getId).collect(Collectors.toList());
+
+        if (siteIds.isEmpty()) {
+            log.warn("No sites found for user {}, returning empty dashboard summary.", userId);
+            return DashboardSummaryResponse.builder()
+                .mainClimateRisk("데이터 없음")
+                .sites(List.of())
+                .build();
+        }
+
+        Map<String, Object> response = fastApiClient.getDashboardSummary(siteIds).block();
         DashboardSummaryResponse dashboardResponse = convertToDto(response, DashboardSummaryResponse.class);
 
         // Enrich with coordinates from database
