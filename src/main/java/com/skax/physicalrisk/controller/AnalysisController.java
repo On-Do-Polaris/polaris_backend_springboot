@@ -3,6 +3,8 @@ package com.skax.physicalrisk.controller;
 import com.skax.physicalrisk.client.fastapi.dto.StartAnalysisRequestDto;
 import com.skax.physicalrisk.dto.response.ErrorResponse;
 import com.skax.physicalrisk.dto.response.analysis.*;
+import com.skax.physicalrisk.exception.ResourceNotFoundException;
+import com.skax.physicalrisk.exception.UnauthorizedException;
 import com.skax.physicalrisk.service.analysis.AnalysisService;
 import com.skax.physicalrisk.service.user.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -245,18 +247,85 @@ public class AnalysisController {
             examples = {
                 @ExampleObject(
                     name = "장기",
-                    description = "장기 리스크 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}}"
+                    description = "장기 리스크 값 (2020s ~ 2050s)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", " +
+                            "\"scenarios1\": {" +
+                                "\"point1\": {\"total\": 72, \"h\": 12, \"e\": 30, \"v\": 20}, " +
+                                "\"point2\": {\"total\": 78, \"h\": 13, \"e\": 30, \"v\": 20}, " +
+                                "\"point3\": {\"total\": 84, \"h\": 14, \"e\": 30, \"v\": 20}, " +
+                                "\"point4\": {\"total\": 89, \"h\": 15, \"e\": 30, \"v\": 20}" +
+                            "}, " +
+                            "\"scenarios2\": {" +
+                                "\"point1\": {\"total\": 72, \"h\": 12, \"e\": 30, \"v\": 20}, " +
+                                "\"point2\": {\"total\": 78, \"h\": 13, \"e\": 30, \"v\": 20}, " +
+                                "\"point3\": {\"total\": 84, \"h\": 14, \"e\": 30, \"v\": 20}, " +
+                                "\"point4\": {\"total\": 89, \"h\": 15, \"e\": 30, \"v\": 20}" +
+                            "}, " +
+                            "\"scenarios3\": {" +
+                                "\"point1\": {\"total\": 72, \"h\": 12, \"e\": 30, \"v\": 20}, " +
+                                "\"point2\": {\"total\": 78, \"h\": 13, \"e\": 30, \"v\": 20}, " +
+                                "\"point3\": {\"total\": 84, \"h\": 14, \"e\": 30, \"v\": 20}, " +
+                                "\"point4\": {\"total\": 89, \"h\": 15, \"e\": 30, \"v\": 20}" +
+                            "}, " +
+                            "\"scenarios4\": {" +
+                                "\"point1\": {\"total\": 72, \"h\": 12, \"e\": 30, \"v\": 20}, " +
+                                "\"point2\": {\"total\": 78, \"h\": 13, \"e\": 30, \"v\": 20}, " +
+                                "\"point3\": {\"total\": 84, \"h\": 14, \"e\": 30, \"v\": 20}, " +
+                                "\"point4\": {\"total\": 89, \"h\": 15, \"e\": 30, \"v\": 20}" +
+                            "}, " +
+                            "\"Strategy\": \"냉각 시스템 강화 및 단열재 보강\"}}"
                 ),
                 @ExampleObject(
                     name = "중기",
-                    description = "중기 리스크 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 65, \"point2\": 70, \"point3\": 75, \"point4\": 80, \"point5\": 85}, \"scenarios2\": {\"point1\": 66, \"point2\": 71, \"point3\": 76, \"point4\": 81, \"point5\": 86}, \"scenarios3\": {\"point1\": 67, \"point2\": 72, \"point3\": 77, \"point4\": 82, \"point5\": 87}, \"scenarios4\": {\"point1\": 68, \"point2\": 73, \"point3\": 78, \"point4\": 83, \"point5\": 88}, \"Strategy\": \"재생 에너지 사용 확대 및 에너지 효율 개선\"}}"
+                    description = "중기 리스크 값 (2026 ~ 2030)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"극심한 고온\", " +
+                            "\"scenarios1\": {" +
+                                "\"point1\": {\"total\": 65, \"h\": 10, \"e\": 25, \"v\": 26}, " +
+                                "\"point2\": {\"total\": 70, \"h\": 11, \"e\": 25, \"v\": 26}, " +
+                                "\"point3\": {\"total\": 75, \"h\": 12, \"e\": 25, \"v\": 25}, " +
+                                "\"point4\": {\"total\": 80, \"h\": 13, \"e\": 25, \"v\": 25}, " +
+                                "\"point5\": {\"total\": 85, \"h\": 14, \"e\": 25, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios2\": {" +
+                                "\"point1\": {\"total\": 66, \"h\": 10, \"e\": 26, \"v\": 26}, " +
+                                "\"point2\": {\"total\": 71, \"h\": 11, \"e\": 26, \"v\": 26}, " +
+                                "\"point3\": {\"total\": 76, \"h\": 12, \"e\": 26, \"v\": 25}, " +
+                                "\"point4\": {\"total\": 81, \"h\": 13, \"e\": 26, \"v\": 25}, " +
+                                "\"point5\": {\"total\": 86, \"h\": 14, \"e\": 26, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios3\": {" +
+                                "\"point1\": {\"total\": 67, \"h\": 10, \"e\": 27, \"v\": 26}, " +
+                                "\"point2\": {\"total\": 72, \"h\": 11, \"e\": 27, \"v\": 26}, " +
+                                "\"point3\": {\"total\": 77, \"h\": 12, \"e\": 27, \"v\": 25}, " +
+                                "\"point4\": {\"total\": 82, \"h\": 13, \"e\": 27, \"v\": 25}, " +
+                                "\"point5\": {\"total\": 87, \"h\": 14, \"e\": 27, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios4\": {" +
+                                "\"point1\": {\"total\": 68, \"h\": 10, \"e\": 28, \"v\": 26}, " +
+                                "\"point2\": {\"total\": 73, \"h\": 11, \"e\": 28, \"v\": 26}, " +
+                                "\"point3\": {\"total\": 78, \"h\": 12, \"e\": 28, \"v\": 25}, " +
+                                "\"point4\": {\"total\": 83, \"h\": 13, \"e\": 28, \"v\": 25}, " +
+                                "\"point5\": {\"total\": 88, \"h\": 14, \"e\": 28, \"v\": 25}" +
+                            "}, " +
+                            "\"Strategy\": \"재생 에너지 사용 확대 및 에너지 효율 개선\"}}"
                 ),
                 @ExampleObject(
                     name = "단기",
-                    description = "단기 리스크 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 50}, \"scenarios2\": {\"point1\": 52}, \"scenarios3\": {\"point1\": 54}, \"scenarios4\": {\"point1\": 56}, \"Strategy\": \"기후 변화 교육 및 인식 제고 프로그램 실시\"}}"
+                    description = "단기 리스크 값 (2026)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"극심한 고온\", " +
+                            "\"scenarios1\": {" +
+                                "\"point1\": {\"total\": 50, \"h\": 10, \"e\": 20, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios2\": {" +
+                                "\"point1\": {\"total\": 52, \"h\": 10, \"e\": 21, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios3\": {" +
+                                "\"point1\": {\"total\": 54, \"h\": 11, \"e\": 20, \"v\": 25}" +
+                            "}, " +
+                            "\"scenarios4\": {" +
+                                "\"point1\": {\"total\": 56, \"h\": 11, \"e\": 21, \"v\": 25}" +
+                            "}, " +
+                            "\"Strategy\": \"기후 변화 교육 및 인식 제고 프로그램 실시\"}}"
                 )
             }
         )
