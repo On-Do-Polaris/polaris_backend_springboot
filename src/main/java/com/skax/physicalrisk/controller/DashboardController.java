@@ -53,11 +53,20 @@ public class DashboardController {
 	)
 	@ApiResponse(
 		responseCode = "401",
-		description = "인증되지 않은 사용자",
+		description = "인증이 필요합니다",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "분석 데이터를 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"분석 결과를 찾을 수 없습니다\", \"errorCode\": \"ANALYSIS_RESULT_NOT_FOUND\", \"code\": \"ANALYSIS_RESULT_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(

@@ -83,6 +83,16 @@ public class HealthController {
 		summary = "CORS 설정 확인",
 		description = "현재 애플리케이션에 적용된 CORS 허용 도메인 목록을 확인합니다."
 	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "CORS 설정 정보",
+		content = @Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(
+				value = "{\"allowed-origins\": \"http://localhost:3000,http://localhost:5173,https://on-do.site\"}"
+			)
+		)
+	)
 	@GetMapping("/cors-check")
 	public ResponseEntity<Map<String, String>> checkCors() {
 		Map<String, String> corsInfo = new HashMap<>();
