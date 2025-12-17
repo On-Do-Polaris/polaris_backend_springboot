@@ -59,11 +59,20 @@ public class ReportController {
 	)
 	@ApiResponse(
 		responseCode = "401",
-		description = "인증되지 않은 사용자",
+		description = "인증이 필요합니다",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "404",
+		description = "리포트를 찾을 수 없음",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"리포트를 찾을 수 없습니다\", \"errorCode\": \"REPORT_NOT_FOUND\", \"code\": \"REPORT_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -108,12 +117,21 @@ public class ReportController {
 		)
 	)
 	@ApiResponse(
-		responseCode = "401",
-		description = "인증되지 않은 사용자",
+		responseCode = "400",
+		description = "잘못된 파일 형식 또는 파라미터",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증이 필요합니다",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -122,7 +140,7 @@ public class ReportController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다\", \"errorCode\": \"SITE_NOT_FOUND\", \"code\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(

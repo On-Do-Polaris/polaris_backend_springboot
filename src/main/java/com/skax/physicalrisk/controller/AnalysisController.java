@@ -78,6 +78,15 @@ public class AnalysisController {
         )
     )
     @ApiResponse(
+        responseCode = "400",
+        description = "입력값 유효성 검사 실패",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+        )
+    )
+    @ApiResponse(
         responseCode = "401",
         description = "인증되지 않은 사용자",
         content = @Content(
@@ -93,6 +102,24 @@ public class AnalysisController {
             mediaType = "application/json",
             schema = @Schema(implementation = ErrorResponse.class),
             examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+        )
+    )
+    @ApiResponse(
+        responseCode = "409",
+        description = "이미 실행 중인 분석 작업이 있음",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이미 실행 중인 분석 작업이 있습니다\", \"errorCode\": \"ANALYSIS_ALREADY_RUNNING\", \"code\": \"ANALYSIS_ALREADY_RUNNING\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+        )
+    )
+    @ApiResponse(
+        responseCode = "503",
+        description = "분석 서버(FastAPI) 연결 실패",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"FastAPI 서버 연결에 실패했습니다\", \"errorCode\": \"FASTAPI_CONNECTION_ERROR\", \"code\": \"FASTAPI_CONNECTION_ERROR\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
         )
     )
     @PostMapping("/start")
@@ -502,12 +529,30 @@ public class AnalysisController {
         )
     )
     @ApiResponse(
+        responseCode = "404",
+        description = "알림을 받을 사용자를 찾을 수 없음",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사용자를 찾을 수 없습니다\", \"errorCode\": \"USER_NOT_FOUND\", \"code\": \"USER_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+        )
+    )
+    @ApiResponse(
         responseCode = "500",
         description = "서버 내부 오류",
         content = @Content(
             mediaType = "application/json",
             schema = @Schema(implementation = ErrorResponse.class),
             examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"서버 내부 오류가 발생했습니다.\", \"errorCode\": \"INTERNAL_SERVER_ERROR\", \"timestamp\": \"2025-12-12T15:30:00\"}")
+        )
+    )
+    @ApiResponse(
+        responseCode = "503",
+        description = "이메일 전송 서비스 오류",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class),
+            examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"이메일 발송에 실패했습니다\", \"errorCode\": \"EMAIL_SEND_FAILED\", \"code\": \"EMAIL_SEND_FAILED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
         )
     )
     @PostMapping("/complete")

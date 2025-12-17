@@ -54,6 +54,15 @@ public class MetaController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "401",
+		description = "인증이 필요합니다",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "500",
 		description = "서버 내부 오류",
 		content = @Content(
@@ -92,6 +101,15 @@ public class MetaController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "401",
+		description = "인증이 필요합니다",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "500",
 		description = "서버 내부 오류",
 		content = @Content(
@@ -127,6 +145,15 @@ public class MetaController {
 			examples = @ExampleObject(
 				value = "[\"SSP1-2.6\", \"SSP2-4.5\", \"SSP3-7.0\", \"SSP5-8.5\"]"
 			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "401",
+		description = "인증이 필요합니다",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = com.skax.physicalrisk.dto.response.ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(

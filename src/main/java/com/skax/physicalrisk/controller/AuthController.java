@@ -88,6 +88,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "503",
 		description = "이메일 발송 실패",
 		content = @Content(
@@ -149,6 +158,15 @@ public class AuthController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증번호가 일치하지 않습니다.\", \"errorCode\": \"VERIFICATION_CODE_MISMATCH\", \"timestamp\": \"2025-12-12T16:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -217,6 +235,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "500",
 		description = "서버 내부 오류",
 		content = @Content(
@@ -261,6 +288,15 @@ public class AuthController {
 			examples = @ExampleObject(
 				value = "{\"result\": \"success\", \"message\": \"로그인에 성공했습니다.\", \"data\": {\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}}"
 			)
+		)
+	)
+	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -364,6 +400,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "401",
 		description = "리프레시 토큰이 유효하지 않거나 만료됨",
 		content = @Content(
@@ -438,6 +483,15 @@ public class AuthController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "503",
 		description = "이메일 발송 실패",
 		content = @Content(
@@ -493,6 +547,15 @@ public class AuthController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"존재하지 않는 이메일입니다.\", \"errorCode\": \"EMAIL_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -560,6 +623,15 @@ public class AuthController {
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"존재하지 않는 이메일입니다.\", \"errorCode\": \"EMAIL_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+		)
+	)
+	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(

@@ -68,7 +68,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -77,7 +77,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다\", \"errorCode\": \"SITE_NOT_FOUND\", \"code\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -136,12 +136,21 @@ public class SiteController {
 		)
 	)
 	@ApiResponse(
+		responseCode = "400",
+		description = "입력값 유효성 검사 실패",
+		content = @Content(
+			mediaType = "application/json",
+			schema = @Schema(implementation = ErrorResponse.class),
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"잘못된 요청입니다\", \"errorCode\": \"INVALID_REQUEST\", \"code\": \"INVALID_REQUEST\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
+		)
+	)
+	@ApiResponse(
 		responseCode = "401",
 		description = "인증되지 않은 사용자",
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -150,7 +159,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"동일한 위경도를 가진 사업장이 이미 존재합니다.\", \"errorCode\": \"DUPLICATE_SITE_COORDINATES\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"동일한 위경도를 가진 사업장이 이미 존재합니다\", \"errorCode\": \"DUPLICATE_SITE_COORDINATES\", \"code\": \"DUPLICATE_SITE_COORDINATES\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -159,7 +168,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"유효하지 않은 사업장 데이터입니다.\", \"errorCode\": \"INVALID_SITE_DATA\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장 데이터가 유효하지 않습니다\", \"errorCode\": \"INVALID_SITE_DATA\", \"code\": \"INVALID_SITE_DATA\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -222,7 +231,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -231,7 +240,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다\", \"errorCode\": \"SITE_NOT_FOUND\", \"code\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -289,7 +298,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증되지 않은 사용자입니다.\", \"errorCode\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"인증이 필요합니다\", \"errorCode\": \"UNAUTHORIZED\", \"code\": \"UNAUTHORIZED\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
@@ -298,7 +307,7 @@ public class SiteController {
 		content = @Content(
 			mediaType = "application/json",
 			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다.\", \"errorCode\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-11T15:30:00\"}")
+			examples = @ExampleObject(value = "{\"result\": \"error\", \"message\": \"사업장을 찾을 수 없습니다\", \"errorCode\": \"SITE_NOT_FOUND\", \"code\": \"SITE_NOT_FOUND\", \"timestamp\": \"2025-12-17T15:30:00.123456789\"}")
 		)
 	)
 	@ApiResponse(
