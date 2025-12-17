@@ -558,13 +558,13 @@ public class AnalysisController {
     @PostMapping("/complete")
     public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> notifyAnalysisCompletion(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "사용자 ID (이메일)",
+            description = "사용자 ID (UUID)",
             required = true,
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = AnalysisCompleteRequest.class),
                 examples = @ExampleObject(
-                    value = "{\"userId\": \"user@example.com\"}"
+                    value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
                 )
             )
         )
@@ -583,8 +583,8 @@ public class AnalysisController {
     @lombok.AllArgsConstructor
     @Schema(description = "분석 완료 알림 요청")
     public static class AnalysisCompleteRequest {
-        @Schema(description = "사용자 ID (이메일 형식)", required = true, example = "user@example.com")
-        private String userId;
+        @Schema(description = "사용자 ID (UUID)", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+        private UUID userId;
     }
 
     /**
