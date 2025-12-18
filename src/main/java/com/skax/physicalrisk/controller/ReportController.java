@@ -161,13 +161,14 @@ public class ReportController {
 			required = true,
 			example = "550e8400-e29b-41d4-a716-446655440000"
 		)
-		@RequestParam(value = "siteId", required = true) UUID siteId,
+		@RequestPart(value = "siteId") String siteIdStr,
 		@Parameter(
 			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
 			required = true
 		)
 		@RequestPart(value = "file", required = true) MultipartFile file
 	) {
+		UUID siteId = UUID.fromString(siteIdStr);
 		log.info("POST /api/report/data - siteId: {}, fileName: {}", siteId, file.getOriginalFilename());
 
 		// DTO 객체 생성
