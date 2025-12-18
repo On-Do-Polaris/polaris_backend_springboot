@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * 과거 재해 이력 응답 DTO
  *
- * 최종 수정일: 2025-12-15
- * 파일 버전: v02 - FastAPI 응답 구조에 맞게 수정 (data를 직접 배열로 변경)
+ * 최종 수정일: 2025-12-18
+ * 파일 버전: v03 - FastAPI 응답 필드명에 맞게 수정 (alertDate, disasterType)
  *
  * @author SKAX Team
  */
@@ -40,14 +40,14 @@ public class PastDisasterResponse {
 		private Integer id;
 
 		/**
-		 * 발생 날짜
+		 * 발생 날짜 (FastAPI에서 alertDate로 반환)
 		 */
-		private String date;
+		private String alertDate;
 
 		/**
-		 * 재해 유형
+		 * 재해 유형 (FastAPI에서 disasterType으로 반환)
 		 */
-		private String disaster_type;
+		private String disasterType;
 
 		/**
 		 * 심각도
