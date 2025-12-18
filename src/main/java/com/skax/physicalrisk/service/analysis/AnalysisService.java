@@ -379,10 +379,10 @@ public class AnalysisService {
         }
 
         // 시나리오를 SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5로 분류
-        Map<String, Integer> scenarios1 = null;
-        Map<String, Integer> scenarios2 = null;
-        Map<String, Integer> scenarios3 = null;
-        Map<String, Integer> scenarios4 = null;
+        Map<String, Double> scenarios1 = null;
+        Map<String, Double> scenarios2 = null;
+        Map<String, Double> scenarios3 = null;
+        Map<String, Double> scenarios4 = null;
 
         for (FinancialImpactResponse.ScenarioData scenario : fastApiResponse.getScenarios()) {
             String scenarioName = scenario.getScenario();
@@ -400,7 +400,7 @@ public class AnalysisService {
             }
 
             // term에 따라 해당 데이터 추출
-            Map<String, Integer> termData = null;
+            Map<String, Double> termData = null;
             switch (term) {
                 case "short":
                     termData = scenario.getShortTerm();
@@ -423,7 +423,7 @@ public class AnalysisService {
 
             // Check if termData has any non-zero values
             boolean hasNonZeroData = termData.values().stream()
-                .anyMatch(value -> value != null && value != 0);
+                .anyMatch(value -> value != null && value != 0.0);
 
             if (!hasNonZeroData) {
                 log.debug("All zero AAL data for term: {} in scenario: {}, skipping", term, scenarioName);

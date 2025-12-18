@@ -11,8 +11,19 @@ import java.util.stream.Collectors;
  * Spring Boot의 영문 HazardType을 FastAPI가 기대하는 한글 값으로 변환
  * 역방향 매핑도 지원 (FastAPI 한글 → Spring Boot 표준 한글)
  *
+ * FastAPI 재해 종류 매핑 (9가지):
+ * - "가뭄" (drought) → "가뭄"
+ * - "한파" (cold wave) → "극심한 저온"
+ * - "폭염" (heat wave) → "극심한 고온"
+ * - "내륙침수" (inland flood) → "하천 홍수"
+ * - "해안침수" (coastal flood) → "해수면 상승"
+ * - "태풍" (typhoon) → "태풍"
+ * - "도시침수" (urban flood) → "도시 홍수"
+ * - "물부족" (water scarcity) → "물 부족"
+ * - "산불" (wildfire) → "산불"
+ *
  * 최종 수정일: 2025-12-19
- * 파일 버전: v02
+ * 파일 버전: v03
  *
  * @author SKAX Team
  */
