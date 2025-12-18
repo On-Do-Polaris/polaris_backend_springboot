@@ -182,23 +182,22 @@ public class SimulationService {
         }
 
         // 4-2. 사업장별 AAL 결과 파싱 (Key: SiteId String, Value: Map<Year, Score>)
-        final Map<String, Map<String, Double>> siteAalResults;
+        Map<String, Map<String, Double>> tempSiteAalResults = new HashMap<>();
         if (apiResponse.containsKey("siteAALs") && apiResponse.get("siteAALs") != null) {
             try {
-                siteAalResults = objectMapper.convertValue(
+                tempSiteAalResults = objectMapper.convertValue(
                     apiResponse.get("siteAALs"),
                     new TypeReference<Map<String, Map<String, Double>>>() {}
                 );
-                log.info("Parsed siteAALs: {} sites", siteAalResults.size());
-                log.debug("Site AAL keys: {}", siteAalResults.keySet());
+                log.info("Parsed siteAALs: {} sites", tempSiteAalResults.size());
+                log.debug("Site AAL keys: {}", tempSiteAalResults.keySet());
             } catch (Exception e) {
                 log.error("Failed to parse siteAALs: {}", e.getMessage(), e);
-                siteAalResults = new HashMap<>();
             }
         } else {
             log.warn("siteAALs not found in FastAPI response");
-            siteAalResults = new HashMap<>();
         }
+        final Map<String, Map<String, Double>> siteAalResults = tempSiteAalResults;
 
         // 4-3. Sites 리스트 조립 (DB의 이름/지역코드 + API의 AAL 값)
         List<ClimateSimulationResponse.SiteSimulationData> siteDataList = sites.stream()
