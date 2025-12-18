@@ -161,7 +161,7 @@ public class ReportController {
 			required = true,
 			example = "550e8400-e29b-41d4-a716-446655440000"
 		)
-		@RequestPart(value = "siteId") String siteIdStr,
+		@RequestParam(value = "siteId") String siteIdStr,
 		@Parameter(
 			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
 			required = true
