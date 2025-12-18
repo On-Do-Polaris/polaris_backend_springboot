@@ -34,9 +34,9 @@ public class HazardTypeMapper {
 	// Spring Boot 표준 한글명 (사용자에게 보여지는 이름)
 	private static final Map<String, String> STANDARD_KOREAN_NAMES = Map.of(
 		"태풍", "태풍",
-		"내륙침수", "홍수",
+		"내륙침수", "하천 홍수",
 		"해안침수", "해수면 상승",
-		"도시침수", "도시 침수",
+		"도시침수", "도시 홍수",
 		"가뭄", "가뭄",
 		"산불", "산불",
 		"폭염", "극심한 고온",
@@ -50,9 +50,10 @@ public class HazardTypeMapper {
 	static {
 		FASTAPI_TO_STANDARD = new HashMap<>();
 		FASTAPI_TO_STANDARD.put("태풍", "태풍");
-		FASTAPI_TO_STANDARD.put("내륙침수", "홍수");
+		FASTAPI_TO_STANDARD.put("내륙침수", "하천 홍수");  // DB에 "하천 홍수"로 저장됨
 		FASTAPI_TO_STANDARD.put("해안침수", "해수면 상승");
-		FASTAPI_TO_STANDARD.put("도시침수", "도시 침수");
+		FASTAPI_TO_STANDARD.put("도시침수", "도시 홍수");  // DB에 "도시 홍수"로 저장됨
+		FASTAPI_TO_STANDARD.put("도시 침수", "도시 홍수");  // FastAPI에서 "도시 침수"로 올 경우도 처리
 		FASTAPI_TO_STANDARD.put("가뭄", "가뭄");
 		FASTAPI_TO_STANDARD.put("산불", "산불");
 		FASTAPI_TO_STANDARD.put("폭염", "극심한 고온");
@@ -63,8 +64,9 @@ public class HazardTypeMapper {
 		FASTAPI_TO_STANDARD.put("극심한 고온", "극심한 고온");
 		FASTAPI_TO_STANDARD.put("극심한 저온", "극심한 저온");
 		FASTAPI_TO_STANDARD.put("홍수", "홍수");
+		FASTAPI_TO_STANDARD.put("하천 홍수", "하천 홍수");  // DB 저장값
+		FASTAPI_TO_STANDARD.put("도시 홍수", "도시 홍수");  // DB 저장값
 		FASTAPI_TO_STANDARD.put("해수면 상승", "해수면 상승");
-		FASTAPI_TO_STANDARD.put("도시 침수", "도시 침수");
 		FASTAPI_TO_STANDARD.put("물 부족", "물 부족");
 	}
 
