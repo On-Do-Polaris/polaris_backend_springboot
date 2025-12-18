@@ -1,0 +1,136 @@
+# TC/test_springboot_cicd.yaml
+# 이 파일은 Spring Boot 프로젝트의 CI/CD 파이프라인을 정의하는 GitHub Actions 워크플로우입니다.
+# 명세서의 각 테스트 케이스(TC)가 파이프라인의 어떤 단계에서 검증되는지 주석으로 표기했습니다.
+
+name: Spring Boot CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GCP_PROJECT_ID: your-gcp-project-id # GCP 프로젝트 ID로 변경
+  GCR_HOSTNAME: gcr.io
+  ARTIFACT_ID: physical-risk-management # pom.xml의 artifactId
+  GCR_IMAGE_NAME: ${{ARTIFACT_ID}}
+
+jobs:
+  # =================================================================
+  #  1. 빌드 및 품질 게이트 (Build & Quality Gate)
+  # =================================================================
+  build-and-test:
+    name: Build, Quality Gate & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 3. Cache Maven packages
+        # TC_007: Maven 의존성을 캐싱하여 빌드 시간 단축
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: 4. Run Maven Verify
+        # 이 단계는 여러 TC를 동시에 검증합니다.
+        # TC_002: Checkstyle 플러그인이 pom.xml에 설정되어 있다면, 'verify' 단계에서 자동으로 실행되어 코드 스타일 위반 시 빌드를 실패시킵니다.
+        # TC_003: 실패하는 단위 테스트가 있으면, 'test' 단계에서 빌드가 실패합니다.
+        # TC_004: JaCoCo 커버리지(pom.xml에 0.8로 설정 가정)가 기준 미달이면, 'check' 단계에서 빌드가 실패합니다.
+        # TC_001: 파이프라인 성공의 첫 단계입니다.
+        run: mvn -B verify
+
+      - name: 5. Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+  # =================================================================
+  #  2. Docker 이미지 빌드 및 GCR 푸시 (Build & Push)
+  # =================================================================
+  build-and-push-to-gcr:
+    name: Build and Push Docker Image to GCR
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 3. Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: 4. Configure Docker to use gcloud
+        run: gcloud auth configure-docker ${{ env.GCR_HOSTNAME }}
+
+      - name: 5. Build and push Docker image
+        # TC_007: Docker의 레이어 캐싱은 Docker 자체적으로 처리됩니다.
+        run: |
+          docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.GCR_HOSTNAME }}/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_IMAGE_NAME }}:${{ github.sha }}
+
+  # =================================================================
+  #  3. Google Cloud Run에 배포 및 검증 (Deploy & Verify)
+  # =================================================================
+  deploy-to-cloud-run:
+    name: Deploy to Cloud Run and Verify
+    needs: build-and-push-to-gcr
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: 1. Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 2. Deploy to Cloud Run
+        # TC_006: 'SPRING_PROFILES_ACTIVE=prod' 환경변수를 명시적으로 주입합니다.
+        # TC_001: 파이프라인 성공의 일부입니다.
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.ARTIFACT_ID }}
+          region: asia-northeast3 # 서울 리전
+          image: ${{ env.GCR_HOSTNAME }}/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_IMAGE_NAME }}:${{ github.sha }}
+          env_vars: |
+            SPRING_PROFILES_ACTIVE=prod
+
+      - name: 3. Post-Deployment Health Check
+        # TC_005: 배포된 서비스의 /actuator/health 엔드포인트를 확인하여 'UP' 상태인지 검증합니다.
+        run: |
+          echo "Starting post-deployment health check..."
+          # google-github-actions/deploy-cloudrun 액션이 출력하는 서비스 URL을 사용합니다.
+          # SERVICE_URL 변수는 액션의 출력(output)에서 가져와야 합니다. 여기서는 예시 URL을 사용합니다.
+          SERVICE_URL="https://your-cloud-run-service-url.a.run.app"
+          
+          END_TIME=$(( $(date +%s) + 60 ))
+          while [ $(date +%s) -lt $END_TIME ]; do
+            STATUS=$(curl -s $SERVICE_URL/actuator/health | grep -o '"status":"UP"')
+            if [ ! -z "$STATUS" ]; then
+              echo "Health check PASSED. Service is UP."
+              exit 0
+            fi
+            echo "Service not ready yet. Retrying in 5 seconds..."
+            sleep 5
+          done
+          echo "Health check FAILED after 60 seconds."
+          exit 1

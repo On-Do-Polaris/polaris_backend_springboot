@@ -303,12 +303,30 @@ public class FastApiClient {
      * @return 시뮬레이션 결과
      */
     public Mono<Map<String, Object>> runClimateSimulation(Map<String, Object> request) {
+        log.info("FastAPI 기후 시뮬레이션 요청: {}", request);
+
         return webClient.post()
             .uri("/api/simulation/climate")
             .header("X-API-Key", apiKey)
             .bodyValue(request)
             .retrieve()
-            .bodyToMono(MAP_TYPE_REF);
+            .bodyToMono(MAP_TYPE_REF)
+            .doOnSuccess(response -> {
+                log.info("FastAPI 기후 시뮬레이션 응답 성공");
+                log.info("응답 키: {}", response != null ? response.keySet() : "null");
+                if (response != null) {
+                    log.info("regionScores 존재: {}", response.containsKey("regionScores"));
+                    log.info("siteAALs 존재: {}", response.containsKey("siteAALs"));
+                    log.debug("전체 응답: {}", response);
+                }
+            })
+            .doOnError(error -> {
+                log.error("FastAPI 기후 시뮬레이션 실패", error);
+                if (error instanceof WebClientResponseException) {
+                    WebClientResponseException ex = (WebClientResponseException) error;
+                    log.error("응답 코드: {}, 응답 본문: {}", ex.getStatusCode(), ex.getResponseBodyAsString());
+                }
+            });
     }
 
     /**
