@@ -73,6 +73,7 @@ public class AnalysisService {
 
         // 단일 사업장도 리스트로 전송 (sites 필드 사용)
         StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
+            .userId(userId)            // 로그인한 사용자 ID
             .sites(List.of(siteInfo))  // 단일 사업장을 리스트로 감싸서 전송
             .hazardTypes(List.of())    // 빈 리스트로 초기화
             .priority("normal")        // 기본 우선순위
@@ -227,7 +228,14 @@ public class AnalysisService {
 
         getSiteWithAuth(siteId, userId);
         Map<String, Object> response = fastApiClient.getPhysicalRiskScores(siteId, hazardType, term).block();
-        return convertToDto(response, PhysicalRiskScoreResponse.class);
+
+        log.debug("FastAPI physical-risk-scores response: {}", response);
+
+        // FastAPI 응답을 그대로 DTO로 변환 (Jackson이 자동 매핑)
+        PhysicalRiskScoreResponse result = convertToDto(response, PhysicalRiskScoreResponse.class);
+
+        log.debug("Converted PhysicalRiskScoreResponse: {}", result);
+        return result;
     }
 
     /**
@@ -236,13 +244,89 @@ public class AnalysisService {
      * @param siteId 사업장 ID
      * @return 재무 영향
      */
+    @SuppressWarnings("unchecked")
     public FinancialImpactResponse getFinancialImpact(UUID siteId, String hazardType, String term) {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching financial impact for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
 
         getSiteWithAuth(siteId, userId);
         Map<String, Object> response = fastApiClient.getFinancialImpact(siteId, hazardType, term).block();
-        return convertToDto(response, FinancialImpactResponse.class);
+
+        log.debug("FastAPI AAL response: {}", response);
+
+        // FastAPI는 scenarios 배열로 반환: [{"scenario": "SSP1-2.6", "riskType": "가뭄", "shortTerm": {...}, ...}, ...]
+        // Spring Boot는 scenarios1~4로 분리된 구조 사용
+        List<Map<String, Object>> scenarios = (List<Map<String, Object>>) response.get("scenarios");
+
+        if (scenarios == null || scenarios.isEmpty()) {
+            log.warn("No scenarios found in FastAPI response for siteId: {}", siteId);
+            return FinancialImpactResponse.builder()
+                .siteId(siteId)
+                .term(term)
+                .hazardType(hazardType)
+                .build();
+        }
+
+        // 시나리오를 SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5로 분류
+        Map<String, Integer> scenarios1 = null;
+        Map<String, Integer> scenarios2 = null;
+        Map<String, Integer> scenarios3 = null;
+        Map<String, Integer> scenarios4 = null;
+
+        for (Map<String, Object> scenario : scenarios) {
+            String scenarioName = (String) scenario.get("scenario");
+            String riskType = (String) scenario.get("riskType");
+
+            // hazardType과 riskType이 일치하는 것만 처리
+            if (!hazardType.equals(riskType)) {
+                continue;
+            }
+
+            // term에 해당하는 데이터 추출 (shortTerm, midTerm, longTerm)
+            Map<String, Object> termData = (Map<String, Object>) scenario.get(term + "Term");
+            if (termData == null) {
+                continue;
+            }
+
+            // Integer 형으로 변환
+            Map<String, Integer> termDataInt = termData.entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue() instanceof Number ? ((Number) e.getValue()).intValue() : 0
+                ));
+
+            // 시나리오별로 분류 (termDataInt를 직접 할당)
+            switch (scenarioName) {
+                case "SSP1-2.6":
+                    scenarios1 = termDataInt;
+                    break;
+                case "SSP2-4.5":
+                    scenarios2 = termDataInt;
+                    break;
+                case "SSP3-7.0":
+                    scenarios3 = termDataInt;
+                    break;
+                case "SSP5-8.5":
+                    scenarios4 = termDataInt;
+                    break;
+                default:
+                    log.warn("Unknown scenario: {}", scenarioName);
+            }
+        }
+
+        FinancialImpactResponse result = FinancialImpactResponse.builder()
+            .siteId(siteId)
+            .term(term)
+            .hazardType(hazardType)
+            .scenarios1(scenarios1)
+            .scenarios2(scenarios2)
+            .scenarios3(scenarios3)
+            .scenarios4(scenarios4)
+            .reason((String) response.get("reason"))
+            .build();
+
+        log.debug("Converted FinancialImpactResponse: {}", result);
+        return result;
     }
 
     /**
@@ -255,9 +339,25 @@ public class AnalysisService {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching vulnerability for site: {}", siteId);
 
-        getSiteWithAuth(siteId, userId);
+        Site site = getSiteWithAuth(siteId, userId);
         Map<String, Object> response = fastApiClient.getVulnerability(siteId).block();
-        return convertToDto(response, VulnerabilityResponse.class);
+
+        log.debug("FastAPI vulnerability response: {}", response);
+
+        // FastAPI 응답을 DTO로 변환 (기본 사업장 정보 + FastAPI 응답)
+        VulnerabilityResponse result = VulnerabilityResponse.builder()
+            .siteId(site.getId())
+            .siteName(site.getName())
+            .latitude(site.getLatitude())
+            .longitude(site.getLongitude())
+            .jibunAddress(site.getJibunAddress())
+            .roadAddress(site.getRoadAddress())
+            .siteType(site.getType())
+            .aisummry(response.get("aisummry") != null ? response.get("aisummry").toString() : null)
+            .build();
+
+        log.debug("Vulnerability response for site {}: {}", siteId, result);
+        return result;
     }
 
     /**
@@ -292,6 +392,7 @@ public class AnalysisService {
 
         // 단일 FastAPI 요청으로 모든 사업장 분석 시작
         StartAnalysisRequestDto request = StartAnalysisRequestDto.builder()
+            .userId(userId)          // 로그인한 사용자 ID
             .sites(siteInfoList)
             .hazardTypes(List.of())  // 빈 리스트로 초기화
             .priority("normal")      // 기본 우선순위
