@@ -45,13 +45,12 @@ public class ReportService {
 	private final ObjectMapper objectMapper;
 
 	/**
-	 * 통합 리포트 조회 및 저장
+	 * 통합 리포트 조회
 	 *
-	 * FastAPI로부터 리포트를 조회하고 Report 테이블에 저장
+	 * DB의 reports 테이블에서 user_id로 리포트를 조회
 	 *
 	 * @return TCFD 구조의 리포트 응답
 	 */
-	@Transactional
 	public ReportResponse getReport() {
 		UUID userId = SecurityUtil.getCurrentUserId();
 		log.info("Fetching report for userId={}", userId);
@@ -59,32 +58,19 @@ public class ReportService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-		try {
-			// FastAPI에서 리포트 조회
-			Map<String, Object> response = fastApiClient.getReportByUserId(userId).block();
+		// DB에서 리포트 조회
+		Report report = reportRepository.findByUser(user)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.REPORT_NOT_FOUND));
 
-			// Report 엔티티 생성 또는 업데이트
-			Report report = reportRepository.findByUser(user)
-				.orElse(Report.builder()
-					.user(user)
-					.build());
+		log.info("Report found for userId={}, reportId={}", userId, report.getId());
 
-			// JSONB로 전체 응답 저장
-			report.setReportContent(response);
+		// Map을 ReportResponse DTO로 변환
+		ReportResponse reportResponse = objectMapper.convertValue(
+			report.getReportContent(),
+			ReportResponse.class
+		);
 
-			// DB에 저장
-			reportRepository.save(report);
-			log.info("Report saved successfully for userId={}, reportId={}", userId, report.getId());
-
-			// Map을 ReportResponse DTO로 변환
-			ReportResponse reportResponse = objectMapper.convertValue(response, ReportResponse.class);
-
-			return reportResponse;
-		} catch (Exception e) {
-			log.error("Failed to fetch report: {}", e.getMessage());
-			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
-				"리포트 조회에 실패했습니다: " + e.getMessage());
-		}
+		return reportResponse;
 	}
 
 	/**

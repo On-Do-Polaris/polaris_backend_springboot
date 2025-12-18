@@ -55,8 +55,8 @@ public class PastDisasterResponse {
 		private String severity;
 
 		/**
-		 * 영향을 받은 지역 목록
+		 * 영향을 받은 지역 (FastAPI는 단일 문자열로 반환)
 		 */
-		private List<String> region;
+		private String region;
 	}
 }

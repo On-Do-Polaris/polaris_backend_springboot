@@ -3,6 +3,7 @@ package com.skax.physicalrisk.service.user;
 import com.skax.physicalrisk.client.gmail.GmailClient;
 import com.skax.physicalrisk.domain.user.entity.User;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
+import com.skax.physicalrisk.exception.ErrorCode;
 import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +85,7 @@ public class EmailService {
 		// Gmail API를 통한 실제 이메일 발송
 		gmailClient.sendEmail(toEmail, subject, emailContent);
 
-		log.info("✅ 인증번호 이메일 발송 완료: to={}, purpose={}", toEmail, purpose);
+		log.info("인증번호 이메일 발송 완료: to={}, purpose={}", toEmail, purpose);
 	}
 
 	/**
@@ -104,7 +105,7 @@ public class EmailService {
 		// Gmail API를 통한 실제 이메일 발송
 		gmailClient.sendEmail(toEmail, subject, emailContent);
 
-		log.info("✅ 분석 완료 이메일 발송 완료: to={}", toEmail);
+		log.info("분석 완료 이메일 발송 완료: to={}", toEmail);
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class EmailService {
 
 		// UUID로 사용자 조회
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다"));
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		// 이메일 발송
 		sendAnalysisCompletionEmail(user.getEmail());
