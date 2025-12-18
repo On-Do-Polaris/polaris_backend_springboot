@@ -268,10 +268,10 @@ public class AnalysisService {
         }
 
         // 시나리오를 SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5로 분류
-        Map<String, Map<String, Integer>> scenarios1 = null;
-        Map<String, Map<String, Integer>> scenarios2 = null;
-        Map<String, Map<String, Integer>> scenarios3 = null;
-        Map<String, Map<String, Integer>> scenarios4 = null;
+        Map<String, Integer> scenarios1 = null;
+        Map<String, Integer> scenarios2 = null;
+        Map<String, Integer> scenarios3 = null;
+        Map<String, Integer> scenarios4 = null;
 
         for (Map<String, Object> scenario : scenarios) {
             String scenarioName = (String) scenario.get("scenario");
@@ -295,19 +295,19 @@ public class AnalysisService {
                     e -> e.getValue() instanceof Number ? ((Number) e.getValue()).intValue() : 0
                 ));
 
-            // 시나리오별로 분류
+            // 시나리오별로 분류 (termDataInt를 직접 할당)
             switch (scenarioName) {
                 case "SSP1-2.6":
-                    scenarios1 = Map.of(scenarioName, termDataInt);
+                    scenarios1 = termDataInt;
                     break;
                 case "SSP2-4.5":
-                    scenarios2 = Map.of(scenarioName, termDataInt);
+                    scenarios2 = termDataInt;
                     break;
                 case "SSP3-7.0":
-                    scenarios3 = Map.of(scenarioName, termDataInt);
+                    scenarios3 = termDataInt;
                     break;
                 case "SSP5-8.5":
-                    scenarios4 = Map.of(scenarioName, termDataInt);
+                    scenarios4 = termDataInt;
                     break;
                 default:
                     log.warn("Unknown scenario: {}", scenarioName);
@@ -342,7 +342,9 @@ public class AnalysisService {
         Site site = getSiteWithAuth(siteId, userId);
         Map<String, Object> response = fastApiClient.getVulnerability(siteId).block();
 
-        // FastAPI 응답을 DTO로 변환 (사업장 정보 포함)
+        log.debug("FastAPI vulnerability response: {}", response);
+
+        // FastAPI 응답을 DTO로 변환 (기본 사업장 정보 + FastAPI 응답)
         VulnerabilityResponse result = VulnerabilityResponse.builder()
             .siteId(site.getId())
             .siteName(site.getName())
@@ -350,12 +352,7 @@ public class AnalysisService {
             .longitude(site.getLongitude())
             .jibunAddress(site.getJibunAddress())
             .roadAddress(site.getRoadAddress())
-            .siteType(site.getIndustryType())
-            .useAprDay(site.getUseAprDay() != null ? site.getUseAprDay().toString() : null)
-            .area(site.getArea() != null ? site.getArea().doubleValue() : null)
-            .grndflrCnt(site.getGrndFlrCnt())
-            .ugrnFlrCnt(site.getUgrndFlrCnt())
-            .rserthqkDsgnApplyYn(site.getRserthqkDsgnApplyYn())
+            .siteType(site.getType())
             .aisummry(response.get("aisummry") != null ? response.get("aisummry").toString() : null)
             .build();
 
