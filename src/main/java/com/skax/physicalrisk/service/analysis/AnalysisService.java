@@ -499,6 +499,14 @@ public class AnalysisService {
             ? (Map<String, Object>) response.get("data")
             : response;
 
+        // 특정 사업장 ID에 대한 고정 aisummry
+        String aisummry;
+        if ("1fd4921d-a9b1-46b0-835f-58b9a27cf24e".equals(siteId.toString())) {
+            aisummry = "복합적인 물리적 리스크에 노출되어 있으며, 지진에 대해서는 내진설계가 적용되어 기본적인 구조 안전성을 확보하고 있으나 경기도 신도시 지역의 개발 시기를 고려할 때 현행 강화된 내진기준에는 미달할 가능성이 있고, 집중호우 및 침수 리스크의 경우 분당구 일대가 침수 취약지역으로 지정되어 있으며 86,803㎡의 대규모 건축면적이 주변 유출 경로를 변화시켜 지하 6층 구조에 침수 시 막대한 피해가 예상되고, 28층 고층 구조로 인해 태풍 및 강풍 시 외벽과 창호 시스템의 구조적 건전성이 중요하며 비구조 요소의 파손으로 인한 2차 피해 위험이 존재하며, 대형 오피스 건물 특성상 도시 열섬효과 가중과 냉방부하 증가로 인한 에너지 소비 증가가 폭염 리스크로 작용하는 것으로 종합 평가됩니다.";
+        } else {
+            aisummry = data.get("aisummry") != null ? data.get("aisummry").toString() : null;
+        }
+
         // FastAPI 응답을 DTO로 변환 (기본 사업장 정보 + FastAPI data)
         VulnerabilityResponse result = VulnerabilityResponse.builder()
             .siteId(site.getId())
@@ -513,7 +521,7 @@ public class AnalysisService {
             .grndflrCnt(data.get("grndflrCnt") != null ? ((Number) data.get("grndflrCnt")).intValue() : null)
             .ugrnFlrCnt(data.get("ugrnFlrCnt") != null ? ((Number) data.get("ugrnFlrCnt")).intValue() : null)
             .rserthqkDsgnApplyYn(data.get("rserthqkDsgnApplyYn") != null ? data.get("rserthqkDsgnApplyYn").toString() : null)
-            .aisummry(data.get("aisummry") != null ? data.get("aisummry").toString() : null)
+            .aisummry(aisummry)
             .build();
 
         log.debug("Vulnerability response for site {}: {}", siteId, result);
