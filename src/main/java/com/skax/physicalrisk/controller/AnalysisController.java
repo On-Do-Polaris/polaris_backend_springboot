@@ -558,21 +558,35 @@ public class AnalysisController {
     @PostMapping("/complete")
     public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> notifyAnalysisCompletion(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "사용자 ID (UUID)",
+            description = "사용자 ID 및 리포트 생성 완료 여부",
             required = true,
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = AnalysisCompleteRequest.class),
-                examples = @ExampleObject(
-                    value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
-                )
+                examples = {
+                    @ExampleObject(
+                        name = "분석 완료",
+                        value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"report\": false}"
+                    ),
+                    @ExampleObject(
+                        name = "리포트 생성 완료",
+                        value = "{\"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"report\": true}"
+                    )
+                }
             )
         )
         @RequestBody AnalysisCompleteRequest request
     ) {
-        log.info("POST /api/analysis/complete - userId: {}", request.getUserId());
-        emailService.sendAnalysisCompletionEmail(request.getUserId());
-        return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석이 완료되었습니다."));
+        log.info("POST /api/analysis/complete - userId: {}, report: {}", request.getUserId(), request.getReport());
+
+        // report 값에 따라 다른 이메일 발송
+        if (Boolean.TRUE.equals(request.getReport())) {
+            emailService.sendReportCompletionEmail(request.getUserId());
+            return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("리포트 생성이 완료되었습니다."));
+        } else {
+            emailService.sendAnalysisCompletionEmail(request.getUserId());
+            return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("분석이 완료되었습니다."));
+        }
     }
 
     /**
@@ -585,6 +599,9 @@ public class AnalysisController {
     public static class AnalysisCompleteRequest {
         @Schema(description = "사용자 ID (UUID)", required = true, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
         private UUID userId;
+
+        @Schema(description = "리포트 생성 완료 여부 (true: 리포트 생성 완료, false: 분석 완료)", required = true, example = "false")
+        private Boolean report;
     }
 
     /**

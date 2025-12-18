@@ -236,7 +236,6 @@ public class AnalysisService {
      * @param hazardType 위험 유형 (옵션)
      * @return 물리적 리스크 점수
      */
-    @SuppressWarnings("unchecked")
     public PhysicalRiskScoreResponse getPhysicalRiskScores(UUID siteId, String hazardType, String term) {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching physical risk scores for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
@@ -246,11 +245,11 @@ public class AnalysisService {
 
         log.debug("FastAPI physical-risk-scores response: {}", response);
 
-        // FastAPI는 scenarios 배열로 반환: [{"scenario": "SSP1-2.6", "riskType": "폭염", "shortTerm": {...}, ...}, ...]
-        // Spring Boot는 scenarios1~4로 분리된 구조 사용
-        List<Map<String, Object>> scenarios = (List<Map<String, Object>>) response.get("scenarios");
+        // FastAPI 응답을 DTO로 자동 매핑 (camelCase 지원)
+        PhysicalRiskScoreResponse.FastApiResponse fastApiResponse =
+            objectMapper.convertValue(response, PhysicalRiskScoreResponse.FastApiResponse.class);
 
-        if (scenarios == null || scenarios.isEmpty()) {
+        if (fastApiResponse.getScenarios() == null || fastApiResponse.getScenarios().isEmpty()) {
             log.warn("No scenarios found in FastAPI response for siteId: {}", siteId);
             return PhysicalRiskScoreResponse.builder()
                 .siteId(siteId)
@@ -265,49 +264,55 @@ public class AnalysisService {
         Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios3 = null;
         Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios4 = null;
 
-        for (Map<String, Object> scenario : scenarios) {
-            String scenarioName = (String) scenario.get("scenario");
-            String riskType = (String) scenario.get("riskType");
+        for (PhysicalRiskScoreResponse.ScenarioData scenario : fastApiResponse.getScenarios()) {
+            String scenarioName = scenario.getScenario();
+            String riskType = scenario.getRiskType();
 
-            // hazardType과 riskType이 일치하는 것만 처리
-            if (hazardType != null && !hazardType.equals(riskType)) {
+            log.debug("Processing scenario: {}, riskType: {}, requested hazardType: {}", scenarioName, riskType, hazardType);
+
+            // hazardType 필터링 (선택사항)
+            if (hazardType != null && !hazardType.isEmpty() && !hazardType.equals(riskType)) {
+                log.debug("Skipping scenario due to riskType mismatch: {} != {}", hazardType, riskType);
                 continue;
             }
 
-            // term에 해당하는 데이터 추출 (shortTerm, midTerm, longTerm)
-            Map<String, Object> termData = (Map<String, Object>) scenario.get(term + "Term");
+            // term에 따라 해당 데이터 추출
+            Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> termData = null;
+            switch (term) {
+                case "short":
+                    termData = scenario.getShortTerm();
+                    break;
+                case "mid":
+                    termData = scenario.getMidTerm();
+                    break;
+                case "long":
+                    termData = scenario.getLongTerm();
+                    break;
+                default:
+                    log.warn("Unknown term: {}", term);
+                    continue;
+            }
+
             if (termData == null) {
+                log.debug("No data found for term: {}", term);
                 continue;
             }
 
-            // RiskScoreDetail 형으로 변환
-            Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> termDataConverted = termData.entrySet().stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> {
-                        Map<String, Object> pointData = (Map<String, Object>) e.getValue();
-                        return PhysicalRiskScoreResponse.RiskScoreDetail.builder()
-                            .total(pointData.get("total") instanceof Number ? ((Number) pointData.get("total")).doubleValue() : null)
-                            .h(pointData.get("h") instanceof Number ? ((Number) pointData.get("h")).doubleValue() : null)
-                            .e(pointData.get("e") instanceof Number ? ((Number) pointData.get("e")).doubleValue() : null)
-                            .v(pointData.get("v") instanceof Number ? ((Number) pointData.get("v")).doubleValue() : null)
-                            .build();
-                    }
-                ));
+            log.debug("Found termData for {}: {} points", term, termData.size());
 
             // 시나리오별로 분류
             switch (scenarioName) {
                 case "SSP1-2.6":
-                    scenarios1 = termDataConverted;
+                    scenarios1 = termData;
                     break;
                 case "SSP2-4.5":
-                    scenarios2 = termDataConverted;
+                    scenarios2 = termData;
                     break;
                 case "SSP3-7.0":
-                    scenarios3 = termDataConverted;
+                    scenarios3 = termData;
                     break;
                 case "SSP5-8.5":
-                    scenarios4 = termDataConverted;
+                    scenarios4 = termData;
                     break;
                 default:
                     log.warn("Unknown scenario: {}", scenarioName);
@@ -322,7 +327,7 @@ public class AnalysisService {
             .scenarios2(scenarios2)
             .scenarios3(scenarios3)
             .scenarios4(scenarios4)
-            .Strategy((String) response.get("Strategy"))
+            .Strategy(fastApiResponse.getStrategy())
             .build();
 
         log.debug("Converted PhysicalRiskScoreResponse: {}", result);
@@ -335,7 +340,6 @@ public class AnalysisService {
      * @param siteId 사업장 ID
      * @return 재무 영향
      */
-    @SuppressWarnings("unchecked")
     public FinancialImpactResponse getFinancialImpact(UUID siteId, String hazardType, String term) {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching financial impact for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
@@ -345,11 +349,11 @@ public class AnalysisService {
 
         log.debug("FastAPI AAL response: {}", response);
 
-        // FastAPI는 scenarios 배열로 반환: [{"scenario": "SSP1-2.6", "riskType": "가뭄", "shortTerm": {...}, ...}, ...]
-        // Spring Boot는 scenarios1~4로 분리된 구조 사용
-        List<Map<String, Object>> scenarios = (List<Map<String, Object>>) response.get("scenarios");
+        // FastAPI 응답을 DTO로 자동 매핑 (camelCase 지원)
+        FinancialImpactResponse.FastApiResponse fastApiResponse =
+            objectMapper.convertValue(response, FinancialImpactResponse.FastApiResponse.class);
 
-        if (scenarios == null || scenarios.isEmpty()) {
+        if (fastApiResponse.getScenarios() == null || fastApiResponse.getScenarios().isEmpty()) {
             log.warn("No scenarios found in FastAPI response for siteId: {}", siteId);
             return FinancialImpactResponse.builder()
                 .siteId(siteId)
@@ -364,41 +368,55 @@ public class AnalysisService {
         Map<String, Integer> scenarios3 = null;
         Map<String, Integer> scenarios4 = null;
 
-        for (Map<String, Object> scenario : scenarios) {
-            String scenarioName = (String) scenario.get("scenario");
-            String riskType = (String) scenario.get("riskType");
+        for (FinancialImpactResponse.ScenarioData scenario : fastApiResponse.getScenarios()) {
+            String scenarioName = scenario.getScenario();
+            String riskType = scenario.getRiskType();
 
-            // hazardType과 riskType이 일치하는 것만 처리
-            if (!hazardType.equals(riskType)) {
+            log.debug("Processing financial scenario: {}, riskType: {}, requested hazardType: {}", scenarioName, riskType, hazardType);
+
+            // hazardType 필터링 (선택사항)
+            if (hazardType != null && !hazardType.isEmpty() && !hazardType.equals(riskType)) {
+                log.debug("Skipping financial scenario due to riskType mismatch: {} != {}", hazardType, riskType);
                 continue;
             }
 
-            // term에 해당하는 데이터 추출 (shortTerm, midTerm, longTerm)
-            Map<String, Object> termData = (Map<String, Object>) scenario.get(term + "Term");
+            // term에 따라 해당 데이터 추출
+            Map<String, Integer> termData = null;
+            switch (term) {
+                case "short":
+                    termData = scenario.getShortTerm();
+                    break;
+                case "mid":
+                    termData = scenario.getMidTerm();
+                    break;
+                case "long":
+                    termData = scenario.getLongTerm();
+                    break;
+                default:
+                    log.warn("Unknown term: {}", term);
+                    continue;
+            }
+
             if (termData == null) {
+                log.debug("No financial data found for term: {}", term);
                 continue;
             }
 
-            // Integer 형으로 변환
-            Map<String, Integer> termDataInt = termData.entrySet().stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue() instanceof Number ? ((Number) e.getValue()).intValue() : 0
-                ));
+            log.debug("Found financial termData for {}: {} points", term, termData.size());
 
-            // 시나리오별로 분류 (termDataInt를 직접 할당)
+            // 시나리오별로 분류
             switch (scenarioName) {
                 case "SSP1-2.6":
-                    scenarios1 = termDataInt;
+                    scenarios1 = termData;
                     break;
                 case "SSP2-4.5":
-                    scenarios2 = termDataInt;
+                    scenarios2 = termData;
                     break;
                 case "SSP3-7.0":
-                    scenarios3 = termDataInt;
+                    scenarios3 = termData;
                     break;
                 case "SSP5-8.5":
-                    scenarios4 = termDataInt;
+                    scenarios4 = termData;
                     break;
                 default:
                     log.warn("Unknown scenario: {}", scenarioName);
@@ -413,7 +431,7 @@ public class AnalysisService {
             .scenarios2(scenarios2)
             .scenarios3(scenarios3)
             .scenarios4(scenarios4)
-            .reason((String) response.get("reason"))
+            .reason(fastApiResponse.getReason())
             .build();
 
         log.debug("Converted FinancialImpactResponse: {}", result);
@@ -538,7 +556,7 @@ public class AnalysisService {
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 완료 이메일 발송
-        emailService.sendAnalysisCompletionEmail(user.getEmail());
+        emailService.sendAnalysisCompletionEmail(user.getEmail(), userId);
 
         log.info("Analysis completion notification sent to: {}", user.getEmail());
     }

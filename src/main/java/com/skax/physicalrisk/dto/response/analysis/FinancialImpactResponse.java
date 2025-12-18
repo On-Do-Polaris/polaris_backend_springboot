@@ -1,11 +1,13 @@
 package com.skax.physicalrisk.dto.response.analysis;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,4 +46,37 @@ public class FinancialImpactResponse {
 
     @Schema(description = "재무 영향 발생 근거", example = "태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실")
     private String reason;
+
+    /**
+     * FastAPI 응답 구조를 직접 매핑하는 내부 DTO (scenarios 배열)
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FastApiResponse {
+        private List<ScenarioData> scenarios;
+        private String reason;
+    }
+
+    /**
+     * 각 시나리오 데이터
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ScenarioData {
+        private String scenario;  // "SSP1-2.6"
+
+        @JsonProperty("riskType")
+        private String riskType;  // "폭염"
+
+        @JsonProperty("shortTerm")
+        private Map<String, Integer> shortTerm;
+
+        @JsonProperty("midTerm")
+        private Map<String, Integer> midTerm;
+
+        @JsonProperty("longTerm")
+        private Map<String, Integer> longTerm;
+    }
 }

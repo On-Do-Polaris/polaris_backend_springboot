@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -58,7 +59,7 @@ public class PhysicalRiskScoreResponse {
     @AllArgsConstructor
     @Schema(description = "물리적 리스크 상세 점수 (Total, H, E, V)")
     public static class RiskScoreDetail {
-        
+
         @Schema(description = "종합 점수 (Total)", example = "50")
         private Double total; // 소수점 계산이 필요하다면 Double, 정수면 Integer
 
@@ -70,5 +71,40 @@ public class PhysicalRiskScoreResponse {
 
         @Schema(description = "Vulnerability 점수", example = "20")
         private Double v;
+    }
+
+    /**
+     * FastAPI 응답 구조를 직접 매핑하는 내부 DTO (scenarios 배열)
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FastApiResponse {
+        private List<ScenarioData> scenarios;
+
+        @JsonProperty("Strategy")
+        private String Strategy;
+    }
+
+    /**
+     * 각 시나리오 데이터
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ScenarioData {
+        private String scenario;  // "SSP1-2.6"
+
+        @JsonProperty("riskType")
+        private String riskType;  // "폭염"
+
+        @JsonProperty("shortTerm")
+        private Map<String, RiskScoreDetail> shortTerm;
+
+        @JsonProperty("midTerm")
+        private Map<String, RiskScoreDetail> midTerm;
+
+        @JsonProperty("longTerm")
+        private Map<String, RiskScoreDetail> longTerm;
     }
 }
