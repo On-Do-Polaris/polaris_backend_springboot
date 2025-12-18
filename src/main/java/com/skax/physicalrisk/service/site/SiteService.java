@@ -4,6 +4,7 @@ import com.skax.physicalrisk.domain.site.entity.Site;
 import com.skax.physicalrisk.domain.site.repository.SiteRepository;
 import com.skax.physicalrisk.domain.user.entity.User;
 import com.skax.physicalrisk.domain.user.repository.UserRepository;
+import com.skax.physicalrisk.dto.request.site.BuildingInfo;
 import com.skax.physicalrisk.dto.request.site.CreateSiteRequest;
 import com.skax.physicalrisk.dto.request.site.UpdateSiteRequest;
 import com.skax.physicalrisk.dto.response.site.SiteResponse;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -94,16 +96,28 @@ public class SiteService {
 			});
 		}
 
-		Site site = Site.builder()
+		Site.SiteBuilder siteBuilder = Site.builder()
 			.user(user)
 			.name(request.getName())
 			.roadAddress(request.getRoadAddress())
 			.jibunAddress(request.getJibunAddress())
 			.latitude(request.getLatitude())
 			.longitude(request.getLongitude())
-			.type(request.getType())
-			.build();
+			.type(request.getType());
 
+		// 건물 정보가 있으면 추가
+		if (request.getBuildingInfo() != null) {
+			BuildingInfo buildingInfo = request.getBuildingInfo();
+			siteBuilder
+				.buildingAge(buildingInfo.getBuildingAge())
+				.buildingType(buildingInfo.getBuildingType())
+				.seismicDesign(buildingInfo.getSeismicDesign())
+				.grossFloorArea(buildingInfo.getGrossFloorArea() != null
+					? BigDecimal.valueOf(buildingInfo.getGrossFloorArea())
+					: null);
+		}
+
+		Site site = siteBuilder.build();
 		Site savedSite = siteRepository.save(site);
 		log.info("Site created successfully: {}", savedSite.getId());
 
@@ -154,6 +168,23 @@ public class SiteService {
 		}
 		if (request.getType() != null) {
 			site.setType(request.getType());
+		}
+
+		// 건물 정보 업데이트
+		if (request.getBuildingInfo() != null) {
+			BuildingInfo buildingInfo = request.getBuildingInfo();
+			if (buildingInfo.getBuildingAge() != null) {
+				site.setBuildingAge(buildingInfo.getBuildingAge());
+			}
+			if (buildingInfo.getBuildingType() != null) {
+				site.setBuildingType(buildingInfo.getBuildingType());
+			}
+			if (buildingInfo.getSeismicDesign() != null) {
+				site.setSeismicDesign(buildingInfo.getSeismicDesign());
+			}
+			if (buildingInfo.getGrossFloorArea() != null) {
+				site.setGrossFloorArea(BigDecimal.valueOf(buildingInfo.getGrossFloorArea()));
+			}
 		}
 
 		Site savedSite = siteRepository.save(site);

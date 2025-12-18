@@ -59,4 +59,16 @@ public class Site {
 
 	@Column(name = "type", length = 100)
 	private String type; // 업종/유형
+
+	@Column(name = "building_age")
+	private Integer buildingAge; // 건물 연식 (년)
+
+	@Column(name = "building_type", length = 100)
+	private String buildingType; // 건물 구조 (예: 철근콘크리트)
+
+	@Column(name = "seismic_design")
+	private Boolean seismicDesign; // 내진 설계 여부
+
+	@Column(name = "gross_floor_area", precision = 10, scale = 2)
+	private BigDecimal grossFloorArea; // 연면적 (m²)
 }

@@ -190,7 +190,7 @@ public class AnalysisService {
     }
 
     /**
-     * 대시보드 응답에 좌표 정보 추가
+     * 대시보드 응답에 좌표 정보 및 건물 정보 추가
      *
      * @param response 대시보드 응답
      * @param user 사용자
@@ -205,12 +205,18 @@ public class AnalysisService {
         Map<UUID, Site> siteMap = sites.stream()
             .collect(Collectors.toMap(Site::getId, Function.identity()));
 
-        // Enrich each site summary with coordinates
+        // Enrich each site summary with coordinates and building info
         response.getSites().forEach(siteSummary -> {
             Site site = siteMap.get(siteSummary.getSiteId());
             if (site != null) {
                 siteSummary.setLatitude(site.getLatitude());
                 siteSummary.setLongitude(site.getLongitude());
+
+                // 건물 정보 추가 (내부 로직용, 응답 스키마에는 노출 안됨)
+                siteSummary.setBuildingAge(site.getBuildingAge());
+                siteSummary.setBuildingType(site.getBuildingType());
+                siteSummary.setSeismicDesign(site.getSeismicDesign());
+                siteSummary.setGrossFloorArea(site.getGrossFloorArea());
             }
         });
     }
@@ -335,6 +341,7 @@ public class AnalysisService {
      * @param siteId 사업장 ID
      * @return 취약성 분석
      */
+    @SuppressWarnings("unchecked")
     public VulnerabilityResponse getVulnerability(UUID siteId) {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching vulnerability for site: {}", siteId);
@@ -344,7 +351,12 @@ public class AnalysisService {
 
         log.debug("FastAPI vulnerability response: {}", response);
 
-        // FastAPI 응답을 DTO로 변환 (기본 사업장 정보 + FastAPI 응답)
+        // FastAPI 응답에서 data 객체 추출
+        Map<String, Object> data = response.get("data") != null
+            ? (Map<String, Object>) response.get("data")
+            : response;
+
+        // FastAPI 응답을 DTO로 변환 (기본 사업장 정보 + FastAPI data)
         VulnerabilityResponse result = VulnerabilityResponse.builder()
             .siteId(site.getId())
             .siteName(site.getName())
@@ -353,7 +365,12 @@ public class AnalysisService {
             .jibunAddress(site.getJibunAddress())
             .roadAddress(site.getRoadAddress())
             .siteType(site.getType())
-            .aisummry(response.get("aisummry") != null ? response.get("aisummry").toString() : null)
+            // FastAPI data에서 건물 정보 추출
+            .area(data.get("area") != null ? ((Number) data.get("area")).doubleValue() : null)
+            .grndflrCnt(data.get("grndflrCnt") != null ? ((Number) data.get("grndflrCnt")).intValue() : null)
+            .ugrnFlrCnt(data.get("ugrnFlrCnt") != null ? ((Number) data.get("ugrnFlrCnt")).intValue() : null)
+            .rserthqkDsgnApplyYn(data.get("rserthqkDsgnApplyYn") != null ? data.get("rserthqkDsgnApplyYn").toString() : null)
+            .aisummry(data.get("aisummry") != null ? data.get("aisummry").toString() : null)
             .build();
 
         log.debug("Vulnerability response for site {}: {}", siteId, result);
