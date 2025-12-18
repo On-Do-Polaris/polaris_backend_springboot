@@ -41,6 +41,7 @@ public class EmailService {
 
 		String subject;
 		String emailContent;
+		String link = "https://on-do.site/privacy-policy";
 
 		if ("REGISTER".equals(purpose)) {
 			subject = "[SKAX-Polaris] 이메일 인증 코드 안내";
@@ -57,8 +58,8 @@ public class EmailService {
 				"감사합니다.\n\n" +
 				"SKALA On-Do 팀\n" +
 				"SKAX-Polaris: 사업장 기후 물리적 리스크 AI 평가 시스템\n\n" +
-				"개인정보처리방침: 링크",
-				toEmail, code
+				"개인정보처리방침: %s",
+				toEmail, code, link
 			);
 		} else if ("PASSWORD_RESET".equals(purpose)) {
 			subject = "[SKAX-Polaris] 비밀번호 재설정 인증번호";
@@ -96,12 +97,34 @@ public class EmailService {
 	public void sendAnalysisCompletionEmail(String toEmail) {
 		log.info("분석 완료 이메일 발송: to={}", toEmail);
 
+		String link = "https://on-do.site/privacy-policy";
 		String subject = "[SKAX-Polaris] 사업장 분석 완료!";
-		String emailContent =
-			"축하드립니다.\n\n" +
-			"SKAX의 SKALA 2기 On-Do가 당신이 기대하고 고대하고 고수하고 기다리던 사업장 분석 작업을 완료했습니다.\n\n" +
-			"당장 어서, RIGHT NOW!!!! 로그인 해서 결과를 씹고 뜯고 맛보세여~~!";
-
+		String emailContent = String.format(
+				"안녕하세요, %s님\n\n" +
+				"SKAX-Polaris 사업장 기후 물리적 리스크 AI 평가 시스템입니다.\n\n" +
+				"요청하신 사업장에 대한 기후 물리적 리스크 분석이 완료되었습니다.\n\n" +
+				"분석 완료 정보\n" +
+				" - 분석 완료 시각: 2025년 12월 18일 22:15 KST\n" +
+				" - 분석 대상: [사업장 개수] \n" +
+				" - 평가 항목: [9대 재해 리스크]\n" + //
+				" - 분석 결과: [상세 분석 결과]\n\n" +
+				"이제 Polaris 시스템에서 상세 분석 결과를 확인하실 수 있습니다.\n\n" +
+				"[SKAX-Polaris 주소]\n" +
+				"https://on-do.site\n\n" +
+				"[주요 제공 정보]\n" +
+				" - 사업장별 기후 물리적 리스크 평가 결과\n" +
+				" - 시나리오별 물리적 리스크 및 연평균 재무 손실률(AAL) 분석\n" +
+				" - 시계열 리스크 변화 추이\n" +
+				" - 위치 및 기후 시뮬레이션\n" +
+				" - TCFD 보고서\n\n" +
+				"※ 분석 결과는 로그인 후 대시보드에서 확인 가능합니다.\n\n" +
+				"문의사항이 있으시면 언제든지 연락 주시기 바랍니다.\n\n" +
+				"감사합니다.\n\n" +
+				"SKALA On-Do 팀\n" +
+				"SKAX-Polaris: 사업장 기후 물리적 리스크 AI 평가 시스템\n\n" +
+				"개인정보처리방침: %s",
+				toEmail, link
+			);
 		// Gmail API를 통한 실제 이메일 발송
 		gmailClient.sendEmail(toEmail, subject, emailContent);
 
