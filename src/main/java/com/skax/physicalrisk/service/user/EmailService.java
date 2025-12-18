@@ -1,9 +1,15 @@
 package com.skax.physicalrisk.service.user;
 
 import com.skax.physicalrisk.client.gmail.GmailClient;
+import com.skax.physicalrisk.domain.user.entity.User;
+import com.skax.physicalrisk.domain.user.repository.UserRepository;
+import com.skax.physicalrisk.exception.ErrorCode;
+import com.skax.physicalrisk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * 이메일 서비스
@@ -21,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
 	private final GmailClient gmailClient;
+	private final UserRepository userRepository;
 
 	/**
 	 * 인증번호 이메일 발송
@@ -78,11 +85,11 @@ public class EmailService {
 		// Gmail API를 통한 실제 이메일 발송
 		gmailClient.sendEmail(toEmail, subject, emailContent);
 
-		log.info("✅ 인증번호 이메일 발송 완료: to={}, purpose={}", toEmail, purpose);
+		log.info("인증번호 이메일 발송 완료: to={}, purpose={}", toEmail, purpose);
 	}
 
 	/**
-	 * 분석 완료 이메일 발송
+	 * 분석 완료 이메일 발송 (이메일 주소로)
 	 *
 	 * @param toEmail 수신자 이메일
 	 */
@@ -98,7 +105,24 @@ public class EmailService {
 		// Gmail API를 통한 실제 이메일 발송
 		gmailClient.sendEmail(toEmail, subject, emailContent);
 
-		log.info("✅ 분석 완료 이메일 발송 완료: to={}", toEmail);
+		log.info("분석 완료 이메일 발송 완료: to={}", toEmail);
+	}
+
+	/**
+	 * 분석 완료 이메일 발송 (사용자 UUID로)
+	 *
+	 * @param userId 사용자 UUID
+	 * @throws ResourceNotFoundException 사용자를 찾을 수 없는 경우
+	 */
+	public void sendAnalysisCompletionEmail(UUID userId) {
+		log.info("분석 완료 이메일 발송 요청: userId={}", userId);
+
+		// UUID로 사용자 조회
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		// 이메일 발송
+		sendAnalysisCompletionEmail(user.getEmail());
 	}
 
 }
