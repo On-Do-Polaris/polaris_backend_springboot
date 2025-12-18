@@ -57,5 +57,18 @@ public class DashboardSummaryResponse {
 
 		@Schema(description = "통합 리스크 점수 (0-100)", example = "75")
 		private Integer totalRiskScore;
+
+		// 내부 로직용 건물 정보 (응답 스키마에는 노출되지 않지만 DB에서 가져옴)
+		@Schema(hidden = true)
+		private Integer buildingAge;
+
+		@Schema(hidden = true)
+		private String buildingType;
+
+		@Schema(hidden = true)
+		private Boolean seismicDesign;
+
+		@Schema(hidden = true)
+		private BigDecimal grossFloorArea;
 	}
 }

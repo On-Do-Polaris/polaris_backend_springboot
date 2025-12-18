@@ -35,4 +35,7 @@ public class UpdateSiteRequest {
 
 	@Schema(description = "사업장 유형", example = "data_center")
 	private String type;
+
+	@Schema(description = "건물 정보")
+	private BuildingInfo buildingInfo;
 }

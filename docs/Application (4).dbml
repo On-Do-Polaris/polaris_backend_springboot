@@ -130,8 +130,12 @@ Table sites {
   latitude decimal(10,8) [note: '위도']
   longitude decimal(11,8) [note: '경도']
   type varchar(100) [note: '업종/유형']
+  building_age integer [note: '건물 연식 (년)']
+  building_type varchar(100) [note: '건물 구조 (예: 철근콘크리트)']
+  seismic_design boolean [note: '내진 설계 여부']
+  gross_floor_area decimal(10,2) [note: '연면적 (m²)']
 
-  Note: '사업장 정보 (basic.dbml 기준)'
+  Note: '사업장 정보 (basic.dbml 기준 + 건물 정보)'
 
   indexes {
     user_id
