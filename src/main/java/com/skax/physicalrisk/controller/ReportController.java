@@ -156,26 +156,12 @@ public class ReportController {
 	)
 	@PostMapping(value = "/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<com.skax.physicalrisk.dto.common.ApiResponse<Void>> registerReportData(
-		@Parameter(
-			description = "사업장 ID",
-			required = true,
-			example = "550e8400-e29b-41d4-a716-446655440000"
-		)
-		@RequestParam(value = "siteId") String siteIdStr,
-		@Parameter(
-			description = "업로드할 데이터 파일 (.xlsx, .xls, .csv)",
-			required = true
-		)
-		@RequestPart(value = "file", required = true) MultipartFile file
+		@Parameter(description = "데이터 정보 (JSON)", required = true)
+		@RequestPart("data") @jakarta.validation.Valid ReportDataRequest request,
+		@Parameter(description = "업로드할 파일", required = true)
+		@RequestPart("file") MultipartFile file
 	) {
-		UUID siteId = UUID.fromString(siteIdStr);
-		log.info("POST /api/report/data - siteId: {}, fileName: {}", siteId, file.getOriginalFilename());
-
-		// DTO 객체 생성
-		ReportDataRequest request = ReportDataRequest.builder()
-			.siteId(siteId)
-			.build();
-
+		log.info("POST /api/report/data - request: {}, fileName: {}", request, file.getOriginalFilename());
 		reportService.registerReportData(request, file);
 		return ResponseEntity.ok(com.skax.physicalrisk.dto.common.ApiResponse.success("리포트 데이터가 등록되었습니다."));
 	}
