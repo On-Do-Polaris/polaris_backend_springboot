@@ -236,6 +236,7 @@ public class AnalysisService {
      * @param hazardType 위험 유형 (옵션)
      * @return 물리적 리스크 점수
      */
+    @SuppressWarnings("unchecked")
     public PhysicalRiskScoreResponse getPhysicalRiskScores(UUID siteId, String hazardType, String term) {
         UUID userId = SecurityUtil.getCurrentUserId();
         log.info("Fetching physical risk scores for site: {}, hazardType: {}, term: {}", siteId, hazardType, term);
@@ -245,8 +246,84 @@ public class AnalysisService {
 
         log.debug("FastAPI physical-risk-scores response: {}", response);
 
-        // FastAPI 응답을 그대로 DTO로 변환 (Jackson이 자동 매핑)
-        PhysicalRiskScoreResponse result = convertToDto(response, PhysicalRiskScoreResponse.class);
+        // FastAPI는 scenarios 배열로 반환: [{"scenario": "SSP1-2.6", "riskType": "폭염", "shortTerm": {...}, ...}, ...]
+        // Spring Boot는 scenarios1~4로 분리된 구조 사용
+        List<Map<String, Object>> scenarios = (List<Map<String, Object>>) response.get("scenarios");
+
+        if (scenarios == null || scenarios.isEmpty()) {
+            log.warn("No scenarios found in FastAPI response for siteId: {}", siteId);
+            return PhysicalRiskScoreResponse.builder()
+                .siteId(siteId)
+                .term(term)
+                .hazardType(hazardType)
+                .build();
+        }
+
+        // 시나리오를 SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5로 분류
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios1 = null;
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios2 = null;
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios3 = null;
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> scenarios4 = null;
+
+        for (Map<String, Object> scenario : scenarios) {
+            String scenarioName = (String) scenario.get("scenario");
+            String riskType = (String) scenario.get("riskType");
+
+            // hazardType과 riskType이 일치하는 것만 처리
+            if (hazardType != null && !hazardType.equals(riskType)) {
+                continue;
+            }
+
+            // term에 해당하는 데이터 추출 (shortTerm, midTerm, longTerm)
+            Map<String, Object> termData = (Map<String, Object>) scenario.get(term + "Term");
+            if (termData == null) {
+                continue;
+            }
+
+            // RiskScoreDetail 형으로 변환
+            Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> termDataConverted = termData.entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> {
+                        Map<String, Object> pointData = (Map<String, Object>) e.getValue();
+                        return PhysicalRiskScoreResponse.RiskScoreDetail.builder()
+                            .total(pointData.get("total") instanceof Number ? ((Number) pointData.get("total")).doubleValue() : null)
+                            .h(pointData.get("h") instanceof Number ? ((Number) pointData.get("h")).doubleValue() : null)
+                            .e(pointData.get("e") instanceof Number ? ((Number) pointData.get("e")).doubleValue() : null)
+                            .v(pointData.get("v") instanceof Number ? ((Number) pointData.get("v")).doubleValue() : null)
+                            .build();
+                    }
+                ));
+
+            // 시나리오별로 분류
+            switch (scenarioName) {
+                case "SSP1-2.6":
+                    scenarios1 = termDataConverted;
+                    break;
+                case "SSP2-4.5":
+                    scenarios2 = termDataConverted;
+                    break;
+                case "SSP3-7.0":
+                    scenarios3 = termDataConverted;
+                    break;
+                case "SSP5-8.5":
+                    scenarios4 = termDataConverted;
+                    break;
+                default:
+                    log.warn("Unknown scenario: {}", scenarioName);
+            }
+        }
+
+        PhysicalRiskScoreResponse result = PhysicalRiskScoreResponse.builder()
+            .siteId(siteId)
+            .term(term)
+            .hazardType(hazardType)
+            .scenarios1(scenarios1)
+            .scenarios2(scenarios2)
+            .scenarios3(scenarios3)
+            .scenarios4(scenarios4)
+            .Strategy((String) response.get("Strategy"))
+            .build();
 
         log.debug("Converted PhysicalRiskScoreResponse: {}", result);
         return result;
