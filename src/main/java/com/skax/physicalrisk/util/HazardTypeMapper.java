@@ -74,6 +74,7 @@ public class HazardTypeMapper {
 		// 역방향도 지원 (표준 한글 → 표준 한글)
 		FASTAPI_TO_STANDARD.put("극심한 고온", "극심한 고온");
 		FASTAPI_TO_STANDARD.put("극심한 저온", "극심한 저온");
+		FASTAPI_TO_STANDARD.put("극심한 한파", "극심한 저온");  // "극심한 한파"도 "극심한 저온"으로 매핑
 		FASTAPI_TO_STANDARD.put("홍수", "홍수");
 		FASTAPI_TO_STANDARD.put("하천 홍수", "하천 홍수");  // DB 저장값
 		FASTAPI_TO_STANDARD.put("도시 홍수", "도시 홍수");  // DB 저장값
