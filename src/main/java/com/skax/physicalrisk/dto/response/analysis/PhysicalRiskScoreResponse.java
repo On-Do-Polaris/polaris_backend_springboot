@@ -32,16 +32,16 @@ public class PhysicalRiskScoreResponse {
     @Schema(description = "위험 유형", example = "극심한 고온")
     private String hazardType;
 
-    @Schema(description = "시나리오 1 점수 상세")
+    @Schema(description = "시나리오 1 점수 상세 (연도별)")
     private Map<String, RiskScoreDetail> scenarios1;
 
-    @Schema(description = "시나리오 2 점수 상세")
+    @Schema(description = "시나리오 2 점수 상세 (연도별)")
     private Map<String, RiskScoreDetail> scenarios2;
 
-    @Schema(description = "시나리오 3 점수 상세")
+    @Schema(description = "시나리오 3 점수 상세 (연도별)")
     private Map<String, RiskScoreDetail> scenarios3;
 
-    @Schema(description = "시나리오 4 점수 상세")
+    @Schema(description = "시나리오 4 점수 상세 (연도별)")
     private Map<String, RiskScoreDetail> scenarios4;
 
     @JsonProperty("Strategy")

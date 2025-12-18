@@ -43,16 +43,16 @@ public class FinancialImpactResponse {
     @Schema(description = "위험 유형", example = "극심한 고온")
     private String hazardType;
 
-    @Schema(description = "시나리오 1 (SSP1-2.6) AAL 값")
+    @Schema(description = "시나리오 1 (SSP1-2.6) AAL 값 (연도별)")
     private Map<String, Double> scenarios1;
 
-    @Schema(description = "시나리오 2 (SSP2-4.5) AAL 값")
+    @Schema(description = "시나리오 2 (SSP2-4.5) AAL 값 (연도별)")
     private Map<String, Double> scenarios2;
 
-    @Schema(description = "시나리오 3 (SSP3-7.0) AAL 값")
+    @Schema(description = "시나리오 3 (SSP3-7.0) AAL 값 (연도별)")
     private Map<String, Double> scenarios3;
 
-    @Schema(description = "시나리오 4 (SSP5-8.5) AAL 값")
+    @Schema(description = "시나리오 4 (SSP5-8.5) AAL 값 (연도별)")
     private Map<String, Double> scenarios4;
 
     @Schema(description = "재무 영향 발생 근거", example = "태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실")

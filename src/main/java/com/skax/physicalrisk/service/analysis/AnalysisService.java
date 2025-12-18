@@ -335,14 +335,20 @@ public class AnalysisService {
             }
         }
 
+        // point를 연도로 변환
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> yearScenarios1 = convertPointMapToYearMap(scenarios1, term);
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> yearScenarios2 = convertPointMapToYearMap(scenarios2, term);
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> yearScenarios3 = convertPointMapToYearMap(scenarios3, term);
+        Map<String, PhysicalRiskScoreResponse.RiskScoreDetail> yearScenarios4 = convertPointMapToYearMap(scenarios4, term);
+
         PhysicalRiskScoreResponse result = PhysicalRiskScoreResponse.builder()
             .siteId(siteId)
             .term(term)
             .hazardType(hazardType)
-            .scenarios1(scenarios1)
-            .scenarios2(scenarios2)
-            .scenarios3(scenarios3)
-            .scenarios4(scenarios4)
+            .scenarios1(yearScenarios1)
+            .scenarios2(yearScenarios2)
+            .scenarios3(yearScenarios3)
+            .scenarios4(yearScenarios4)
             .Strategy(fastApiResponse.getStrategy())
             .build();
 
@@ -451,14 +457,20 @@ public class AnalysisService {
             }
         }
 
+        // point를 연도로 변환
+        Map<String, Double> yearScenarios1 = convertPointMapToYearMap(scenarios1, term);
+        Map<String, Double> yearScenarios2 = convertPointMapToYearMap(scenarios2, term);
+        Map<String, Double> yearScenarios3 = convertPointMapToYearMap(scenarios3, term);
+        Map<String, Double> yearScenarios4 = convertPointMapToYearMap(scenarios4, term);
+
         FinancialImpactResponse result = FinancialImpactResponse.builder()
             .siteId(siteId)
             .term(term)
             .hazardType(hazardType)
-            .scenarios1(scenarios1)
-            .scenarios2(scenarios2)
-            .scenarios3(scenarios3)
-            .scenarios4(scenarios4)
+            .scenarios1(yearScenarios1)
+            .scenarios2(yearScenarios2)
+            .scenarios3(yearScenarios3)
+            .scenarios4(yearScenarios4)
             .reason(fastApiResponse.getReason())
             .build();
 
@@ -603,5 +615,66 @@ public class AnalysisService {
             log.error("Failed to convert response to {}: {}", clazz.getSimpleName(), e.getMessage());
             throw new RuntimeException("응답 변환 실패: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * point를 연도로 매핑
+     * - 단기: point1 -> "2026"
+     * - 중기: point1~5 -> "2026", "2027", "2028", "2029", "2030"
+     * - 장기: point1~4 -> "2020s", "2030s", "2040s", "2050s"
+     *
+     * @param pointKey point 키 (예: "point1", "point2")
+     * @param term 기간 (short, mid, long)
+     * @return 연도 문자열
+     */
+    private String mapPointToYear(String pointKey, String term) {
+        if (pointKey == null || term == null) {
+            return pointKey;
+        }
+
+        // point 숫자 추출
+        int pointNum;
+        try {
+            pointNum = Integer.parseInt(pointKey.replace("point", ""));
+        } catch (NumberFormatException e) {
+            log.warn("Invalid point key: {}", pointKey);
+            return pointKey;
+        }
+
+        switch (term) {
+            case "short":
+                // 단기: point1 -> "2026"
+                return "2026";
+            case "mid":
+                // 중기: point1~5 -> 2026~2030
+                return String.valueOf(2025 + pointNum);
+            case "long":
+                // 장기: point1~4 -> 2020s, 2030s, 2040s, 2050s
+                return String.valueOf(2020 + (pointNum - 1) * 10) + "s";
+            default:
+                log.warn("Unknown term: {}", term);
+                return pointKey;
+        }
+    }
+
+    /**
+     * point 키를 연도 키로 변환한 새로운 Map 생성
+     *
+     * @param pointMap point 기반 Map
+     * @param term 기간 (short, mid, long)
+     * @param <T> Map의 값 타입
+     * @return 연도 기반 Map
+     */
+    private <T> Map<String, T> convertPointMapToYearMap(Map<String, T> pointMap, String term) {
+        if (pointMap == null) {
+            return null;
+        }
+
+        return pointMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> mapPointToYear(entry.getKey(), term),
+                Map.Entry::getValue,
+                (v1, v2) -> v1  // 중복 시 첫 번째 값 사용
+            ));
     }
 }

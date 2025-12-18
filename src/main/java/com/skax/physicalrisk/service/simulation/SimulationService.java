@@ -149,6 +149,7 @@ public class SimulationService {
         }
 
         log.info("Received FastAPI response with keys: {}", apiResponse.keySet());
+        log.info("FastAPI 전체 응답 데이터: {}", apiResponse);
 
         // 4. 응답 데이터 조립 (DB 데이터 + API 결과 병합)
         return buildSimulationResponse(request, sites, apiResponse);
@@ -163,39 +164,58 @@ public class SimulationService {
             Map<String, Object> apiResponse
     ) {
         log.info("Building simulation response from FastAPI data");
-        log.debug("FastAPI response keys: {}", apiResponse.keySet());
+        log.info("FastAPI response keys: {}", apiResponse.keySet());
+        log.info("FastAPI response 전체: {}", apiResponse);
 
-        // 4-1. 행정구역 점수 파싱 (regionScores)
+        // 4-1. 행정구역 점수 파싱 (regionScores 또는 region_scores)
         Map<String, Map<String, Double>> regionScores = new HashMap<>();
-        if (apiResponse.containsKey("regionScores") && apiResponse.get("regionScores") != null) {
-            try {
-                regionScores = objectMapper.convertValue(
-                    apiResponse.get("regionScores"),
-                    new TypeReference<Map<String, Map<String, Double>>>() {}
-                );
-                log.info("Parsed regionScores: {} regions", regionScores.size());
-            } catch (Exception e) {
-                log.error("Failed to parse regionScores: {}", e.getMessage(), e);
-            }
-        } else {
-            log.warn("regionScores not found in FastAPI response");
+        Object regionScoresData = apiResponse.get("regionScores");
+        if (regionScoresData == null) {
+            regionScoresData = apiResponse.get("region_scores");
         }
 
-        // 4-2. 사업장별 AAL 결과 파싱 (Key: SiteId String, Value: Map<Year, Score>)
-        Map<String, Map<String, Double>> tempSiteAalResults = new HashMap<>();
-        if (apiResponse.containsKey("siteAALs") && apiResponse.get("siteAALs") != null) {
+        if (regionScoresData != null) {
             try {
-                tempSiteAalResults = objectMapper.convertValue(
-                    apiResponse.get("siteAALs"),
+                regionScores = objectMapper.convertValue(
+                    regionScoresData,
                     new TypeReference<Map<String, Map<String, Double>>>() {}
                 );
-                log.info("Parsed siteAALs: {} sites", tempSiteAalResults.size());
-                log.debug("Site AAL keys: {}", tempSiteAalResults.keySet());
+                log.info("✓ Parsed regionScores: {} regions", regionScores.size());
+                log.info("regionScores 샘플: {}", regionScores.entrySet().stream().limit(3).collect(Collectors.toList()));
             } catch (Exception e) {
-                log.error("Failed to parse siteAALs: {}", e.getMessage(), e);
+                log.error("✗ Failed to parse regionScores: {}", e.getMessage(), e);
+                log.error("regionScoresData type: {}", regionScoresData.getClass());
+                log.error("regionScoresData value: {}", regionScoresData);
             }
         } else {
-            log.warn("siteAALs not found in FastAPI response");
+            log.warn("✗ regionScores not found in FastAPI response. Available keys: {}", apiResponse.keySet());
+        }
+
+        // 4-2. 사업장별 AAL 결과 파싱 (siteAALs 또는 site_aals 또는 site_AALs)
+        Map<String, Map<String, Double>> tempSiteAalResults = new HashMap<>();
+        Object siteAalData = apiResponse.get("siteAALs");
+        if (siteAalData == null) {
+            siteAalData = apiResponse.get("site_aals");
+        }
+        if (siteAalData == null) {
+            siteAalData = apiResponse.get("site_AALs");
+        }
+
+        if (siteAalData != null) {
+            try {
+                tempSiteAalResults = objectMapper.convertValue(
+                    siteAalData,
+                    new TypeReference<Map<String, Map<String, Double>>>() {}
+                );
+                log.info("✓ Parsed siteAALs: {} sites", tempSiteAalResults.size());
+                log.info("Site AAL keys 샘플: {}", tempSiteAalResults.keySet().stream().limit(3).collect(Collectors.toList()));
+            } catch (Exception e) {
+                log.error("✗ Failed to parse siteAALs: {}", e.getMessage(), e);
+                log.error("siteAalData type: {}", siteAalData.getClass());
+                log.error("siteAalData value: {}", siteAalData);
+            }
+        } else {
+            log.warn("✗ siteAALs not found in FastAPI response. Available keys: {}", apiResponse.keySet());
         }
         final Map<String, Map<String, Double>> siteAalResults = tempSiteAalResults;
 
