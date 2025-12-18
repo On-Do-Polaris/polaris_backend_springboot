@@ -123,13 +123,17 @@ public class SimulationService {
 
         // 2. FastAPI 요청 데이터 생성
         List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
-        
+
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("scenario", request.getScenario());
         requestMap.put("hazardType", request.getHazardType());
         requestMap.put("siteIds", siteIds);
         requestMap.put("startYear", 2025); // 요구사항에 맞춰 2025년으로 변경 (기존 2020)
         requestMap.put("endYear", 2100);
+
+        log.info("Calling FastAPI climate simulation: scenario={}, hazardType={}, siteCount={}",
+            request.getScenario(), request.getHazardType(), siteIds.size());
+        log.debug("FastAPI request: {}", requestMap);
 
         // 3. FastAPI 호출 (비동기 결과를 동기로 대기)
         // 예상 FastAPI 응답 구조:
@@ -140,8 +144,11 @@ public class SimulationService {
         Map<String, Object> apiResponse = fastApiClient.runClimateSimulation(requestMap).block();
 
         if (apiResponse == null) {
+            log.error("FastAPI returned null response");
             throw new RuntimeException("FastAPI로부터 응답을 받지 못했습니다.");
         }
+
+        log.info("Received FastAPI response with keys: {}", apiResponse.keySet());
 
         // 4. 응답 데이터 조립 (DB 데이터 + API 결과 병합)
         return buildSimulationResponse(request, sites, apiResponse);
@@ -151,29 +158,54 @@ public class SimulationService {
      * DB의 사업장 정보와 FastAPI의 계산 결과를 병합하여 최종 DTO 생성
      */
     private ClimateSimulationResponse buildSimulationResponse(
-            ClimateSimulationRequest request, 
-            List<Site> sites, 
+            ClimateSimulationRequest request,
+            List<Site> sites,
             Map<String, Object> apiResponse
     ) {
-        ObjectMapper mapper = new ObjectMapper(); // 또는 Bean으로 주입받은 mapper 사용
+        log.info("Building simulation response from FastAPI data");
+        log.debug("FastAPI response keys: {}", apiResponse.keySet());
 
         // 4-1. 행정구역 점수 파싱 (regionScores)
-        Map<String, Map<String, Double>> regionScores = mapper.convertValue(
-                apiResponse.get("regionScores"), 
-                new TypeReference<Map<String, Map<String, Double>>>() {}
-        );
+        Map<String, Map<String, Double>> regionScores = new HashMap<>();
+        if (apiResponse.containsKey("regionScores") && apiResponse.get("regionScores") != null) {
+            try {
+                regionScores = objectMapper.convertValue(
+                    apiResponse.get("regionScores"),
+                    new TypeReference<Map<String, Map<String, Double>>>() {}
+                );
+                log.info("Parsed regionScores: {} regions", regionScores.size());
+            } catch (Exception e) {
+                log.error("Failed to parse regionScores: {}", e.getMessage(), e);
+            }
+        } else {
+            log.warn("regionScores not found in FastAPI response");
+        }
 
         // 4-2. 사업장별 AAL 결과 파싱 (Key: SiteId String, Value: Map<Year, Score>)
-        Map<String, Map<String, Double>> siteAalResults = mapper.convertValue(
-                apiResponse.get("siteAALs"), // FastAPI가 이 키로 사업장 결과를 준다고 가정
-                new TypeReference<Map<String, Map<String, Double>>>() {}
-        );
+        Map<String, Map<String, Double>> siteAalResults = new HashMap<>();
+        if (apiResponse.containsKey("siteAALs") && apiResponse.get("siteAALs") != null) {
+            try {
+                siteAalResults = objectMapper.convertValue(
+                    apiResponse.get("siteAALs"),
+                    new TypeReference<Map<String, Map<String, Double>>>() {}
+                );
+                log.info("Parsed siteAALs: {} sites", siteAalResults.size());
+                log.debug("Site AAL keys: {}", siteAalResults.keySet());
+            } catch (Exception e) {
+                log.error("Failed to parse siteAALs: {}", e.getMessage(), e);
+            }
+        } else {
+            log.warn("siteAALs not found in FastAPI response");
+        }
 
         // 4-3. Sites 리스트 조립 (DB의 이름/지역코드 + API의 AAL 값)
         List<ClimateSimulationResponse.SiteSimulationData> siteDataList = sites.stream()
         	.map(site -> {
-            	Map<String, Double> aalData = siteAalResults.getOrDefault(site.getId().toString(), new HashMap<>());
-                
+            	String siteIdStr = site.getId().toString();
+            	Map<String, Double> aalData = siteAalResults.getOrDefault(siteIdStr, new HashMap<>());
+
+                log.debug("Site {}: found {} AAL data points", siteIdStr, aalData.size());
+
                 return ClimateSimulationResponse.SiteSimulationData.builder()
                         .siteId(site.getId())
                         .siteName(site.getName())        // DB에서 가져온 이름
@@ -182,6 +214,8 @@ public class SimulationService {
                         .build();
 			})
             .collect(Collectors.toList());
+
+        log.info("Built simulation response with {} sites", siteDataList.size());
 
         // 4-4. 최종 DTO 반환
         return ClimateSimulationResponse.builder()

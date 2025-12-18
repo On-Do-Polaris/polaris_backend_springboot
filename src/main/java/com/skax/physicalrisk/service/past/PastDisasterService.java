@@ -54,13 +54,77 @@ public class PastDisasterService {
 		try {
 			// FastAPI로 과거 재해 데이터 요청
 			Map<String, Object> response = fastApiClient.getPastDisasters(year, disasterType, severity).block();
+
 			// 응답을 DTO로 변환
-			return convertToDto(response, PastDisasterResponse.class);
+			PastDisasterResponse pastDisasterResponse = convertToDto(response, PastDisasterResponse.class);
+
+			// FastAPI가 필터링을 제대로 하지 못하는 경우를 대비해 Java에서 추가 필터링
+			return filterDisasters(pastDisasterResponse, year, disasterType, severity);
 		} catch (Exception e) {
 			log.error("Failed to fetch past disasters: {}", e.getMessage());
 			throw new BusinessException(ErrorCode.FASTAPI_CONNECTION_ERROR,
 				"과거 재해 데이터 조회에 실패했습니다: " + e.getMessage());
 		}
+	}
+
+	/**
+	 * 재해 이력 필터링
+	 *
+	 * @param response     FastAPI 응답
+	 * @param year         연도 필터
+	 * @param disasterType 재해 유형 필터
+	 * @param severity     심각도 필터
+	 * @return 필터링된 재해 이력
+	 */
+	private PastDisasterResponse filterDisasters(PastDisasterResponse response,
+												  Integer year,
+												  String disasterType,
+												  String severity) {
+		if (response == null || response.getData() == null) {
+			return response;
+		}
+
+		// 필터링 조건이 없으면 그대로 반환
+		if (year == null && disasterType == null && severity == null) {
+			log.info("No filter criteria provided, returning all disasters");
+			return response;
+		}
+
+		// 필터링 수행
+		var filteredItems = response.getData().stream()
+			.filter(item -> {
+				// year 필터링 (alertDate에서 연도 추출)
+				if (year != null && item.getAlertDate() != null) {
+					String itemYear = item.getAlertDate().substring(0, 4); // "2023-07-15" -> "2023"
+					if (!String.valueOf(year).equals(itemYear)) {
+						return false;
+					}
+				}
+
+				// disasterType 필터링
+				if (disasterType != null && !disasterType.isEmpty()) {
+					if (item.getDisasterType() == null || !item.getDisasterType().equals(disasterType)) {
+						return false;
+					}
+				}
+
+				// severity 필터링
+				if (severity != null && !severity.isEmpty()) {
+					if (item.getSeverity() == null || !item.getSeverity().equals(severity)) {
+						return false;
+					}
+				}
+
+				return true;
+			})
+			.toList();
+
+		log.info("Filtered disasters: original={}, filtered={}, year={}, disasterType={}, severity={}",
+			response.getData().size(), filteredItems.size(), year, disasterType, severity);
+
+		return PastDisasterResponse.builder()
+			.data(filteredItems)
+			.build();
 	}
 
 	/**
