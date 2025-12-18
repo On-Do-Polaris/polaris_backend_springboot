@@ -556,7 +556,7 @@ public class AnalysisService {
             .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 완료 이메일 발송
-        emailService.sendAnalysisCompletionEmail(user.getEmail());
+        emailService.sendAnalysisCompletionEmail(user.getEmail(), userId);
 
         log.info("Analysis completion notification sent to: {}", user.getEmail());
     }
