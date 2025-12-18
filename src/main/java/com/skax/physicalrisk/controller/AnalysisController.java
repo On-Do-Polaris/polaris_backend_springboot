@@ -404,24 +404,24 @@ public class AnalysisController {
     )
     @ApiResponse(
         responseCode = "200",
-        description = "AAL 시나리오별 값",
+        description = "AAL 시나리오별 값 (소수점 값, FastAPI에서 계산된 실제 AAL)",
         content = @Content(
             mediaType = "application/json",
             examples = {
                 @ExampleObject(
-                    name = "장기",
-                    description = "장기 AAL 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios2\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios3\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"scenarios4\": {\"point1\": 72, \"point2\": 78, \"point3\": 84, \"point4\": 89}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+                    name = "장기 - 극심한 고온",
+                    description = "장기 AAL 값 (폭염 리스크)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"long\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 0.00707435, \"point2\": 0.00811052, \"point3\": 0.00735511, \"point4\": 0.00867113}, \"scenarios2\": {\"point1\": 0.01558847, \"point2\": 0.01713493, \"point3\": 0.01677061, \"point4\": 0.01470857}, \"scenarios3\": {\"point1\": 0.01911098, \"point2\": 0.02169913, \"point3\": 0.02564433, \"point4\": 0.02200999}, \"scenarios4\": {\"point1\": 0.02372254, \"point2\": 0.02920655, \"point3\": 0.03693806, \"point4\": 0.03773896}, \"reason\": \"폭염으로 인한 냉방 비용 증가, 작업 효율 저하에 따른 생산성 감소\"}}"
                 ),
                 @ExampleObject(
-                    name = "중기",
-                    description = "중기 AAL 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 65, \"point2\": 70, \"point3\": 75, \"point4\": 80, \"point5\": 85}, \"scenarios2\": {\"point1\": 66, \"point2\": 71, \"point3\": 76, \"point4\": 81, \"point5\": 86}, \"scenarios3\": {\"point1\": 67, \"point2\": 72, \"point3\": 77, \"point4\": 82, \"point5\": 87}, \"scenarios4\": {\"point1\": 68, \"point2\": 73, \"point3\": 78, \"point4\": 83, \"point5\": 88}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+                    name = "중기 - 태풍",
+                    description = "중기 AAL 값 (태풍 리스크)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"mid\", \"hazardType\": \"태풍\", \"scenarios1\": {\"point1\": 0.00005014, \"point2\": 0.00004136, \"point3\": 0.00005468, \"point4\": 0.00006181, \"point5\": 0.00006757}, \"scenarios2\": {\"point1\": 0.00010585, \"point2\": 0.0000889, \"point3\": 0.00010661, \"point4\": 0.00009617, \"point5\": 0.0001244}, \"scenarios3\": {\"point1\": 0.00011343, \"point2\": 0.00013168, \"point3\": 0.00018862, \"point4\": 0.00019361, \"point5\": 0.00021297}, \"scenarios4\": {\"point1\": 0.00019889, \"point2\": 0.00022043, \"point3\": 0.00017433, \"point4\": 0.00026775, \"point5\": 0.00022108}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
                 ),
                 @ExampleObject(
-                    name = "단기",
-                    description = "단기 AAL 값",
-                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"극심한 고온\", \"scenarios1\": {\"point1\": 50}, \"scenarios2\": {\"point1\": 52}, \"scenarios3\": {\"point1\": 54}, \"scenarios4\": {\"point1\": 56}, \"reason\": \"태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실\"}}"
+                    name = "단기 - 가뭄",
+                    description = "단기 AAL 값 (가뭄 리스크)",
+                    value = "{\"result\": \"success\", \"data\": {\"siteId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", \"term\": \"short\", \"hazardType\": \"가뭄\", \"scenarios1\": {\"point1\": 0.00009084}, \"scenarios2\": {\"point1\": 0.00020063}, \"scenarios3\": {\"point1\": 0.00026846}, \"scenarios4\": {\"point1\": 0.00044258}, \"reason\": \"가뭄으로 인한 용수 부족, 냉각수 확보 비용 증가\"}}"
                 )
             }
         )

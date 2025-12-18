@@ -14,6 +14,17 @@ import java.util.UUID;
 /**
  * AAL 리스크 값 응답 DTO
  *
+ * FastAPI 재해 종류 매핑:
+ * - "가뭄" → "가뭄"
+ * - "한파" → "극심한 저온"
+ * - "폭염" → "극심한 고온"
+ * - "내륙침수" → "하천 홍수"
+ * - "해안침수" → "해수면 상승"
+ * - "태풍" → "태풍"
+ * - "도시침수" → "도시 홍수"
+ * - "물부족" → "물 부족"
+ * - "산불" → "산불"
+ *
  * @author SKAX Team
  */
 @Data
@@ -32,17 +43,17 @@ public class FinancialImpactResponse {
     @Schema(description = "위험 유형", example = "극심한 고온")
     private String hazardType;
 
-    @Schema(description = "시나리오 1 점수")
-    private Map<String, Integer> scenarios1;
+    @Schema(description = "시나리오 1 (SSP1-2.6) AAL 값")
+    private Map<String, Double> scenarios1;
 
-    @Schema(description = "시나리오 2 점수")
-    private Map<String, Integer> scenarios2;
+    @Schema(description = "시나리오 2 (SSP2-4.5) AAL 값")
+    private Map<String, Double> scenarios2;
 
-    @Schema(description = "시나리오 3 점수")
-    private Map<String, Integer> scenarios3;
+    @Schema(description = "시나리오 3 (SSP3-7.0) AAL 값")
+    private Map<String, Double> scenarios3;
 
-    @Schema(description = "시나리오 4 점수")
-    private Map<String, Integer> scenarios4;
+    @Schema(description = "시나리오 4 (SSP5-8.5) AAL 값")
+    private Map<String, Double> scenarios4;
 
     @Schema(description = "재무 영향 발생 근거", example = "태풍으로 인한 시설 피해 복구 비용, 생산 중단에 따른 매출 손실")
     private String reason;
@@ -65,18 +76,18 @@ public class FinancialImpactResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ScenarioData {
-        private String scenario;  // "SSP1-2.6"
+        private String scenario;  // "SSP1-2.6", "SSP2-4.5", "SSP3-7.0", "SSP5-8.5"
 
         @JsonProperty("riskType")
-        private String riskType;  // "폭염"
+        private String riskType;  // FastAPI 재해 종류: "폭염", "한파", "가뭄", "내륙침수", "해안침수", "태풍", "도시침수", "물부족", "산불"
 
         @JsonProperty("shortTerm")
-        private Map<String, Integer> shortTerm;
+        private Map<String, Double> shortTerm;  // point1 (단기: 2026년)
 
         @JsonProperty("midTerm")
-        private Map<String, Integer> midTerm;
+        private Map<String, Double> midTerm;  // point1~5 (중기: 2026~2030년)
 
         @JsonProperty("longTerm")
-        private Map<String, Integer> longTerm;
+        private Map<String, Double> longTerm;  // point1~4 (장기: 2020s~2050s)
     }
 }
