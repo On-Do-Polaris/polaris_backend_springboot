@@ -270,10 +270,13 @@ public class AnalysisService {
 
             log.debug("Processing scenario: {}, riskType: {}, requested hazardType: {}", scenarioName, riskType, hazardType);
 
-            // hazardType 필터링 (선택사항)
-            if (hazardType != null && !hazardType.isEmpty() && !hazardType.equals(riskType)) {
-                log.debug("Skipping scenario due to riskType mismatch: {} != {}", hazardType, riskType);
-                continue;
+            // hazardType 필터링: HazardTypeMapper를 사용한 스마트 매칭
+            // 예: riskType="폭염"과 hazardType="극심한 고온"을 같은 것으로 인식
+            if (hazardType != null && !hazardType.isEmpty()) {
+                if (!com.skax.physicalrisk.util.HazardTypeMapper.matches(hazardType, riskType)) {
+                    log.debug("Skipping scenario due to riskType mismatch: requested='{}', received='{}'", hazardType, riskType);
+                    continue;
+                }
             }
 
             // term에 따라 해당 데이터 추출
@@ -293,12 +296,25 @@ public class AnalysisService {
                     continue;
             }
 
-            if (termData == null) {
-                log.debug("No data found for term: {}", term);
+            if (termData == null || termData.isEmpty()) {
+                log.debug("No data found for term: {} in scenario: {}", term, scenarioName);
                 continue;
             }
 
-            log.debug("Found termData for {}: {} points", term, termData.size());
+            // Check if termData has any non-zero values
+            boolean hasNonZeroData = termData.values().stream()
+                .anyMatch(detail -> detail != null &&
+                    (detail.getTotal() != null && detail.getTotal() != 0.0 ||
+                     detail.getH() != null && detail.getH() != 0.0 ||
+                     detail.getE() != null && detail.getE() != 0.0 ||
+                     detail.getV() != null && detail.getV() != 0.0));
+
+            if (!hasNonZeroData) {
+                log.debug("All zero data for term: {} in scenario: {}, skipping", term, scenarioName);
+                continue;
+            }
+
+            log.debug("Found valid termData for {}: {} points", term, termData.size());
 
             // 시나리오별로 분류
             switch (scenarioName) {
@@ -374,10 +390,13 @@ public class AnalysisService {
 
             log.debug("Processing financial scenario: {}, riskType: {}, requested hazardType: {}", scenarioName, riskType, hazardType);
 
-            // hazardType 필터링 (선택사항)
-            if (hazardType != null && !hazardType.isEmpty() && !hazardType.equals(riskType)) {
-                log.debug("Skipping financial scenario due to riskType mismatch: {} != {}", hazardType, riskType);
-                continue;
+            // hazardType 필터링: HazardTypeMapper를 사용한 스마트 매칭
+            // 예: riskType="폭염"과 hazardType="극심한 고온"을 같은 것으로 인식
+            if (hazardType != null && !hazardType.isEmpty()) {
+                if (!com.skax.physicalrisk.util.HazardTypeMapper.matches(hazardType, riskType)) {
+                    log.debug("Skipping financial scenario due to riskType mismatch: requested='{}', received='{}'", hazardType, riskType);
+                    continue;
+                }
             }
 
             // term에 따라 해당 데이터 추출
@@ -397,12 +416,21 @@ public class AnalysisService {
                     continue;
             }
 
-            if (termData == null) {
-                log.debug("No financial data found for term: {}", term);
+            if (termData == null || termData.isEmpty()) {
+                log.debug("No financial data found for term: {} in scenario: {}", term, scenarioName);
                 continue;
             }
 
-            log.debug("Found financial termData for {}: {} points", term, termData.size());
+            // Check if termData has any non-zero values
+            boolean hasNonZeroData = termData.values().stream()
+                .anyMatch(value -> value != null && value != 0);
+
+            if (!hasNonZeroData) {
+                log.debug("All zero AAL data for term: {} in scenario: {}, skipping", term, scenarioName);
+                continue;
+            }
+
+            log.debug("Found valid financial termData for {}: {} points", term, termData.size());
 
             // 시나리오별로 분류
             switch (scenarioName) {
