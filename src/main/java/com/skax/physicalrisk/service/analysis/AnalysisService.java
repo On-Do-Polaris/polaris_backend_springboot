@@ -191,6 +191,7 @@ public class AnalysisService {
 
     /**
      * 대시보드 응답에 좌표 정보 및 건물 정보 추가
+     * (SiteService처럼 DB에서 직접 가져오는 방식)
      *
      * @param response 대시보드 응답
      * @param user 사용자
@@ -205,12 +206,19 @@ public class AnalysisService {
         Map<UUID, Site> siteMap = sites.stream()
             .collect(Collectors.toMap(Site::getId, Function.identity()));
 
-        // Enrich each site summary with coordinates and building info
+        // Enrich each site summary with coordinates and building info from DB
         response.getSites().forEach(siteSummary -> {
             Site site = siteMap.get(siteSummary.getSiteId());
             if (site != null) {
+                // 좌표 정보
                 siteSummary.setLatitude(site.getLatitude());
                 siteSummary.setLongitude(site.getLongitude());
+
+                // 주소 및 이름 정보 (DB에서 직접 가져오기)
+                siteSummary.setJibunAddress(site.getJibunAddress());
+                siteSummary.setRoadAddress(site.getRoadAddress());
+                siteSummary.setSiteName(site.getName());
+                siteSummary.setSiteType(site.getType());
 
                 // 건물 정보 추가 (내부 로직용, 응답 스키마에는 노출 안됨)
                 siteSummary.setBuildingAge(site.getBuildingAge());
