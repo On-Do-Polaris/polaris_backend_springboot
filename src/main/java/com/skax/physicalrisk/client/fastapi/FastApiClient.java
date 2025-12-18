@@ -73,6 +73,7 @@ public class FastApiClient {
 
         // 4. 변환된 요청 생성
         StartAnalysisRequestDto convertedRequest = StartAnalysisRequestDto.builder()
+            .userId(request.getUserId())
             .sites(request.getSites())
             .hazardTypes(convertedHazardTypes)
             .priority(normalizedPriority)
