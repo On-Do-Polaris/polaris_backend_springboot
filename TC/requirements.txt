@@ -1,6 +1,0 @@
-pytest
-httpx
-PyJWT
-python-dotenv
-pytest-asyncio
-psycopg2-binary
