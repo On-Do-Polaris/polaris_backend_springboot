@@ -4,3 +4,4 @@ PyJWT
 python-dotenv
 pytest-asyncio
 psycopg2-binary
+numpy

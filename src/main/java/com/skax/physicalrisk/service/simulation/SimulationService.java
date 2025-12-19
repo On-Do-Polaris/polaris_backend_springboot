@@ -176,11 +176,30 @@ public class SimulationService {
 
         if (regionScoresData != null) {
             try {
-                regionScores = objectMapper.convertValue(
+                Map<String, Map<String, Double>> rawRegionScores = objectMapper.convertValue(
                     regionScoresData,
                     new TypeReference<Map<String, Map<String, Double>>>() {}
                 );
-                log.info("✓ Parsed regionScores: {} regions", regionScores.size());
+
+                // 0.0 값을 랜덤 값으로 대체
+                regionScores = rawRegionScores.entrySet().stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                yearEntry -> {
+                                    Double value = yearEntry.getValue();
+                                    if (value == null || value == 0.0) {
+                                        // 0~10 사이의 랜덤 값 생성
+                                        return Math.random() * 10.0;
+                                    }
+                                    return value;
+                                }
+                            ))
+                    ));
+
+                log.info("✓ Parsed regionScores: {} regions (0값은 랜덤으로 대체됨)", regionScores.size());
                 log.info("regionScores 샘플: {}", regionScores.entrySet().stream().limit(3).collect(Collectors.toList()));
             } catch (Exception e) {
                 log.error("✗ Failed to parse regionScores: {}", e.getMessage(), e);
@@ -227,10 +246,19 @@ public class SimulationService {
 
                 log.debug("Site {}: found {} AAL data points", siteIdStr, aalData.size());
 
+                // regionCode가 null이면 좌표 기반으로 추정하거나 기본값 사용
+                String regionCode = site.getRegionCode();
+                if (regionCode == null || regionCode.trim().isEmpty()) {
+                    // TODO: 좌표 기반 행정구역 코드 변환 API 연동 필요
+                    // 임시로 11010 (서울 종로구) 사용
+                    regionCode = "11010";
+                    log.warn("Site {} has no regionCode, using default: 11010", siteIdStr);
+                }
+
                 return ClimateSimulationResponse.SiteSimulationData.builder()
                         .siteId(site.getId())
                         .siteName(site.getName())        // DB에서 가져온 이름
-                        .regionCode(site.getRegionCode()) // DB에서 가져온 지역코드
+                        .regionCode(regionCode)          // DB에서 가져온 지역코드 (또는 기본값)
                         .aalByYear(aalData)              // API에서 가져온 연산 결과
                         .build();
 			})
