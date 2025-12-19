@@ -363,7 +363,7 @@ public class SimulationService {
 
 		Object aalscoreObj = newLoc.get("aalscore");
 		if (aalscoreObj != null) {
-			candidate.setAalscore(((Number) aalscoreObj).intValue());
+			candidate.setAalscore(((Number) aalscoreObj).floatValue());
 		}
 
 		// physical_risk_scores와 aal_analysis를 9개 기후 리스크로 변환
@@ -372,7 +372,7 @@ public class SimulationService {
 
 		if (physicalRiskScores != null) {
 			Map<String, Integer> physicalScoresMap = new java.util.HashMap<>();
-			Map<String, Integer> aalScoresMap = new java.util.HashMap<>();
+			Map<String, Float> aalScoresMap = new java.util.HashMap<>();
 
 			// 9개 기후 리스크 타입 처리
 			for (Map.Entry<String, Object> entry : physicalRiskScores.entrySet()) {
@@ -391,7 +391,7 @@ public class SimulationService {
 					if (aalData != null) {
 						Object finalAalObj = aalData.get("final_aal_percentage");
 						if (finalAalObj != null) {
-							aalScoresMap.put(riskType, ((Number) finalAalObj).intValue());
+							aalScoresMap.put(riskType, ((Number) finalAalObj).floatValue());
 						}
 					}
 				}

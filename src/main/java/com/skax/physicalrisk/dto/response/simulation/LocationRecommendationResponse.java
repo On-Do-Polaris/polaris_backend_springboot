@@ -73,8 +73,8 @@ public class LocationRecommendationResponse {
 		@Schema(description = "리스크 점수 (시나리오2-2040)", example = "70")
 		private Integer riskscore;
 
-		@Schema(description = "AAL 점수 (시나리오2-2040)", example = "20")
-		private Integer aalscore;
+		@Schema(description = "AAL 점수 (시나리오2-2040)", example = "20.5")
+		private Float aalscore;
 
 		@JsonProperty("physical-risk-scores")
 		@Schema(description = "재해 유형별 물리적 리스크 점수",
@@ -83,8 +83,8 @@ public class LocationRecommendationResponse {
 
 		@JsonProperty("aal-scores")
 		@Schema(description = "재해 유형별 AAL 점수",
-			example = "{\"extreme_heat\": 9, \"extreme_cold\": 10, \"river_flood\": 11}")
-		private Map<String, Integer> aalScores;
+			example = "{\"extreme_heat\": 9.5, \"extreme_cold\": 10.2, \"river_flood\": 11.3}")
+		private Map<String, Float> aalScores;
 
 		@Schema(description = "장점", example = "홍수 위험 62% 감소한다")
 		private String pros;

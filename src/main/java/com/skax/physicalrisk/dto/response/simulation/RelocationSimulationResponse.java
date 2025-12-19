@@ -60,8 +60,8 @@ public class RelocationSimulationResponse {
         @Schema(description = "통합 리스크 점수", example = "70")
         private Integer riskscore;
 
-        @Schema(description = "통합 AAL 점수", example = "20")
-        private Integer aalscore;
+        @Schema(description = "통합 AAL 점수", example = "20.5")
+        private Float aalscore;
 
         @JsonProperty("physical-risk-scores")
         @Schema(description = "재해 유형별 물리적 리스크 점수")
@@ -69,7 +69,7 @@ public class RelocationSimulationResponse {
 
         @JsonProperty("aal-scores")
         @Schema(description = "재해 유형별 AAL 점수")
-        private Map<String, Integer> aalScores;
+        private Map<String, Float> aalScores;
 
         @Schema(description = "장점", example = "홍수 위험 62% 감소한다")
         private String pros;
